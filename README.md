@@ -33,7 +33,7 @@ Data-first order, so the data science and AI work sits at the centre.
 - [x] **Phase 4b — Machine learning**: [global ML models](analysis/04_machine_learning_volatility.ipynb) (ridge, gradient boosting, neural network) on engineered features with purged walk-forward; benchmarked against GARCH; permutation importance
 - [x] **Phase 4c — Unsupervised learning**: [clusters and regimes](analysis/05_clusters_and_regimes.ipynb): 43-stock US + HK research universe, PCA, hierarchical clustering (silhouette, ARI vs country/sector), two-state Gaussian HMM (Baum–Welch, from scratch); market map and regimes on the Insights page
 - [ ] **Phase 5 — Dashboard**: Next.js charts with every metric explained in plain language
-- [x] **Phase 6 — Learn + money tools**: six lessons (money basics to hedge funds) using live data, quizzes with saved progress; calculators for growth, goals, cost of waiting, and pay split with Hong Kong MPF and 50/30/20 (tested with `node --test`)
+- [x] **Phase 6 — Learn + money tools**: two tracks of lessons with quizzes and saved progress. *Money foundations* (4) and *Stock investing* (11: returns and risk, how markets work, trading in Hong Kong, price drivers, company accounts, time value of money, valuation, technical analysis, funds and ETFs, ten strategies, behavioural finance) with built-in tools: HK trade-cost calculator, bear markets from real data, balance-sheet simulator, TVM and dividend-discount calculators, moving-average crosses tested, index vs fund, DCA vs lump sum on real prices. Tools page: growth, goals, cost of waiting, pay split with Hong Kong MPF and 50/30/20. All maths tested with `node --test`
 - [ ] **v2 — AI tutor**: chat assistant grounded in DataVest's lessons and live numbers (RAG), on a free tier; project write-up
 
 ## Run it
@@ -98,6 +98,8 @@ backend/app/
 analysis/             Jupyter notebooks + shared chart style (run by CI)
 scripts/render_notebooks.py  executed notebooks -> site-styled pages
 frontend/             the website (HTML, CSS, JS + Chart.js)
+  js/finance.js, js/invest.js   personal-finance and investing maths (tested in frontend/tests)
+  js/lessons*.js, js/widgets.js lesson content and interactive tools
 scripts/check_site.py browser check of the live site after each deploy
   models.py           tickers + prices tables
 ```

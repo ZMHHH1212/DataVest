@@ -57,6 +57,16 @@ with sync_playwright() as p:
                 page.click("#vc-pick button >> nth=1")
                 page.select_option("#bt-pick", index=0)
             if name == "learn" and label == "desktop":
+                # every Stock investing tool should render without errors
+                for lesson, sel in [("returns-risk", "#r-out"), ("placing-trade", "#tc-out"), ("price-drivers", "#bm-table"),
+                                    ("accounts", "#bs-log"), ("time-value", "#tv-table"), ("valuation", "#gg-out"),
+                                    ("technical", "#mc-out"), ("funds", "#if-out"), ("strategies", "#dca-out"), ("behaviour", "#cl-out")]:
+                    page.goto(BASE + "learn.html#" + lesson)
+                    page.wait_for_timeout(1200)
+                    if not page.inner_text(sel).strip():
+                        errors.append(f"lesson {lesson}: tool {sel} is empty")
+                page.goto(BASE + "learn.html#basics")
+                page.wait_for_timeout(500)
                 for qi in range(3):
                     page.check(f'input[name="q{qi}"] >> nth=0')
                 page.click("#check")

@@ -39,6 +39,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 
 body {
   margin: 0;
@@ -469,6 +470,41 @@ h3.chart-title { font-size: 1rem; }
 .quiz-score { font-weight: 600; min-height: 1.5rem; }
 .quiz-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 
+/* ---- lesson widgets ---- */
+.track-name { font-weight: 600; margin: 1.25rem 0 0.375rem; display: flex; justify-content: space-between; }
+.track-name:first-child { margin-top: 0.25rem; }
+.track-name span { font-weight: 400; color: var(--ink-soft); font-size: 0.875rem; }
+.formula { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.9375rem !important; background: var(--paper-raised); border: 1px solid var(--rule); border-radius: 6px; padding: 0.5rem 0.75rem; display: inline-block; }
+.lesson-body table { border-collapse: collapse; margin: 0.75rem 0 1rem; font-size: 0.9375rem; }
+.lesson-body th, .lesson-body td { text-align: left; padding: 0.5rem 0.875rem 0.5rem 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.strategies li { margin-bottom: 0.625rem; }
+.widget { margin: 1.5rem 0 1.75rem; padding: 1.125rem 1.25rem 1.25rem; border: 1px solid var(--rule); border-radius: 12px; background: var(--paper-raised); max-width: 54rem; }
+.widget h4 { font: 700 1.125rem/1.25 var(--display); margin: 0 0 0.75rem; }
+.w-head { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; }
+.w-head h4 { margin: 0; }
+.w-grid { display: grid; grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr); gap: 1.5rem; align-items: start; }
+.widget .field { background: var(--paper); }
+.w-big { font: 700 1.625rem/1.2 var(--display); margin: 0 0 0.5rem; letter-spacing: -0.01em; }
+.w-big span { font: 400 0.9375rem/1.4 var(--body); color: var(--ink-soft); letter-spacing: 0; }
+.w-result { margin: 0.75rem 0 0; }
+.widget .stats { min-width: 0; font-size: 0.9375rem; }
+.widget .stats tr.total td { font-weight: 600; border-top: 2px solid var(--ink); }
+.widget .stats tr.sub td { color: var(--ink-soft); }
+.widget .stats.grid td.here { background: color-mix(in oklab, var(--s1) 18%, transparent); font-weight: 700; }
+.widget .stats caption { caption-side: top; text-align: left; font-weight: 600; padding-bottom: 0.375rem; }
+.widget .table-wrap { margin-top: 0.75rem; }
+.rc fieldset { border: 0; padding: 0; margin: 0 0 0.875rem; }
+.rc legend { font-weight: 600; margin-bottom: 0.25rem; }
+.bs-moves { display: flex; flex-wrap: wrap; gap: 0.375rem; margin: 0.75rem 0; }
+.bs-moves .btn-quiet { font-size: 0.875rem; padding: 0.5rem 0.75rem; background: var(--paper); }
+.bs { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+.checklist { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.25rem; }
+.checklist label { display: flex; gap: 0.625rem; align-items: flex-start; padding: 0.375rem 0; cursor: pointer; }
+.checklist input { margin-top: 0.3rem; width: 1.0625rem; height: 1.0625rem; accent-color: var(--jade); flex: none; }
+@media (max-width: 760px) {
+  .w-grid, .bs { grid-template-columns: 1fr; }
+}
+
 /* ---- sign in ---- */
 .signin {
   display: grid;
@@ -530,3 +566,5 @@ h3.chart-title { font-size: 1rem; }
 }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+.nb-md.lesson-body { max-width: 54rem; }
+.lesson-body > p, .lesson-body > ul, .lesson-body > ol, .lesson-body > h3, .lesson-body > table { max-width: 42rem; }
