@@ -266,7 +266,7 @@ h3.chart-title { font-size: 1rem; }
 .chart-gap { margin-top: 2.5rem; }
 .chart-note.small { font-size: 0.875rem; }
 .scorecard { display: grid; gap: 0.625rem; margin-top: 1rem; }
-.sc-row { display: grid; grid-template-columns: 9.5rem minmax(6rem, 1fr) 3.5rem; grid-template-rows: auto auto; align-items: center; column-gap: 0.75rem; }
+.sc-row { display: grid; grid-template-columns: 11.5rem minmax(6rem, 1fr) 3.5rem; grid-template-rows: auto auto; align-items: center; column-gap: 0.75rem; }
 .sc-name { font-weight: 500; }
 .sc-track { position: relative; height: 1.25rem; }
 .sc-track b { position: absolute; left: 50%; top: -0.25rem; bottom: -0.25rem; border-left: 1.5px solid var(--ink-soft); }
@@ -275,9 +275,16 @@ h3.chart-title { font-size: 1rem; }
 .sc-track i.worse { background: var(--s2); }
 .sc-val { text-align: right; font-weight: 600; }
 .sc-note { grid-column: 2 / span 2; font-size: 0.8125rem; color: var(--ink-soft); }
-.sc-axis { display: grid; grid-template-columns: 9.5rem 1fr 1fr 3.5rem; column-gap: 0.75rem; font-size: 0.8125rem; color: var(--ink-soft); }
+.sc-axis { display: grid; grid-template-columns: 11.5rem 1fr 1fr 3.5rem; column-gap: 0.75rem; font-size: 0.8125rem; color: var(--ink-soft); }
 .sc-axis span:first-child { grid-column: 2; text-align: right; padding-right: 0.5rem; }
 .sc-axis span:last-child { grid-column: 3; padding-left: 0.5rem; }
+.importance { display: grid; gap: 0.5rem; max-width: 46rem; margin: 0.75rem 0 1.5rem; }
+.imp-row { display: grid; grid-template-columns: minmax(10rem, 16rem) 1fr 3.5rem; gap: 0.75rem; align-items: center; font-size: 0.9375rem; }
+.imp-track { height: 0.875rem; background: var(--paper-raised); border-radius: 3px; overflow: hidden; }
+.imp-track i { display: block; height: 100%; background: var(--s1); border-radius: 3px; }
+.imp-val { text-align: right; color: var(--ink-soft); font-size: 0.875rem; }
+.sc-name { font-size: 0.9375rem; }
+@media (max-width: 560px) { .imp-row { grid-template-columns: 1fr 3.5rem; } .imp-track { grid-column: 1 / -1; grid-row: 2; } }
 .flag { display: inline-block; font-size: 0.75rem; font-weight: 600; padding: 0.0625rem 0.375rem; border-radius: 4px; background: var(--ink); color: var(--paper); margin-left: 0.25rem; }
 .picker { font: 500 0.9375rem/1 var(--body); padding: 0.5rem 0.75rem; border: 1px solid var(--rule); border-radius: 8px; background: var(--paper-raised); color: var(--ink); }
 .plain-list { padding-left: 1.25rem; max-width: 72ch; }
@@ -344,8 +351,8 @@ h3.chart-title { font-size: 1rem; }
 .nb-fig { margin: 1rem 0; }
 .nb-fig img { display: block; max-width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--rule); }
 .nb-table { overflow-x: auto; margin: 1rem 0; padding: 0.25rem 0; }
-.nb-table table { border-collapse: collapse; font-size: 0.875rem; font-variant-numeric: tabular-nums; }
-.nb-table th, .nb-table td { padding: 0.4375rem 0.75rem; border-bottom: 1px solid var(--rule); text-align: right; white-space: nowrap; }
+.nb-table table { border: 0; border-collapse: collapse; font-size: 0.875rem; font-variant-numeric: tabular-nums; }
+.nb-table th, .nb-table td { padding: 0.4375rem 0.75rem; border: 0; border-bottom: 1px solid var(--rule); text-align: right; white-space: nowrap; }
 .nb-table th { font-weight: 600; color: var(--ink-soft); }
 .nb-table thead th { white-space: normal; vertical-align: bottom; min-width: 4.5rem; max-width: 9rem; }
 .nb-table tbody th, .nb-table th.row_heading { text-align: left; color: var(--ink); font-weight: 500; }

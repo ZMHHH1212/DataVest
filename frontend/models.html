@@ -44,9 +44,14 @@
       </div>
       <div class="legend static" id="vc-legend"></div>
       <div class="chart-wrap"><canvas id="volchart" role="img" aria-label="Forecast and realised volatility"></canvas></div>
+      <div id="importance-block" class="chart-gap">
+        <h3 class="chart-title">What the gradient-boosting model looks at</h3>
+        <p class="chart-note">How much worse its forecasts got over the most recent year when each input was scrambled (permutation importance). Longer bar means the input matters more.</p>
+        <div id="importance" class="importance"></div>
+      </div>
       <details class="inline-help">
         <summary>How do these models work?</summary>
-        <p><b>Last month</b> assumes the next month will be as bumpy as the last one. <b>Long run</b> uses the average of all history so far. <b>EWMA</b> averages recent days with more weight on the latest. <b>GARCH</b> is a statistical model in which a big move raises expected volatility, which then fades back towards a long-run level. <b>HAR</b> is a regression on the last day, week and month. All models are refitted every month on the data available at that time.</p>
+        <p><b>Last month</b> assumes the next month will be as bumpy as the last one. <b>Long run</b> uses the average of all history so far. <b>EWMA</b> averages recent days with more weight on the latest. <b>GARCH</b> is a statistical model in which a big move raises expected volatility, which then fades back towards a long-run level. <b>HAR</b> is a regression on the last day, week and month. The three <b>machine-learning</b> models (ridge regression, gradient boosting and a small neural network) learn from all ten markets at once, using inputs such as recent volatility over different windows, the size of recent falls and the US market's mood. They are trained only on months that had already finished, and refitted every quarter.</p>
       </details>
     </section>
 

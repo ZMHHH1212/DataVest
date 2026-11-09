@@ -5,6 +5,7 @@ import pandas as pd
 from app import analytics as an
 from app import backtest as bt
 from app import forecast as fc
+from app import ml_forecast as ml
 
 MIN_TRAIN = 500  # trading days of history before the first out-of-sample forecast
 CHART_SYMBOLS = ["^HSI", "^GSPC"]
@@ -24,21 +25,16 @@ def _weekly(df: pd.DataFrame) -> dict:
 
 
 def build_models(prices: pd.DataFrame, order: list[str]) -> dict:
-    forecasts, evals, rsi_study, strategies, charts = {}, {}, {}, {}, {}
+    forecasts, evals, rsi_study, strategies, charts, classical = {}, {}, {}, {}, {}, {}
     for sym in [s for s in order if s in prices.columns]:
         close = prices[sym].dropna()
         if len(close) < MIN_TRAIN + 100:
             continue
 
         # -- volatility forecasting
-        wf = fc.walk_forward(close, min_train=MIN_TRAIN)
-        table = fc.evaluate(wf)
-        evals[sym] = {"n": int(len(wf)), "start": wf.index[0].date().isoformat(),
-                      **{m: {k: _num(v) for k, v in row.items()} for m, row in table.iterrows()}}
+        classical[sym] = fc.walk_forward(close, min_train=MIN_TRAIN)
         lf = fc.latest_forecast(close)
         forecasts[sym] = {k: _num(v) for k, v in lf.items()}
-        if sym in CHART_SYMBOLS:
-            charts[sym] = _weekly(wf[["target", "garch", "last_month"]])
 
         # -- RSI
         rsi = an.rsi(close)
@@ -53,8 +49,28 @@ def build_models(prices: pd.DataFrame, order: list[str]) -> dict:
             "equity": _weekly(res["equity"]),
         }
 
+    # Machine learning: one global model across all markets, same walk-forward rules
+    importance = []
+    merged = classical
+    try:
+        ml_fc = ml.walk_forward_ml(prices[[s for s in classical]], min_train=MIN_TRAIN)
+        merged = ml.combine_with_classical(classical, ml_fc)
+        imp = ml.feature_importance(prices[[s for s in classical]])
+        importance = [{"feature": f, "label": ml.FEATURE_LABELS[f], "importance": _num(v)} for f, v in imp.items()]
+    except Exception as exc:  # keep the classical results if ML fails
+        print(f"WARNING: ML forecasts skipped: {exc!r}")
+
+    # Evaluate every model on the same dates, so the comparison is fair
+    for sym, wf in merged.items():
+        table = fc.evaluate(wf)
+        evals[sym] = {"n": int(len(wf)), "start": wf.index[0].date().isoformat(),
+                      **{m: {k: _num(v) for k, v in row.items()} for m, row in table.iterrows()}}
+        if sym in CHART_SYMBOLS:
+            cols = ["target", "garch", "last_month"] + (["ridge"] if "ridge" in wf else [])
+            charts[sym] = _weekly(wf[cols])
+
     # Pooled view: how often each model beat the "last month" baseline, and average error ratio
-    models = fc.MODELS
+    models = [m for m in fc.ALL_MODELS if all(m in evals[s] for s in evals)]
     pooled = {}
     for m in models:
         ratios = [evals[s][m]["qlike"] / evals[s]["last_month"]["qlike"] for s in evals if evals[s]["last_month"]["qlike"]]
@@ -64,6 +80,7 @@ def build_models(prices: pd.DataFrame, order: list[str]) -> dict:
                      "beats_last_month": wins, "best_in": best, "markets": len(evals)}
 
     return {"forecasts": forecasts, "evaluation": evals, "pooled": pooled, "vol_charts": charts,
+            "feature_importance": importance,
             "rsi_events": rsi_study, "rsi_strategy": strategies, "settings": {
                 "horizon_days": 21, "min_train_days": MIN_TRAIN, "refit_every_days": 21,
                 "rsi_low": 30, "rsi_high": 70, "event_horizon_days": 20, "cost_per_trade": 0.001}}

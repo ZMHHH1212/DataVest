@@ -19,6 +19,7 @@ from scipy.signal import lfilter
 
 TRADING_DAYS = 252
 MODELS = ["last_month", "long_run", "ewma", "garch", "har"]
+ALL_MODELS = MODELS + ["ridge", "gbm", "mlp"]  # machine-learning models live in ml_forecast.py
 
 
 def log_returns(close: pd.Series) -> pd.Series:
@@ -165,7 +166,7 @@ def evaluate(fc: pd.DataFrame, baseline: str = "last_month") -> pd.DataFrame:
     """
     rows = {}
     y = fc["target"]
-    for m in [c for c in MODELS if c in fc]:
+    for m in [c for c in ALL_MODELS if c in fc]:
         f = fc[m]
         ratio = (y**2) / (f**2)
         rows[m] = {

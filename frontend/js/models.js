@@ -1,7 +1,11 @@
 // Models page: volatility forecasts and the RSI test. Data from data/models.json (export_models.py).
 import { $, css, pct, fmtDate, fmtMonth, getJSON, esc, renderTopBar, chartDefaults, crosshair, endLabels } from "./common.js";
 
-const MODEL_NAMES = { last_month: "Last month", long_run: "Long-run average", ewma: "EWMA", garch: "GARCH", har: "HAR regression" };
+const MODEL_NAMES = {
+  last_month: "Last month", long_run: "Long-run average", ewma: "EWMA", garch: "GARCH", har: "HAR regression",
+  ridge: "Ridge regression (ML)", gbm: "Gradient boosting (ML)", mlp: "Neural network (ML)",
+};
+const ML = ["ridge", "gbm", "mlp"];
 const SHORT = { "^GSPC": "S&P 500", "^IXIC": "Nasdaq", "^HSI": "Hang Seng", SPY: "SPY fund", "2800.HK": "Tracker Fund" };
 let names = {};
 let data;
@@ -13,7 +17,7 @@ const volPct = (v) => (v == null ? "–" : `${(v * 100).toFixed(0)}%`);
 function findings() {
   const p = data.pooled;
   const n = p.garch?.markets || 0;
-  const smart = ["ewma", "garch", "har"];
+  const smart = ["ewma", "garch", "har", ...ML].filter((m) => p[m]);
   const best = smart.reduce((a, b) => ((p[a]?.qlike_vs_last_month ?? 0) <= (p[b]?.qlike_vs_last_month ?? 0) ? a : b));
   const beats = p[best].beats_last_month;
 
@@ -32,9 +36,20 @@ function findings() {
 
   $("findings").innerHTML = [
     `<p><b>${MODEL_NAMES[best]}</b> forecast next month's volatility best on average. Its error was <b>${pct(p[best].qlike_vs_last_month, 0)}</b> compared with assuming next month looks like the last, and it did better in <b>${beats} of ${n}</b> markets.</p>`,
-    `<p>RSI signals were <b>${rsiWorks ? "sometimes" : "not"} reliable</b>. Only ${sig} of ${tests.length} tests showed a difference from ordinary days that is unlikely to be luck (p &lt; 0.05). Chance alone would give about ${Math.round(tests.length * 0.05)}.</p>`,
+    `<p>RSI signals were <b>${rsiWorks ? "sometimes" : "not"} reliable</b>. ${sig === 0 ? "None" : `Only ${sig}`} of the ${tests.length} tests showed a difference from ordinary days that is unlikely to be luck (p &lt; 0.05). Chance alone would give about ${Math.round(tests.length * 0.05)}.</p>`,
     `<p>Trading on RSI had a better return for its risk than holding in ${rsiWins} of ${strat.length} markets. It was invested only part of the time, so it also took less risk.</p>`,
+    mlFinding(p),
   ].join("");
+}
+
+function mlFinding(p) {
+  const have = ML.filter((m) => p[m]);
+  if (!have.length || !p.garch) return "";
+  const bestMl = have.reduce((a, b) => (p[a].qlike_vs_last_month <= p[b].qlike_vs_last_month ? a : b));
+  const beatsGarch = p[bestMl].qlike_vs_last_month < p.garch.qlike_vs_last_month;
+  const flexible = ["gbm", "mlp"].filter((m) => p[m]);
+  const flexWorse = flexible.length && flexible.every((m) => p[m].qlike_vs_last_month > p.ridge?.qlike_vs_last_month);
+  return `<p>Machine learning: the best ML model was <b>${MODEL_NAMES[bestMl]}</b>, which ${beatsGarch ? "beat" : "did not beat"} GARCH.${flexWorse ? " The more flexible models (trees and the neural network) did worse than the simple linear one: with only five years of data, extra flexibility mostly fits noise." : ""}</p>`;
 }
 
 // ---- forecast table + scorecard -------------------------------------------------------
@@ -51,7 +66,7 @@ function forecastTable() {
 }
 
 function scorecard() {
-  const order = ["garch", "ewma", "har", "long_run"];
+  const order = ["garch", "ewma", "har", ...ML, "long_run"].filter((m) => data.pooled[m]);
   const vals = order.map((m) => data.pooled[m]?.qlike_vs_last_month ?? 0);
   const max = Math.max(0.3, ...vals.map(Math.abs));
   $("scorecard").innerHTML = order.map((m, i) => {
@@ -74,9 +89,10 @@ function volChartFor(sym) {
   if (!c) return;
   const sets = [
     ["target", "What happened", "--ink", 2],
-    ["garch", "GARCH forecast", "--s1", 2],
+    ["garch", "GARCH", "--s1", 2],
+    ["ridge", "Ridge (ML)", "--s3", 2],
     ["last_month", "Last month", "--s2", 1.5],
-  ];
+  ].filter(([k]) => c.series[k]);
   const datasets = sets.map(([k, label, v, w]) => ({
     label, endLabel: label, data: c.series[k], borderColor: css(v), backgroundColor: css(v),
     borderWidth: w, pointRadius: 0, pointHoverRadius: 4, tension: 0.15,
@@ -107,6 +123,19 @@ function volChartFor(sym) {
       },
     },
   });
+}
+
+// ---- feature importance --------------------------------------------------------------------
+function importanceChart() {
+  const imp = (data.feature_importance || []).filter((f) => f.importance != null);
+  if (!imp.length) { $("importance-block").hidden = true; return; }
+  const max = Math.max(...imp.map((f) => f.importance), 1e-9);
+  $("importance").innerHTML = imp.map((f) => `
+    <div class="imp-row">
+      <span class="imp-name">${esc(f.label)}</span>
+      <span class="imp-track" aria-hidden="true"><i style="width:${Math.max(0, (f.importance / max) * 100).toFixed(1)}%"></i></span>
+      <span class="imp-val">${f.importance.toFixed(3)}</span>
+    </div>`).join("");
 }
 
 // ---- RSI event table -------------------------------------------------------------------
@@ -182,6 +211,7 @@ async function init() {
     $("vc-pick").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => volChartFor(b.dataset.sym)));
     volChartFor(vcSyms[0]);
 
+    importanceChart();
     eventTable();
     const btSyms = data.symbols.filter((s) => data.rsi_strategy[s]);
     $("bt-pick").innerHTML = btSyms.map((s) => `<option value="${esc(s)}">${esc(nm(s))}</option>`).join("");
