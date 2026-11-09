@@ -4,7 +4,7 @@ import { $, css, pct, money, fmtDate, fmtMonth, priceText, getJSON, esc, renderT
 
 const RANGES = { "1M": 1, "6M": 6, "1Y": 12, "5Y": 60 }; // months
 const RANGE_WORDS = { "1M": "a month ago", "6M": "6 months ago", "1Y": "a year ago", "5Y": "5 years ago" };
-const state = { tickers: [], current: null, series: [], range: "1Y", chart: null, dd: null };
+const state = { tickers: [], current: null, series: [], range: "1Y", chart: null, dd: null, rsi: null, overlays: new Set() };
 const cache = new Map();
 
 // ---- metrics -------------------------------------------------------------
@@ -35,11 +35,20 @@ function metrics(rows) {
     return dd;
   });
 
+  // Historical 95% one-day Value at Risk and expected shortfall (same method as pandas quantile)
+  const simple = [];
+  for (let i = 1; i < adj.length; i++) simple.push(adj[i] / adj[i - 1] - 1);
+  const sorted = [...simple].sort((a, b) => a - b);
+  const pos = (sorted.length - 1) * 0.05, lo = Math.floor(pos);
+  const var95 = sorted[lo] + (sorted[Math.min(lo + 1, sorted.length - 1)] - sorted[lo]) * (pos - lo);
+  const tail = sorted.filter((r) => r <= var95);
+  const es95 = tail.reduce((a, b) => a + b, 0) / tail.length;
+
   const years = (new Date(rows[rows.length - 1][0]) - new Date(rows[0][0])) / (365.25 * 864e5);
   const cagr = years >= 0.95 ? growth ** (1 / years) - 1 : null;
 
   return {
-    growth, vol, cagr, years, ddSeries,
+    growth, vol, cagr, years, ddSeries, var95, es95, days: simple.length,
     dd: worst,
     ddPeak: rows[worstPeakI][0],
     ddTrough: rows[worstTroughI][0],
@@ -125,6 +134,20 @@ function renderDetail() {
     $("cagr-text").textContent = `The steady yearly rate that matches a total change of ${pct(m.growth - 1)} over ${m.years.toFixed(1)} years.`;
   }
 
+  if (m.days >= 20) {
+    $("var-figure").textContent = `${pct(m.var95)} in a day`;
+    $("var-text").textContent = `On 1 trading day in 20 it fell this much or more. On those days the average fall was ${pct(m.es95)}.`;
+  } else {
+    $("var-figure").textContent = "–";
+    $("var-text").textContent = "Pick 6 months or longer: this needs at least 20 trading days.";
+  }
+
+  const lastRsi = rows[rows.length - 1][5] == null ? null : Math.round(rows[rows.length - 1][5]);
+  $("rsi-note").textContent = lastRsi == null
+    ? "Compares the size of recent gains with recent losses on a 0–100 scale."
+    : `Latest reading ${lastRsi}: ${lastRsi >= 70 ? "above 70, the zone often called overbought" : lastRsi <= 30 ? "below 30, the zone often called oversold" : "between 30 and 70, the neutral zone"}.`;
+
+  document.querySelectorAll("[data-overlay]").forEach((b) => b.setAttribute("aria-pressed", String(state.overlays.has(b.dataset.overlay))));
   document.querySelectorAll(".ranges button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.range === state.range)));
   document.querySelectorAll(".market").forEach((b) => b.setAttribute("aria-current", String(b.dataset.symbol === t.symbol)));
   $("chart").setAttribute("aria-label", `${t.name} price from ${fmtDate(m.start)} to ${fmtDate(m.end)}, ${pct(m.growth - 1)} in total.`);
@@ -143,6 +166,16 @@ function drawCharts(rows, m, up) {
     labels,
     datasets: [{ data: rows.map((r) => r[1]), borderColor: color, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4, pointHoverBorderColor: css("--paper"), pointHoverBorderWidth: 2, pointHoverBackgroundColor: color, tension: 0.15, fill: { target: "origin" }, backgroundColor: color + "1a" }],
   };
+  const overlay = (key, col, label, varName, dash) => ({
+    label, data: rows.map((r) => r[col]), borderColor: css(varName), borderWidth: 1.5,
+    borderDash: dash, pointRadius: 0, pointHoverRadius: 0, tension: 0.1, fill: false, spanGaps: false,
+  });
+  if (state.overlays.has("sma50")) priceData.datasets.push(overlay("sma50", 3, "50-day", "--s1", []));
+  if (state.overlays.has("sma200")) priceData.datasets.push(overlay("sma200", 4, "200-day", "--ink-soft", [6, 4]));
+  const rsiData = {
+    labels,
+    datasets: [{ data: rows.map((r) => r[5]), borderColor: css("--ink"), borderWidth: 1.5, pointRadius: 0, pointHoverRadius: 3, tension: 0.1, spanGaps: false }],
+  };
   const ddData = {
     labels,
     datasets: [{ data: m.ddSeries, borderColor: css("--cinnabar"), borderWidth: 1.5, pointRadius: 0, pointHoverRadius: 3, fill: { target: "origin" }, backgroundColor: css("--cinnabar") + "26", tension: 0 }],
@@ -153,6 +186,8 @@ function drawCharts(rows, m, up) {
     state.chart.update("none");
     state.dd.data = ddData;
     state.dd.update("none");
+    state.rsi.data = rsiData;
+    state.rsi.update("none");
     return;
   }
   const base = {
@@ -167,7 +202,7 @@ function drawCharts(rows, m, up) {
     plugins: [crosshair],
     options: {
       ...base,
-      plugins: { ...base.plugins, tooltip: { displayColors: false, callbacks: { title: (i) => fmtDate(i[0].label), label: (i) => priceText(state.current, i.parsed.y) } } },
+      plugins: { ...base.plugins, tooltip: { displayColors: false, callbacks: { title: (i) => fmtDate(i[0].label), label: (i) => (i.datasetIndex === 0 ? priceText(state.current, i.parsed.y) : `${i.dataset.label} average: ${priceText(state.current, i.parsed.y)}`) } } },
       scales: {
         x: { grid: { display: false }, ticks: xTicks() },
         y: { position: "right", grid: { color: css("--rule") }, border: { display: false }, ticks: { maxTicksLimit: 6 } },
@@ -184,6 +219,44 @@ function drawCharts(rows, m, up) {
       scales: {
         x: { grid: { display: false }, ticks: { display: false } },
         y: { position: "right", max: 0, grid: { color: css("--rule") }, border: { display: false }, ticks: { maxTicksLimit: 3, callback: (v) => `${Math.round(v * 100)}%` } },
+      },
+    },
+  });
+  drawRsi(rsiData);
+}
+
+const rsiZones = {
+  id: "rsiZones",
+  beforeDatasetsDraw(chart) {
+    const { ctx, chartArea: a, scales: { y } } = chart;
+    ctx.save();
+    ctx.fillStyle = css("--rule");
+    ctx.globalAlpha = 0.35;
+    ctx.fillRect(a.left, y.getPixelForValue(70), a.right - a.left, y.getPixelForValue(30) - y.getPixelForValue(70));
+    ctx.globalAlpha = 1;
+    ctx.font = `500 11px ${css("--body")}`;
+    ctx.fillStyle = css("--ink-soft");
+    ctx.textBaseline = "bottom";
+    ctx.fillText("70 overbought", a.left + 4, y.getPixelForValue(70) - 2);
+    ctx.textBaseline = "top";
+    ctx.fillText("30 oversold", a.left + 4, y.getPixelForValue(30) + 2);
+    ctx.restore();
+  },
+};
+
+function drawRsi(rsiData) {
+  state.rsi = new Chart($("rsichart"), {
+    type: "line",
+    data: rsiData,
+    plugins: [rsiZones, crosshair],
+    options: {
+      maintainAspectRatio: false,
+      animation: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: { legend: { display: false }, tooltip: { displayColors: false, callbacks: { title: (i) => fmtDate(i[0].label), label: (i) => `RSI ${i.parsed.y.toFixed(0)}` } } },
+      scales: {
+        x: { grid: { display: false }, ticks: { display: false } },
+        y: { position: "right", min: 0, max: 100, grid: { display: false }, border: { display: false }, ticks: { stepSize: 50 } },
       },
     },
   });
@@ -205,6 +278,13 @@ async function init() {
     b.addEventListener("click", () => { state.range = b.dataset.range; renderDetail(); })
   );
   $("star").addEventListener("click", () => toggleWatch(state.current.symbol));
+  document.querySelectorAll("[data-overlay]").forEach((b) =>
+    b.addEventListener("click", () => {
+      const k = b.dataset.overlay;
+      state.overlays.has(k) ? state.overlays.delete(k) : state.overlays.add(k);
+      renderDetail();
+    })
+  );
 
   try {
     const meta = await getJSON("data/tickers.json");

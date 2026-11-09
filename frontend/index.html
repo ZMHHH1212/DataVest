@@ -41,11 +41,27 @@
             <button type="button" data-range="5Y">5 years</button>
           </div>
         </div>
+        <div class="overlays" role="group" aria-label="Show on the chart">
+          <button type="button" class="key" data-overlay="sma50" aria-pressed="false"><i class="sw sw-50"></i>50-day average</button>
+          <button type="button" class="key" data-overlay="sma200" aria-pressed="false"><i class="sw sw-200"></i>200-day average</button>
+          <details class="inline-help">
+            <summary>What is a moving average?</summary>
+            <p>A moving average is the average closing price over the last 50 or 200 trading days. It smooths out daily noise so the trend is easier to see. When the price sits above its 200-day average, the market is usually described as being in an uptrend. Traders also watch for the 50-day line crossing the 200-day line. Treat these as descriptions of what has happened, not predictions.</p>
+          </details>
+        </div>
         <div class="chart-wrap"><canvas id="chart" role="img" aria-label="Price chart"></canvas></div>
 
         <h2 class="chart-title dd-title">Falls from the peak</h2>
         <p class="chart-note">How far below its previous high the price was on each day. Zero means a new high.</p>
         <div class="chart-wrap short"><canvas id="ddchart" role="img" aria-label="Drawdown chart"></canvas></div>
+
+        <h2 class="chart-title dd-title">Momentum (RSI)</h2>
+        <p class="chart-note" id="rsi-note">Compares the size of recent gains with recent losses on a 0–100 scale.</p>
+        <div class="chart-wrap short"><canvas id="rsichart" role="img" aria-label="Relative Strength Index chart"></canvas></div>
+        <details class="inline-help">
+          <summary>How is RSI used?</summary>
+          <p>The Relative Strength Index looks at the last 14 trading days. Above 70 is often called "overbought" because prices rose fast, and below 30 "oversold". These are rules of thumb. An overbought market can keep rising for months, so RSI alone is not a reliable signal to buy or sell. DataVest will test how well it actually works in a later phase.</p>
+        </details>
       </section>
 
       <section class="lessons">
@@ -74,6 +90,15 @@
           <details>
             <summary>Why "per year"?</summary>
             <p>The compound annual growth rate (CAGR) is the steady yearly rate that would turn the starting value into the ending one. It makes periods of different lengths comparable. It hides the bumps, which is why you should read it next to volatility and drawdown.</p>
+          </details>
+        </article>
+        <article class="lesson">
+          <h2>What does a bad day look like?</h2>
+          <p class="figure loss" id="var-figure">–</p>
+          <p id="var-text"></p>
+          <details>
+            <summary>What is Value at Risk?</summary>
+            <p>Value at Risk (VaR) answers "how bad is a normal bad day?". The 95% one-day VaR is the daily fall that was only beaten on 1 day in 20. It says nothing about how bad the other day can be, which is why the average fall on those worst days (called expected shortfall) is shown too. Banks and funds use the same idea to set risk limits.</p>
           </details>
         </article>
       </section>

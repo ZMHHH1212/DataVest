@@ -15,7 +15,7 @@ OUT = Path(sys.argv[2] if len(sys.argv) > 2 else "screenshots")
 OUT.mkdir(parents=True, exist_ok=True)
 
 PAGES = [
-    ("markets", "", ["#chart", "#ddchart"]),
+    ("markets", "", ["#chart", "#ddchart", "#rsichart"]),
     ("insights", "insights.html", ["#growth", "#scatter", "#rollcorr"]),
     ("signin", "signin.html", []),
     ("analysis", "analysis/01_us_vs_hk_markets.html", []),
@@ -41,6 +41,8 @@ with sync_playwright() as p:
                     errors.append(f"chart {sel} was not drawn")
             if name == "markets" and label == "desktop":
                 page.click("[data-range='5Y']")
+                page.click("[data-overlay=sma50]")
+                page.click("[data-overlay=sma200]")
                 page.click("text=Tencent")
                 page.wait_for_timeout(500)
             if name == "insights" and label == "desktop":

@@ -92,7 +92,7 @@ def test_export_site_writes_json(session_factory, tmp_path):
     assert t["name"] == "Hang Seng Index" and t["group"] == "Indexes" and t["is_index"]
     assert t["last"] == 11.5 and t["prev"] == 10.5
     series = json.loads((tmp_path / "prices" / "_HSI.json").read_text())
-    assert series[0] == ["2026-01-02", 10.5, 10.4]
+    assert series[0] == ["2026-01-02", 10.5, 10.4, None, None, None]
 
 
 def test_export_builds_insights_for_several_markets(session_factory, tmp_path):
@@ -123,3 +123,6 @@ def test_export_builds_insights_for_several_markets(session_factory, tmp_path):
     assert ins["rolling_corr"]["a"] == "^HSI" and len(ins["rolling_corr"]["values"]) > 10
     meta = json.loads((tmp_path / "tickers.json").read_text())
     assert len(meta["tickers"][0]["spark"]) == 90
+    rows = json.loads((tmp_path / "prices" / "_GSPC.json").read_text())
+    assert rows[49][3] is not None and rows[48][3] is None  # 50-day average starts on day 50
+    assert rows[-1][4] is not None and 0 <= rows[-1][5] <= 100

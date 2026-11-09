@@ -187,9 +187,17 @@ code { font-size: 0.9em; }
 .chart-wrap.short2 { height: 14rem; }
 .chart-wrap.tall { height: 24rem; }
 
+.overlays { display: flex; flex-wrap: wrap; align-items: center; gap: 0.375rem; margin: -0.25rem 0 0.75rem; }
+.sw { width: 1rem !important; height: 0 !important; border-radius: 0 !important; border-top: 2px solid var(--s1); }
+.sw-200 { border-top: 2px dashed var(--ink-soft); }
+.overlays button.key[aria-pressed="false"] .sw { outline: 0; border-top-color: var(--rule); }
+.inline-help { margin-left: 0.5rem; }
+.chart-wrap.short + .inline-help { margin: 0.5rem 0 0; }
+.inline-help[open] { flex-basis: 100%; margin: 0.25rem 0 0.25rem; }
+.inline-help p { max-width: 68ch; }
 .lessons {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0 2rem;
   margin: 2.5rem 0 1rem;
   border-top: 2px solid var(--ink);
@@ -289,6 +297,11 @@ button.key[aria-pressed="false"] i { background: transparent !important; outline
 .notice { border-left: 3px solid var(--cinnabar); padding: 0.5rem 1rem; background: var(--paper-raised); }
 
 :focus-visible { outline: 2px solid var(--s1); outline-offset: 2px; }
+
+@media (max-width: 1250px) {
+  .lessons { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .lesson:nth-child(n + 3) { margin-top: 1rem; border-top: 1px solid var(--rule); }
+}
 
 @media (max-width: 900px) {
   .layout { grid-template-columns: 1fr; }

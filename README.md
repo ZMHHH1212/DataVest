@@ -28,7 +28,7 @@ Data-first order, so the data science and AI work sits at the centre.
 - [x] **Phase 1 — Market data pipeline**: fetch daily prices (US + HK), clean, store incrementally, serve via API
 - [x] **Website**: markets page, Insights page, Google sign-in with a synced watchlist; rebuilt with fresh prices every weekday
 - [x] **Phase 2 — Exploratory analysis**: [US vs Hong Kong notebook](analysis/01_us_vs_hk_markets.ipynb) on growth, volatility, drawdowns and correlations, including the time-zone effect ([read it on the site](https://zmhhh1212.github.io/DataVest/analysis/01_us_vs_hk_markets.html))
-- [ ] **Phase 3 — Analytics API**: indicators (moving averages, RSI), risk metrics (volatility, Sharpe, max drawdown, VaR)
+- [x] **Phase 3 — Analytics API**: indicators (SMA, EMA, RSI, MACD, Bollinger bands), risk metrics (volatility, Sharpe, max drawdown, VaR, expected shortfall, beta); moving averages, RSI and a "bad day" lesson on the site
 - [ ] **Phase 4 — Modelling + evaluation**: volatility forecasting (GARCH vs ML) and stock clustering, always compared against a simple baseline
 - [ ] **Phase 5 — Dashboard**: Next.js charts with every metric explained in plain language
 - [ ] **Phase 6 — Learn + money tools**: lessons, quizzes, budget tracker, savings / compound-interest calculators
@@ -69,6 +69,9 @@ Without a config the site still works, and the watchlist is kept in the browser.
 |---|---|
 | `GET /tickers` | tracked symbols with date range and row count |
 | `GET /prices/{symbol}?start=&end=` | daily OHLCV prices |
+| `GET /analytics/{symbol}/risk?start=&end=&benchmark=^GSPC` | growth, volatility, Sharpe, worst fall, 95% VaR, expected shortfall, beta |
+| `GET /analytics/{symbol}/indicators?include=sma50,sma200,rsi14,macd,bb20` | daily close plus the chosen indicators |
+| `GET /analytics/compare?symbols=^GSPC,^HSI,2800.HK` | side-by-side summary and weekly correlation |
 
 ### Tests
 ```bash
@@ -82,7 +85,8 @@ backend/app/
   pipeline/store.py   de-duplicated, incremental saves
   pipeline/ingest.py  CLI that runs fetch -> store
   api/prices.py       REST endpoints
-  analytics.py        returns, volatility, Sharpe, drawdowns, correlations
+  analytics.py        returns, risk (VaR, beta, drawdowns), indicators (SMA, EMA, RSI, MACD, Bollinger)
+  api/analytics.py    risk, indicators and comparison endpoints
   export_site.py      DB -> static JSON for the website
 analysis/             Jupyter notebooks (run and published by CI)
 frontend/             the website (HTML, CSS, JS + Chart.js)

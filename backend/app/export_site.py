@@ -45,8 +45,19 @@ def export(session: Session, out: Path) -> int:
         ).all()
         if len(rows) < 2:
             continue
-        # [date, close, adjusted close]; adjusted close includes dividends, used for returns
-        series = [[d.isoformat(), round(c, 4), round(a if a is not None else c, 4)] for d, c, a in rows]
+        # [date, close, adjusted close, 50-day avg, 200-day avg, RSI 14]
+        # Adjusted close includes dividends and is used for returns; indicators use the plotted close.
+        close = pd.Series([c for _, c, _ in rows], dtype=float)
+        ind = pd.DataFrame({
+            "sma50": an.sma(close, 50),
+            "sma200": an.sma(close, 200),
+            "rsi14": an.rsi(close, 14),
+        }).round({"sma50": 4, "sma200": 4, "rsi14": 2})
+        ind = ind.astype(object).where(ind.notna(), None)
+        series = [
+            [d.isoformat(), round(c, 4), round(a if a is not None else c, 4), *ind.iloc[i].tolist()]
+            for i, (d, c, a) in enumerate(rows)
+        ]
         (out / "prices" / file_name(ticker.symbol)).write_text(json.dumps(series, separators=(",", ":")))
 
         wide[ticker.symbol] = pd.Series(
