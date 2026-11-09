@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from app.api import prices
+from app.api import analytics, prices
 from app.db import init_db
 
 
@@ -14,6 +14,7 @@ async def lifespan(_: FastAPI):
 
 app = FastAPI(title="DataVest", description="Finance education with real market data. Not financial advice.", lifespan=lifespan)
 app.include_router(prices.router)
+app.include_router(analytics.router)
 
 
 @app.get("/health")

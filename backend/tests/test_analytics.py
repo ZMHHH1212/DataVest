@@ -54,3 +54,70 @@ def test_summary_has_a_row_per_symbol():
     assert list(out.index) == ["X", "Y", "Z"]
     assert {"cagr", "volatility", "sharpe", "max_drawdown"} <= set(out.columns)
     assert (out["max_drawdown"] <= 0).all()
+
+
+# ---- indicators ----------------------------------------------------------------
+
+def test_sma_matches_hand_calculation():
+    s = series([1, 2, 3, 4, 5])
+    assert an.sma(s, 3).tolist()[2:] == [2.0, 3.0, 4.0]
+    assert an.sma(s, 3).isna().sum() == 2
+
+
+def test_ema_weights_recent_days_more():
+    s = series([10] * 20 + [20] * 5)
+    assert an.sma(s, 10).iloc[-1] < an.ema(s, 10).iloc[-1] < 20
+
+
+def test_rsi_extremes_and_range():
+    up = series(np.arange(1, 40, dtype=float))
+    down = series(np.arange(40, 1, -1, dtype=float))
+    assert an.rsi(up).iloc[-1] == 100
+    assert an.rsi(down).iloc[-1] == pytest.approx(0)
+    rng = np.random.default_rng(3)
+    noisy = series(100 * np.cumprod(1 + rng.normal(0, 0.01, 300)))
+    r = an.rsi(noisy).dropna()
+    assert r.between(0, 100).all() and 30 < r.mean() < 70
+
+
+def test_rsi_known_value():
+    # Gains of 1 and losses of 1 alternating -> equal average gain and loss -> RSI 50
+    s = series([10, 11] * 30)
+    assert an.rsi(s).iloc[-1] == pytest.approx(50, abs=3)
+
+
+def test_macd_is_zero_for_a_flat_price():
+    m = an.macd(series([50.0] * 60)).dropna()
+    assert (m.abs() < 1e-9).all().all()
+
+
+def test_bollinger_bands_surround_the_average():
+    rng = np.random.default_rng(4)
+    s = series(100 + rng.normal(0, 1, 100).cumsum())
+    b = an.bollinger(s).dropna()
+    assert (b["upper"] > b["middle"]).all() and (b["lower"] < b["middle"]).all()
+
+
+# ---- risk ----------------------------------------------------------------------
+
+def test_var_and_expected_shortfall():
+    r = pd.Series(np.linspace(-0.10, 0.09, 20))  # 20 evenly spaced daily returns
+    var = an.value_at_risk(r, 0.95)
+    assert -0.10 <= var <= -0.09
+    assert an.expected_shortfall(r, 0.95) <= var
+
+
+def test_beta_of_a_leveraged_copy_is_two():
+    rng = np.random.default_rng(5)
+    bench = pd.Series(rng.normal(0, 0.01, 200))
+    assert an.beta(2 * bench, bench) == pytest.approx(2.0)
+
+
+def test_risk_report_fields():
+    rng = np.random.default_rng(6)
+    s = series(100 * np.cumprod(1 + rng.normal(0.0004, 0.01, 600)))
+    b = series(100 * np.cumprod(1 + rng.normal(0.0003, 0.01, 600)))
+    rep = an.risk_report(s, b)
+    for key in ["cagr", "volatility", "sharpe", "max_drawdown", "var_95", "expected_shortfall_95", "beta", "correlation"]:
+        assert rep[key] is not None
+    assert rep["expected_shortfall_95"] <= rep["var_95"] < 0 < rep["best_day"]
