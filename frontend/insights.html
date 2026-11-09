@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DataVest · Insights</title>
+  <meta name="description" content="US vs Hong Kong markets over five years: growth, risk and how closely they move together.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top" id="top"></header>
+
+  <main id="main" class="page">
+    <section class="lede">
+      <p class="kicker">The last 5 years</p>
+      <h1 id="headline">How US and Hong Kong markets compare.</h1>
+      <div class="findings" id="findings"><p class="muted">Loading the numbers…</p></div>
+    </section>
+
+    <section class="block" aria-labelledby="growth-title">
+      <div class="chart-head">
+        <h2 id="growth-title" class="chart-title">Growth of $100</h2>
+        <div class="legend" id="growth-legend" role="group" aria-label="Show or hide markets"></div>
+      </div>
+      <p class="chart-note">Index levels leave out dividends. The two index funds include them, so the gap between an index and its fund is roughly what dividends added.</p>
+      <div class="chart-wrap"><canvas id="growth" role="img" aria-label="Growth of $100 over five years"></canvas></div>
+    </section>
+
+    <section class="block two-col">
+      <div>
+        <h2 class="chart-title">Risk vs return</h2>
+        <p class="chart-note">Further right means a bumpier ride. Higher means more growth per year. The best place to be is top left.</p>
+        <div class="legend static">
+          <span class="key"><i style="background: var(--s1)"></i>United States</span>
+          <span class="key"><i style="background: var(--s2)"></i>Hong Kong</span>
+        </div>
+        <div class="chart-wrap tall"><canvas id="scatter" role="img" aria-label="Risk versus return for each market"></canvas></div>
+      </div>
+      <div>
+        <h2 class="chart-title">Do they move together?</h2>
+        <p class="chart-note" id="corr-note"></p>
+        <div class="segmented" role="group" aria-label="How returns are measured">
+          <button type="button" data-corr="weekly" aria-pressed="true">Weekly returns</button>
+          <button type="button" data-corr="daily" aria-pressed="false">Same-day returns</button>
+        </div>
+        <div class="heatmap-wrap"><table class="heatmap" id="heatmap"></table></div>
+        <div class="scale" aria-hidden="true"><span>−1 opposite</span><i></i><span>+1 in step</span></div>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="rc-title">
+      <h2 id="rc-title" class="chart-title">Hang Seng vs S&amp;P 500: the link changes over time</h2>
+      <p class="chart-note">Correlation of weekly returns over rolling one-year windows. 1 means they moved in step, 0 means no link.</p>
+      <div class="chart-wrap short2"><canvas id="rollcorr" role="img" aria-label="Rolling one-year correlation between the Hang Seng and the S&P 500"></canvas></div>
+    </section>
+
+    <section class="block" aria-labelledby="table-title">
+      <h2 id="table-title" class="chart-title">Every market, side by side</h2>
+      <p class="chart-note">Click a column heading to sort. The Sharpe ratio is growth per unit of volatility, using a 0% risk-free rate.</p>
+      <div class="table-wrap"><table class="stats" id="stats"></table></div>
+      <p class="more"><a href="analysis/01_us_vs_hk_markets.html">Read the full analysis notebook, with code and method notes</a></p>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <p>Prices from Yahoo Finance, updated every weekday. <span id="updated"></span></p>
+    <p>DataVest is a learning project. Nothing here is financial advice, and past performance does not predict future results.</p>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script type="module" src="js/insights.js"></script>
+</body>
+</html>

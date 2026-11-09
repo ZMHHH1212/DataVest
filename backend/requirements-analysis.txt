@@ -1,0 +1,4 @@
+matplotlib
+jinja2
+nbconvert
+ipykernel

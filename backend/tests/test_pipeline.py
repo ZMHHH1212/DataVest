@@ -93,3 +93,33 @@ def test_export_site_writes_json(session_factory, tmp_path):
     assert t["last"] == 11.5 and t["prev"] == 10.5
     series = json.loads((tmp_path / "prices" / "_HSI.json").read_text())
     assert series[0] == ["2026-01-02", 10.5, 10.4]
+
+
+def test_export_builds_insights_for_several_markets(session_factory, tmp_path):
+    import json
+    import numpy as np
+    from app.export_site import export
+
+    rng = np.random.default_rng(0)
+    days = pd.bdate_range("2023-01-02", periods=400)
+
+    def fetch_for(seed):
+        def fetch(symbol, start=None, period="5y"):
+            p = 100 * np.cumprod(1 + np.random.default_rng(seed).normal(0.0004, 0.01, len(days)))
+            cols = pd.MultiIndex.from_product([["Open", "High", "Low", "Close", "Adj Close", "Volume"], [symbol]])
+            raw = pd.DataFrame(np.column_stack([p, p, p, p, p, np.full(len(p), 1000)]), index=pd.DatetimeIndex(days, name="Date"), columns=cols)
+            return clean_prices(raw)
+        return fetch
+
+    with session_factory() as s:
+        for i, sym in enumerate(["^GSPC", "^HSI", "AAPL"]):
+            ingest_symbol(s, sym, fetcher=fetch_for(i), info_fetcher=lambda x: {"name": None, "currency": "USD"})
+        assert export(s, tmp_path) == 3
+
+    ins = json.loads((tmp_path / "insights.json").read_text())
+    assert ins["symbols"] == ["^GSPC", "^HSI", "AAPL"]
+    assert set(ins["stats"]) == {"^GSPC", "^HSI", "AAPL"}
+    assert ins["corr_weekly"][0][0] == 1.0
+    assert ins["rolling_corr"]["a"] == "^HSI" and len(ins["rolling_corr"]["values"]) > 10
+    meta = json.loads((tmp_path / "tickers.json").read_text())
+    assert len(meta["tickers"][0]["spark"]) == 90

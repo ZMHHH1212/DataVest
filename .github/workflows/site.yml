@@ -1,5 +1,6 @@
 name: website
-# Fetches fresh prices, exports them as JSON and publishes frontend/ to GitHub Pages.
+# Fetches fresh prices, runs the analysis notebook, publishes frontend/ to GitHub Pages,
+# then checks the live site in a real browser.
 on:
   push:
     branches: [main]
@@ -25,14 +26,16 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
-          cache-dependency-path: backend/requirements.txt
-      - run: pip install -r backend/requirements.txt
+          cache-dependency-path: backend/requirements*.txt
+      - run: pip install -r backend/requirements.txt -r backend/requirements-analysis.txt
       - name: Fetch market data
         working-directory: backend
         run: python -m app.pipeline.ingest --period 5y
       - name: Export JSON for the site
         working-directory: backend
         run: python -m app.export_site
+      - name: Run the analysis notebook
+        run: jupyter nbconvert --to html --execute analysis/01_us_vs_hk_markets.ipynb --output-dir frontend/analysis
       - uses: actions/upload-pages-artifact@v3
         with:
           path: frontend
@@ -43,6 +46,25 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  check:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install playwright && python -m playwright install --with-deps chromium
+      - name: Check the live site
+        run: python scripts/check_site.py "${{ needs.deploy.outputs.url }}" screenshots
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: site-screenshots
+          path: screenshots

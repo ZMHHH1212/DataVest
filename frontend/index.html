@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>DataVest · Market explorer</title>
+  <title>DataVest · Markets</title>
   <meta name="description" content="See how markets really behave: growth, ups and downs, and the worst falls, explained in plain language.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,10 +11,7 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header class="top">
-    <a class="brand" href="./">DataVest</a>
-    <p class="tagline">Learn how markets behave, using real prices.</p>
-  </header>
+  <header class="top" id="top"></header>
 
   <div class="layout">
     <nav class="markets" aria-label="Markets">
@@ -23,19 +20,32 @@
 
     <main id="main" class="detail" aria-live="polite">
       <section class="lede">
-        <p class="kicker" id="m-name">&nbsp;</p>
+        <div class="lede-head">
+          <p class="kicker" id="m-name">&nbsp;</p>
+          <button type="button" class="star" id="star" aria-pressed="false" hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.8z"/></svg>
+            <span id="star-label">Add to watchlist</span>
+          </button>
+        </div>
         <h1 id="m-story">&nbsp;</h1>
         <p class="price-line" id="m-price"></p>
       </section>
 
-      <section class="chart-block">
-        <div class="ranges" role="group" aria-label="Time period">
-          <button type="button" data-range="1M">1 month</button>
-          <button type="button" data-range="6M">6 months</button>
-          <button type="button" data-range="1Y" aria-pressed="true">1 year</button>
-          <button type="button" data-range="5Y">5 years</button>
+      <section class="chart-block" aria-labelledby="price-title">
+        <div class="chart-head">
+          <h2 id="price-title" class="chart-title">Price</h2>
+          <div class="ranges" role="group" aria-label="Time period">
+            <button type="button" data-range="1M">1 month</button>
+            <button type="button" data-range="6M">6 months</button>
+            <button type="button" data-range="1Y" aria-pressed="true">1 year</button>
+            <button type="button" data-range="5Y">5 years</button>
+          </div>
         </div>
         <div class="chart-wrap"><canvas id="chart" role="img" aria-label="Price chart"></canvas></div>
+
+        <h2 class="chart-title dd-title">Falls from the peak</h2>
+        <p class="chart-note">How far below its previous high the price was on each day. Zero means a new high.</p>
+        <div class="chart-wrap short"><canvas id="ddchart" role="img" aria-label="Drawdown chart"></canvas></div>
       </section>
 
       <section class="lessons">
@@ -76,6 +86,6 @@
   </footer>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-  <script src="app.js"></script>
+  <script type="module" src="js/markets.js"></script>
 </body>
 </html>

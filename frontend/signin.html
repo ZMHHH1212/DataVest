@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DataVest · Sign in</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="signin-page">
+  <header class="top" id="top"></header>
+
+  <main class="signin">
+    <div class="signin-copy">
+      <h1>Keep your markets with you.</h1>
+      <p>Sign in to save the markets you follow to your watchlist. It appears at the top of the market list on any device you sign in from.</p>
+      <p class="muted">DataVest only stores your name, email and watchlist. You can sign out at any time.</p>
+    </div>
+
+    <div class="signin-panel" id="panel">
+      <h2>Sign in to DataVest</h2>
+      <button type="button" class="google-btn" id="google">
+        <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.7 13.3l7.9 6.1C12.5 13.6 17.8 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 2.9-2.2 5.4-4.7 7.1l7.6 5.9c4.4-4.1 6.9-10.1 6.9-17.5z"/><path fill="#FBBC05" d="M10.6 28.6c-.5-1.4-.8-3-.8-4.6s.3-3.2.8-4.6l-7.9-6.1C1 16.6 0 20.2 0 24s1 7.4 2.7 10.7l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.6-5.9c-2.1 1.4-4.9 2.3-8.3 2.3-6.2 0-11.5-4.1-13.4-9.9l-7.9 6.1C6.6 42.6 14.6 48 24 48z"/></svg>
+        <span>Continue with Google</span>
+      </button>
+      <p class="form-msg" id="msg" role="status"></p>
+      <p class="fine">You'll choose your Google account in a pop-up window.</p>
+    </div>
+  </main>
+
+  <script type="module">
+    import { authConfigured, onUser, signInWithGoogle, signOut } from "./js/auth.js";
+    import { $, esc, renderTopBar } from "./js/common.js";
+
+    renderTopBar(null);
+    const btn = $("google"), msg = $("msg");
+
+    if (!authConfigured) {
+      btn.disabled = true;
+      msg.textContent = "Sign-in isn't switched on for this site yet. Your watchlist is still saved in this browser.";
+    }
+
+    btn.addEventListener("click", async () => {
+      btn.disabled = true;
+      msg.textContent = "Waiting for Google…";
+      try {
+        await signInWithGoogle();
+      } catch (err) {
+        const closed = err && (err.code === "auth/popup-closed-by-user" || err.code === "auth/cancelled-popup-request");
+        msg.textContent = closed ? "The Google window was closed before you finished. Try again when you're ready."
+          : err && err.code === "auth/popup-blocked" ? "Your browser blocked the Google window. Allow pop-ups for this site and try again."
+          : `Sign-in failed: ${err.message}`;
+        btn.disabled = false;
+      }
+    });
+
+    onUser((user) => {
+      if (!user) return;
+      $("panel").innerHTML = `
+        <h2>You're signed in</h2>
+        <p>Signed in as <strong>${esc(user.email || user.displayName)}</strong>. Star any market to add it to your watchlist.</p>
+        <p class="actions"><a class="btn" href="./">Go to markets</a><button type="button" class="btn-quiet" id="out">Sign out</button></p>`;
+      $("out").addEventListener("click", () => signOut().then(() => location.reload()));
+    });
+  </script>
+</body>
+</html>
