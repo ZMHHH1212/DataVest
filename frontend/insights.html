@@ -57,6 +57,40 @@
       <div class="chart-wrap short2"><canvas id="rollcorr" role="img" aria-label="Rolling one-year correlation between the Hang Seng and the S&P 500"></canvas></div>
     </section>
 
+    <section class="block" aria-labelledby="map-title" id="map-block">
+      <h2 id="map-title" class="chart-title">Market map: which stocks move together?</h2>
+      <p class="chart-note" id="map-note">An unsupervised learning model grouped large US and Hong Kong stocks by how their weekly returns move together. Nobody told it about countries or industries.</p>
+      <div class="two-col">
+        <div>
+          <div class="legend static" id="map-legend"></div>
+          <div class="chart-wrap tall"><canvas id="mapchart" role="img" aria-label="Map of stocks by how they move"></canvas></div>
+          <details class="inline-help">
+            <summary>How was this map made?</summary>
+            <p>Each dot is a stock. Principal component analysis (PCA) squeezes about five years of weekly returns into a few "patterns" of movement, and the map plots each stock on two of them. Stocks close together tend to move together. The groups come from hierarchical clustering on correlation, with the number of groups chosen by the silhouette score, which measures how well-separated the groups are.</p>
+          </details>
+        </div>
+        <div id="map-groups" class="groups"></div>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="reg-title" id="reg-block">
+      <div class="chart-head">
+        <h2 id="reg-title" class="chart-title">Calm or stormy? Market regimes</h2>
+        <div class="segmented" id="reg-pick" role="group" aria-label="Market"></div>
+      </div>
+      <p class="chart-note" id="reg-note"></p>
+      <div class="legend static">
+        <span class="key"><i style="background: var(--ink)"></i>Price</span>
+        <span class="key"><i class="band"></i>Stormy phase (model is over 50% sure)</span>
+      </div>
+      <div class="chart-wrap"><canvas id="regchart" role="img" aria-label="Price with stormy phases shaded"></canvas></div>
+      <div class="table-wrap"><table class="stats" id="reg-table"></table></div>
+      <details class="inline-help">
+        <summary>How does the model find regimes?</summary>
+        <p>A Hidden Markov Model assumes the market switches between two hidden states, calm and stormy, each with its own typical daily swing. It learns those swings, and how likely the market is to switch, from the data alone (Baum–Welch algorithm). "Today" uses only past data. The shaded history uses the full sample, so it's a description of the past, not a forecast.</p>
+      </details>
+    </section>
+
     <section class="block" aria-labelledby="table-title">
       <h2 id="table-title" class="chart-title">Every market, side by side</h2>
       <p class="chart-note">Click a column heading to sort. The Sharpe ratio is growth per unit of volatility, using a 0% risk-free rate.</p>

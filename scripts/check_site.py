@@ -16,13 +16,15 @@ OUT.mkdir(parents=True, exist_ok=True)
 
 PAGES = [
     ("markets", "", ["#chart", "#ddchart", "#rsichart"]),
-    ("insights", "insights.html", ["#growth", "#scatter", "#rollcorr"]),
+    ("insights", "insights.html", ["#growth", "#scatter", "#rollcorr", "#mapchart", "#regchart"]),
     ("models", "models.html", ["#volchart", "#btchart"]),
     ("signin", "signin.html", []),
     ("analysis-index", "analysis/", []),
     ("analysis", "analysis/01_us_vs_hk_markets.html", []),
     ("analysis-vol", "analysis/02_volatility_forecasting.html", []),
     ("analysis-rsi", "analysis/03_does_rsi_work.html", []),
+    ("analysis-ml", "analysis/04_machine_learning_volatility.html", []),
+    ("analysis-clusters", "analysis/05_clusters_and_regimes.html", []),
 ]
 
 problems = []

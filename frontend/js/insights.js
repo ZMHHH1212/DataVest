@@ -208,6 +208,130 @@ function table() {
   );
 }
 
+// ---- market map (PCA + clustering) -------------------------------------------------
+const CLUSTER_COLORS = ["--s1", "--s2", "--s3", "--s4", "--s5"];
+let patterns = null;
+
+function marketMap() {
+  const m = patterns?.map;
+  if (!m) { $("map-block").hidden = true; return; }
+  const color = (c) => css(CLUSTER_COLORS[(c - 1) % CLUSTER_COLORS.length]);
+  const groupName = (g) => `${g.region === "Mixed" ? "Mixed US and HK" : g.region === "Hong Kong" ? "Mostly Hong Kong" : "Mostly US"}: ${g.top_sectors.slice(0, 2).join(", ").toLowerCase()}`;
+  $("map-legend").innerHTML = m.clusters.map((g) => `<span class="key"><i style="background: var(${CLUSTER_COLORS[(g.id - 1) % 5]})"></i>Group ${g.id}</span>`).join("");
+  const weak = Math.max(m.ari_region, m.ari_sector) < 0.1;
+  const verdict = weak ? "match neither country nor industry closely"
+    : m.ari_region > m.ari_sector ? "line up with country much more than with industry" : "line up with industry more than with country";
+  $("map-note").textContent = `An unsupervised model grouped ${m.stocks.length} large US and Hong Kong stocks into ${m.k} groups using only how their weekly returns moved together. Nobody told it about countries or industries. The groups ${verdict} (agreement ${m.ari_region.toFixed(2)} for country and ${m.ari_sector.toFixed(2)} for industry, where 1 is a perfect match and 0 is random).`;
+
+  const pcLabel = (i) => `Pattern ${i} (${Math.round(m.explained[i - 1] * 100)}% of movement)`;
+  new Chart($("mapchart"), {
+    type: "scatter",
+    data: {
+      datasets: m.clusters.map((g) => ({
+        label: `Group ${g.id}`,
+        data: m.stocks.filter((s) => s.cluster === g.id).map((s) => ({ x: s.pc2, y: s.pc3, s })),
+        backgroundColor: color(g.id), borderColor: css("--paper"), borderWidth: 1.5,
+        pointStyle: (ctx) => (ctx.raw?.s.region === "Hong Kong" ? "rectRot" : "circle"),
+        pointRadius: 6, pointHoverRadius: 8,
+      })),
+    },
+    options: {
+      maintainAspectRatio: false, animation: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { title: (i) => `${i[0].raw.s.name} (${i[0].raw.s.symbol})`, label: (i) => [`${i.raw.s.sector}, ${i.raw.s.region}`, `Group ${i.raw.s.cluster}`] } },
+      },
+      scales: {
+        x: { title: { display: true, text: pcLabel(2) }, grid: { color: css("--rule") }, border: { display: false }, ticks: { display: false } },
+        y: { title: { display: true, text: pcLabel(3) }, grid: { color: css("--rule") }, border: { display: false }, ticks: { display: false } },
+      },
+    },
+  });
+
+  $("map-groups").innerHTML = `<p class="chart-note">Circles are US stocks, diamonds are Hong Kong stocks. Pattern 1 (${Math.round(m.explained[0] * 100)}% of movement) is the whole market rising and falling together, so the map shows patterns 2 and 3.</p>` +
+    m.clusters.map((g) => {
+      const members = m.stocks.filter((s) => s.cluster === g.id);
+      return `<div class="group">
+        <h3><i style="background: var(${CLUSTER_COLORS[(g.id - 1) % 5]})"></i>Group ${g.id}: ${esc(groupName(g))}</h3>
+        <p class="muted">${g.size} stocks${g.avg_within_corr != null ? `, average correlation ${g.avg_within_corr.toFixed(2)} within the group` : ""}</p>
+        <p class="chips">${members.map((s) => `<span title="${esc(s.sector)}">${esc(s.name)}</span>`).join("")}</p>
+      </div>`;
+    }).join("");
+}
+
+// ---- regimes (HMM) --------------------------------------------------------------------
+let regChart;
+let stormP = null; // weekly probability of the stormy state for the chart on screen
+const stormBands = {
+  id: "stormBands",
+  beforeDatasetsDraw(chart) {
+    const p = stormP;
+    if (!p) return;
+    const { ctx, chartArea: a, scales: { x } } = chart;
+    ctx.save();
+    ctx.fillStyle = css("--cinnabar");
+    ctx.globalAlpha = 0.14;
+    let start = null;
+    const step = (x.getPixelForValue(1) - x.getPixelForValue(0)) / 2;
+    p.forEach((v, i) => {
+      const on = v != null && v > 0.5;
+      if (on && start === null) start = i;
+      if ((!on || i === p.length - 1) && start !== null) {
+        const end = on ? i : i - 1;
+        const x0 = x.getPixelForValue(start) - step, x1 = x.getPixelForValue(end) + step;
+        ctx.fillRect(Math.max(x0, a.left), a.top, Math.min(x1, a.right) - Math.max(x0, a.left), a.bottom - a.top);
+        start = null;
+      }
+    });
+    ctx.restore();
+  },
+};
+
+function regimeFor(sym) {
+  const r = patterns.regimes[sym];
+  const [calm, storm] = r.states;
+  const p = r.today_p_turbulent;
+  const phase = p > 0.5 ? "stormy" : "calm";
+  const sure = Math.round((p > 0.5 ? p : 1 - p) * 100);
+  $("reg-note").innerHTML = `As of ${fmtDate(r.today_date)}, the model puts the <b>${esc(nm(sym))}</b> in a <b>${phase}</b> phase (${sure}% probability). Stormy phases had a typical yearly swing of ±${(storm.volatility * 100).toFixed(0)}%, against ±${(calm.volatility * 100).toFixed(0)}% in calm ones.`;
+  $("reg-table").innerHTML = `
+    <thead><tr><th scope="col">${esc(nm(sym))}</th><th scope="col">Typical yearly swing</th><th scope="col">Average length</th><th scope="col">Share of the 5 years</th></tr></thead>
+    <tbody>${r.states.map((st) => `<tr><td>${st.name === "calm" ? "Calm phase" : "Stormy phase"}</td><td class="num">±${(st.volatility * 100).toFixed(0)}%</td><td class="num">${Math.round(st.avg_days)} trading days</td><td class="num">${Math.round(st.share_of_time * 100)}%</td></tr>`).join("")}</tbody>`;
+  document.querySelectorAll("#reg-pick button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.sym === sym)));
+
+  const data = { labels: r.weekly.dates, datasets: [{ data: r.weekly.close, borderColor: css("--ink"), borderWidth: 1.75, pointRadius: 0, pointHoverRadius: 4, tension: 0.15 }] };
+  stormP = r.weekly.p_turbulent;
+  if (regChart) {
+    regChart.data = data;
+    regChart.update("none");
+    return;
+  }
+  regChart = new Chart($("regchart"), {
+    type: "line", data, plugins: [stormBands, crosshair],
+    options: {
+      maintainAspectRatio: false, animation: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: { displayColors: false, callbacks: { title: (i) => `Week of ${fmtDate(i[0].label)}`, label: (i) => [`Level ${i.parsed.y.toLocaleString("en-US", { maximumFractionDigits: 0 })}`, `Stormy: ${Math.round((stormP?.[i.dataIndex] ?? 0) * 100)}% likely`] } },
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { maxTicksLimit: 6, maxRotation: 0, callback(v) { return fmtMonth(this.getLabelForValue(v)); } } },
+        y: { position: "right", grid: { color: css("--rule") }, border: { display: false } },
+      },
+    },
+  });
+}
+
+function regimes() {
+  const syms = Object.keys(patterns?.regimes || {});
+  if (!syms.length) { $("reg-block").hidden = true; return; }
+  const SHORTN = { "^GSPC": "S&P 500", "^HSI": "Hang Seng" };
+  $("reg-pick").innerHTML = syms.map((s) => `<button type="button" data-sym="${esc(s)}" aria-pressed="false">${esc(SHORTN[s] || nm(s))}</button>`).join("");
+  $("reg-pick").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => regimeFor(b.dataset.sym)));
+  regimeFor(syms.includes("^HSI") ? "^HSI" : syms[0]);
+}
+
 async function init() {
   renderTopBar("insights");
   chartDefaults();
@@ -223,6 +347,9 @@ async function init() {
     document.querySelectorAll("[data-corr]").forEach((b) => b.addEventListener("click", () => heatmap(b.dataset.corr)));
     rollingCorr();
     table();
+    try { patterns = await getJSON("data/patterns.json"); } catch { patterns = null; }
+    marketMap();
+    regimes();
   } catch (err) {
     console.error(err);
     $("main").innerHTML = `<p class="notice">The insights data isn't available yet. It is built together with the market data: run <code>python -m app.export_site</code> in the backend folder.</p>`;

@@ -285,6 +285,13 @@ h3.chart-title { font-size: 1rem; }
 .imp-val { text-align: right; color: var(--ink-soft); font-size: 0.875rem; }
 .sc-name { font-size: 0.9375rem; }
 @media (max-width: 560px) { .imp-row { grid-template-columns: 1fr 3.5rem; } .imp-track { grid-column: 1 / -1; grid-row: 2; } }
+.groups { display: grid; gap: 1.25rem; align-content: start; }
+.group h3 { display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; margin: 0 0 0.125rem; }
+.group h3 i { width: 0.75rem; height: 0.75rem; border-radius: 3px; flex: none; }
+.group .muted { margin: 0 0 0.375rem; font-size: 0.875rem; }
+.chips { display: flex; flex-wrap: wrap; gap: 0.25rem; margin: 0; }
+.chips span { font-size: 0.8125rem; padding: 0.125rem 0.5rem; border: 1px solid var(--rule); border-radius: 999px; }
+.key i.band { background: var(--cinnabar); opacity: 0.25; }
 .flag { display: inline-block; font-size: 0.75rem; font-weight: 600; padding: 0.0625rem 0.375rem; border-radius: 4px; background: var(--ink); color: var(--paper); margin-left: 0.25rem; }
 .picker { font: 500 0.9375rem/1 var(--body); padding: 0.5rem 0.75rem; border: 1px solid var(--rule); border-radius: 8px; background: var(--paper-raised); color: var(--ink); }
 .plain-list { padding-left: 1.25rem; max-width: 72ch; }

@@ -31,7 +31,7 @@ Data-first order, so the data science and AI work sits at the centre.
 - [x] **Phase 3 — Analytics API**: indicators (SMA, EMA, RSI, MACD, Bollinger bands), risk metrics (volatility, Sharpe, max drawdown, VaR, expected shortfall, beta); moving averages, RSI and a "bad day" lesson on the site
 - [x] **Phase 4 — Modelling + evaluation**: [volatility forecasting](analysis/02_volatility_forecasting.ipynb) (GARCH, EWMA, HAR vs baselines, walk-forward, QLIKE) and [does RSI work?](analysis/03_does_rsi_work.ipynb) (event study with bootstrap + backtest with costs); Models page on the site
 - [x] **Phase 4b — Machine learning**: [global ML models](analysis/04_machine_learning_volatility.ipynb) (ridge, gradient boosting, neural network) on engineered features with purged walk-forward; benchmarked against GARCH; permutation importance
-- [ ] **Phase 4c — More markets**: widen the universe so stock clustering and regime detection are meaningful
+- [x] **Phase 4c — Unsupervised learning**: [clusters and regimes](analysis/05_clusters_and_regimes.ipynb): 43-stock US + HK research universe, PCA, hierarchical clustering (silhouette, ARI vs country/sector), two-state Gaussian HMM (Baum–Welch, from scratch); market map and regimes on the Insights page
 - [ ] **Phase 5 — Dashboard**: Next.js charts with every metric explained in plain language
 - [ ] **Phase 6 — Learn + money tools**: lessons, quizzes, budget tracker, savings / compound-interest calculators
 - [ ] **v2 — AI tutor**: chat assistant grounded in DataVest's lessons and live numbers (RAG), on a free tier; project write-up
@@ -91,6 +91,7 @@ backend/app/
   forecast.py         GARCH(1,1) by maximum likelihood, EWMA, HAR; walk-forward evaluation
   backtest.py         RSI event study (bootstrap) and long-only backtest with costs
   ml_forecast.py      global ML volatility models (ridge, gradient boosting, neural net), purged walk-forward
+  unsupervised.py     PCA, hierarchical clustering, Gaussian HMM (Baum–Welch)
   export_models.py    model results for the website
   api/analytics.py    risk, indicators and comparison endpoints
   export_site.py      DB -> static JSON for the website

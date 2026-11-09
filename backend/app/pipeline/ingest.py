@@ -1,6 +1,6 @@
 """Run the pipeline: fetch -> clean -> store, incrementally.
 
-    python -m app.pipeline.ingest                 # default watchlist
+    python -m app.pipeline.ingest                 # website markets + research universe
     python -m app.pipeline.ingest AAPL 0700.HK    # specific symbols
     python -m app.pipeline.ingest --period max    # longer first backfill
 """
@@ -11,7 +11,7 @@ from collections.abc import Callable
 import pandas as pd
 from sqlalchemy.orm import Session
 
-from app.config import DEFAULT_WATCHLIST
+from app.config import ALL_SYMBOLS
 from app.db import SessionLocal, init_db
 from app.pipeline import fetch, store
 
@@ -54,7 +54,7 @@ def run(symbols: list[str], period: str = "5y") -> dict[str, int | str]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Fetch daily market data into the DataVest DB.")
-    parser.add_argument("symbols", nargs="*", default=DEFAULT_WATCHLIST)
+    parser.add_argument("symbols", nargs="*", default=ALL_SYMBOLS, help="default: website markets + research universe")
     parser.add_argument("--period", default="5y", help="first-time backfill length (e.g. 1y, 5y, max)")
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")

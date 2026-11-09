@@ -37,6 +37,8 @@ def export(session: Session, out: Path) -> int:
     (out / "prices").mkdir(parents=True, exist_ok=True)
     tickers = []
     wide: dict[str, pd.Series] = {}
+    site_symbols = {s for group in WATCHLIST_GROUPS.values() for s in group}
+    research: dict[str, pd.Series] = {}
     for ticker in session.scalars(select(Ticker).order_by(Ticker.symbol)):
         rows = session.execute(
             select(Price.date, Price.close, Price.adj_close)
@@ -45,6 +47,9 @@ def export(session: Session, out: Path) -> int:
         ).all()
         if len(rows) < 2:
             continue
+        research[ticker.symbol] = pd.Series([a if a is not None else c for _, c, a in rows], index=pd.to_datetime([d for d, _, _ in rows]))
+        if ticker.symbol not in site_symbols:
+            continue  # research-only stock: used for the market map, not listed on the site
         # [date, close, adjusted close, 50-day avg, 200-day avg, RSI 14]
         # Adjusted close includes dividends and is used for returns; indicators use the plotted close.
         close = pd.Series([c for _, c, _ in rows], dtype=float)
@@ -95,6 +100,14 @@ def export(session: Session, out: Path) -> int:
             (out / "models.json").write_text(json.dumps(models, separators=(",", ":")))
         except Exception as exc:  # the rest of the site should still publish
             print(f"WARNING: models.json not built: {exc!r}")
+        try:
+            from app.export_patterns import build_patterns
+
+            patterns = build_patterns(pd.DataFrame(research).sort_index(), prices)
+            patterns["generated_at"] = meta["generated_at"]
+            (out / "patterns.json").write_text(json.dumps(patterns, separators=(",", ":")))
+        except Exception as exc:
+            print(f"WARNING: patterns.json not built: {exc!r}")
     return len(tickers)
 
 
