@@ -33,7 +33,7 @@ Data-first order, so the data science and AI work sits at the centre.
 - [x] **Phase 4b — Machine learning**: [global ML models](analysis/04_machine_learning_volatility.ipynb) (ridge, gradient boosting, neural network) on engineered features with purged walk-forward; benchmarked against GARCH; permutation importance
 - [x] **Phase 4c — Unsupervised learning**: [clusters and regimes](analysis/05_clusters_and_regimes.ipynb): 43-stock US + HK research universe, PCA, hierarchical clustering (silhouette, ARI vs country/sector), two-state Gaussian HMM (Baum–Welch, from scratch); market map and regimes on the Insights page
 - [ ] **Phase 5 — Dashboard**: Next.js charts with every metric explained in plain language
-- [ ] **Phase 6 — Learn + money tools**: lessons, quizzes, budget tracker, savings / compound-interest calculators
+- [x] **Phase 6 — Learn + money tools**: six lessons (money basics to hedge funds) using live data, quizzes with saved progress; calculators for growth, goals, cost of waiting, and pay split with Hong Kong MPF and 50/30/20 (tested with `node --test`)
 - [ ] **v2 — AI tutor**: chat assistant grounded in DataVest's lessons and live numbers (RAG), on a free tier; project write-up
 
 ## Run it

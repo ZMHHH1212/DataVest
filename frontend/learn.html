@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DataVest · Learn</title>
+  <meta name="description" content="Six short lessons on money and markets, from budgeting to hedge funds, with real data and quizzes.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top" id="top"></header>
+
+  <div class="nb-layout learn">
+    <aside class="nb-toc" aria-label="Lessons">
+      <p class="toc-title">Lessons</p>
+      <ol class="lesson-list" id="lesson-list"></ol>
+      <p class="progress-line" id="progress"></p>
+    </aside>
+
+    <main class="nb" id="main" aria-live="polite">
+      <p class="kicker" id="l-kicker"></p>
+      <h1 id="l-title"></h1>
+      <p class="nb-meta" id="l-summary"></p>
+      <div class="nb-md lesson-body" id="l-body"></div>
+
+      <section class="takeaways" aria-labelledby="t-title">
+        <h2 id="t-title">Key points</h2>
+        <ul id="l-takeaways"></ul>
+      </section>
+
+      <section class="quiz" aria-labelledby="q-title">
+        <h2 id="q-title">Check your understanding</h2>
+        <form id="quiz" onsubmit="return false"></form>
+        <p class="quiz-score" id="quiz-score" role="status"></p>
+        <div class="quiz-actions">
+          <button type="button" class="btn" id="check">Check answers</button>
+          <a class="btn-quiet" id="next" href="#" hidden>Next lesson</a>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer class="foot">
+    <p>Your progress is saved in this browser only.</p>
+    <p>DataVest is a learning project. Nothing here is financial advice.</p>
+  </footer>
+
+  <script type="module" src="js/learn.js"></script>
+</body>
+</html>

@@ -18,6 +18,8 @@ PAGES = [
     ("markets", "", ["#chart", "#ddchart", "#rsichart"]),
     ("insights", "insights.html", ["#growth", "#scatter", "#rollcorr", "#mapchart", "#regchart"]),
     ("models", "models.html", ["#volchart", "#btchart"]),
+    ("tools", "tools.html", ["#g-chart"]),
+    ("learn", "learn.html", []),
     ("signin", "signin.html", []),
     ("analysis-index", "analysis/", []),
     ("analysis", "analysis/01_us_vs_hk_markets.html", []),
@@ -54,6 +56,17 @@ with sync_playwright() as p:
             if name == "models" and label == "desktop":
                 page.click("#vc-pick button >> nth=1")
                 page.select_option("#bt-pick", index=0)
+            if name == "learn" and label == "desktop":
+                for qi in range(3):
+                    page.check(f'input[name="q{qi}"] >> nth=0')
+                page.click("#check")
+                if "out of 3" not in page.inner_text("#quiz-score"):
+                    errors.append("quiz did not score")
+            if name == "tools" and label == "desktop":
+                page.fill("#g-monthly", "3000")
+                page.click("#currency button >> nth=1")
+                if "US$" not in page.inner_text("#g-headline"):
+                    errors.append("currency switch failed")
             if name == "insights" and label == "desktop":
                 page.click("[data-corr=daily]")
                 page.click(".stats th button[data-k=cagr]")

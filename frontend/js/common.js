@@ -31,6 +31,8 @@ export function renderTopBar(active, base = "") {
     ["markets", base || "./", "Markets"],
     ["insights", `${base}insights.html`, "Insights"],
     ["models", `${base}models.html`, "Models"],
+    ["learn", `${base}learn.html`, "Learn"],
+    ["tools", `${base}tools.html`, "Tools"],
     ["analysis", `${base}analysis/`, "Analysis"],
   ];
   $("top").innerHTML = `

@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DataVest · Money tools</title>
+  <meta name="description" content="Free calculators: watch savings grow, plan for a goal, see the cost of waiting, and split your pay with MPF and the 50/30/20 rule.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top" id="top"></header>
+
+  <main id="main" class="page">
+    <section class="lede">
+      <p class="kicker">Money tools</p>
+      <h1>Small amounts, saved early, become large ones.</h1>
+      <p class="nb-lead">Four calculators for planning your own money. Nothing you type leaves this page.</p>
+      <div class="currency" role="group" aria-label="Currency">
+        <span class="muted">Currency</span>
+        <div class="segmented" id="currency">
+          <button type="button" data-cur="HK$" aria-pressed="true">HK$</button>
+          <button type="button" data-cur="US$" aria-pressed="false">US$</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 1. growth -->
+    <section class="block tool" aria-labelledby="g-title">
+      <h2 id="g-title" class="section-title">Watch your money grow</h2>
+      <div class="tool-grid">
+        <form class="inputs" id="g-form" onsubmit="return false">
+          <label>Starting amount <span class="field"><span class="cur"></span><input type="number" id="g-start" value="10000" min="0" step="1000" inputmode="decimal"></span></label>
+          <label>Saved every month <span class="field"><span class="cur"></span><input type="number" id="g-monthly" value="2000" min="0" step="100" inputmode="decimal"></span></label>
+          <label>Years <input type="range" id="g-years" min="1" max="45" value="20"><output id="g-years-out">20 years</output></label>
+          <fieldset>
+            <legend>Yearly return (an assumption, not a promise)</legend>
+            <div class="segmented" id="g-rate-pick">
+              <button type="button" data-rate="0.02" aria-pressed="false">Savings 2%</button>
+              <button type="button" data-rate="0.04" aria-pressed="false">Balanced 4%</button>
+              <button type="button" data-rate="0.07" aria-pressed="true">Stocks 7%</button>
+            </div>
+            <span class="field small"><input type="number" id="g-rate" value="7" min="-10" max="20" step="0.5" aria-label="Yearly return in percent"><span>% a year</span></span>
+          </fieldset>
+          <label class="check"><input type="checkbox" id="g-real"> Show in today's money (2% yearly inflation)</label>
+        </form>
+        <div class="result">
+          <p class="big" id="g-headline"></p>
+          <p id="g-split"></p>
+          <div class="legend static">
+            <span class="key"><i style="background: var(--jade)"></i>Total value</span>
+            <span class="key"><i style="background: var(--ink-soft)"></i>Money you put in</span>
+          </div>
+          <div class="chart-wrap short2"><canvas id="g-chart" role="img" aria-label="Growth of savings over time"></canvas></div>
+          <p class="chart-note" id="g-context"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. goal -->
+    <section class="block tool" aria-labelledby="goal-title">
+      <h2 id="goal-title" class="section-title">Plan for a goal</h2>
+      <div class="tool-grid">
+        <form class="inputs" onsubmit="return false">
+          <label>Goal <span class="field"><span class="cur"></span><input type="number" id="goal-amount" value="300000" min="0" step="10000" inputmode="decimal"></span></label>
+          <label>Already saved <span class="field"><span class="cur"></span><input type="number" id="goal-start" value="20000" min="0" step="1000" inputmode="decimal"></span></label>
+          <label>In how many years <span class="field small"><input type="number" id="goal-years" value="5" min="1" max="50" step="1"><span>years</span></span></label>
+          <label>Yearly return <span class="field small"><input type="number" id="goal-rate" value="3" min="-10" max="20" step="0.5"><span>% a year</span></span></label>
+        </form>
+        <div class="result">
+          <p class="big" id="goal-headline"></p>
+          <p id="goal-detail"></p>
+          <p class="chart-note">For a goal only a few years away, a low-risk return such as 2–4% is the realistic assumption. Stocks can fall a lot in a short period: see the worst falls on the <a href="./">Markets</a> page.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. waiting -->
+    <section class="block tool" aria-labelledby="w-title">
+      <h2 id="w-title" class="section-title">The cost of waiting</h2>
+      <div class="tool-grid">
+        <form class="inputs" onsubmit="return false">
+          <label>Saved every month <span class="field"><span class="cur"></span><input type="number" id="w-monthly" value="1000" min="0" step="100" inputmode="decimal"></span></label>
+          <label>Your age now <span class="field small"><input type="number" id="w-age" value="21" min="15" max="70" step="1"><span>years old</span></span></label>
+          <label>Start how many years later <span class="field small"><input type="number" id="w-delay" value="10" min="1" max="30" step="1"><span>years</span></span></label>
+          <label>Keep saving until age <span class="field small"><input type="number" id="w-end" value="65" min="20" max="90" step="1"><span>years old</span></span></label>
+          <label>Yearly return <span class="field small"><input type="number" id="w-rate" value="6" min="-10" max="20" step="0.5"><span>% a year</span></span></label>
+        </form>
+        <div class="result">
+          <p class="big" id="w-headline"></p>
+          <div class="compare" id="w-compare"></div>
+          <p class="chart-note" id="w-note"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. pay -->
+    <section class="block tool" aria-labelledby="p-title">
+      <h2 id="p-title" class="section-title">Split your pay</h2>
+      <div class="tool-grid">
+        <form class="inputs" onsubmit="return false">
+          <label>Monthly salary before deductions <span class="field"><span class="cur"></span><input type="number" id="p-income" value="18000" min="0" step="500" inputmode="decimal"></span></label>
+          <label class="check"><input type="checkbox" id="p-mpf" checked> I'm an employee in Hong Kong (MPF applies)</label>
+        </form>
+        <div class="result">
+          <div class="budget" id="p-bars"></div>
+          <p class="chart-note" id="p-note"></p>
+          <details class="inline-help">
+            <summary>What is the 50/30/20 rule?</summary>
+            <p>A simple starting point for a budget: about half of take-home pay on needs (rent, food, transport, bills), 30% on wants (eating out, hobbies, trips) and 20% on saving and paying off debt. In an expensive city like Hong Kong, needs often take more than half. Then the savings share is what to protect, and wants are what to trim.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <p>Results are estimates from the numbers you enter. Real returns go up and down from year to year, and fees and taxes reduce them.</p>
+    <p>DataVest is a learning project. Nothing here is financial advice.</p>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script type="module" src="js/tools.js"></script>
+</body>
+</html>
