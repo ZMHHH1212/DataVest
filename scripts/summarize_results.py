@@ -40,6 +40,21 @@ if (d / "models.json").exists():
     wins = sum((s["strategy"]["sharpe"] or -9) > (s["buy_and_hold"]["sharpe"] or -9) for s in m["rsi_strategy"].values())
     lines.append(f"\nRSI: {sig} of {len(tests)} signal tests had p < 0.05. RSI rule beat buy-and-hold on Sharpe in {wins} of {len(m['rsi_strategy'])} markets.")
 
+if (d / "patterns.json").exists():
+    pt = json.loads((d / "patterns.json").read_text())
+    if pt.get("map"):
+        m = pt["map"]
+        lines += ["", "### Market map (unsupervised)", "",
+                  f"{len(m['stocks'])} stocks, {m['k']} groups. Match with country (ARI): {m['ari_region']:.2f}; with sector: {m['ari_sector']:.2f}. "
+                  f"PC1 explains {m['explained'][0] * 100:.0f}% of weekly movement.", ""]
+        for g in m["clusters"]:
+            names_in = [s["name"] for s in m["stocks"] if s["cluster"] == g["id"]]
+            lines.append(f"- Group {g['id']} ({g['region']}, {g['size']}): {', '.join(names_in)}")
+    for sym, r in pt.get("regimes", {}).items():
+        calm, storm = r["states"]
+        lines.append(f"\n{names.get(sym, sym)} regimes: calm ±{calm['volatility'] * 100:.0f}% ({calm['share_of_time'] * 100:.0f}% of time), "
+                     f"stormy ±{storm['volatility'] * 100:.0f}% (avg {storm['avg_days']:.0f} days). Today: {r['today_p_turbulent'] * 100:.0f}% stormy.")
+
 text = "\n".join(lines)
 print(text)
 if os.environ.get("GITHUB_STEP_SUMMARY"):
