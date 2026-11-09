@@ -4,4 +4,7 @@ sqlalchemy>=2.0
 psycopg[binary]
 python-dotenv
 pandas
+numpy
+scipy
+scikit-learn
 yfinance
