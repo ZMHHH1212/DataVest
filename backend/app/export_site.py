@@ -87,6 +87,14 @@ def export(session: Session, out: Path) -> int:
         insights = build_insights(prices, [t["symbol"] for t in tickers])
         insights["generated_at"] = meta["generated_at"]
         (out / "insights.json").write_text(json.dumps(insights, separators=(",", ":")))
+        try:
+            from app.export_models import build_models
+
+            models = build_models(prices, [t["symbol"] for t in tickers])
+            models["generated_at"] = meta["generated_at"]
+            (out / "models.json").write_text(json.dumps(models, separators=(",", ":")))
+        except Exception as exc:  # the rest of the site should still publish
+            print(f"WARNING: models.json not built: {exc!r}")
     return len(tickers)
 
 

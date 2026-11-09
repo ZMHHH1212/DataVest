@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DataVest · Models</title>
+  <meta name="description" content="Can we forecast next month's market risk, and does the RSI indicator really work? Tested out of sample.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top" id="top"></header>
+
+  <main id="main" class="page">
+    <section class="lede">
+      <p class="kicker">Models, tested on data they never saw</p>
+      <h1 id="headline">What the models say, and how well they do.</h1>
+      <div class="findings" id="findings"><p class="muted">Loading the results…</p></div>
+    </section>
+
+    <!-- 1. volatility -->
+    <section class="block" aria-labelledby="vol-title">
+      <h2 id="vol-title" class="section-title">Can we forecast next month's risk?</h2>
+      <p class="chart-note">Each model predicts how bumpy the next 21 trading days will be. Forecasts are made every day using only the data available on that day, then compared with what actually happened.</p>
+
+      <div class="two-col">
+        <div>
+          <h3 class="chart-title">Forecast for the next month</h3>
+          <p class="chart-note">GARCH forecast of volatility over the next 21 trading days, next to the last month's actual level.</p>
+          <div class="table-wrap"><table class="stats" id="fc-table"></table></div>
+        </div>
+        <div>
+          <h3 class="chart-title">Which model forecasts best?</h3>
+          <p class="chart-note">Average forecast error (QLIKE) compared with simply assuming next month will look like the last one. Bars to the left are better.</p>
+          <div id="scorecard" class="scorecard"></div>
+        </div>
+      </div>
+
+      <div class="chart-head chart-gap">
+        <h3 class="chart-title" id="vc-title">Forecast vs what happened</h3>
+        <div class="segmented" id="vc-pick" role="group" aria-label="Market"></div>
+      </div>
+      <div class="legend static" id="vc-legend"></div>
+      <div class="chart-wrap"><canvas id="volchart" role="img" aria-label="Forecast and realised volatility"></canvas></div>
+      <details class="inline-help">
+        <summary>How do these models work?</summary>
+        <p><b>Last month</b> assumes the next month will be as bumpy as the last one. <b>Long run</b> uses the average of all history so far. <b>EWMA</b> averages recent days with more weight on the latest. <b>GARCH</b> is a statistical model in which a big move raises expected volatility, which then fades back towards a long-run level. <b>HAR</b> is a regression on the last day, week and month. All models are refitted every month on the data available at that time.</p>
+      </details>
+    </section>
+
+    <!-- 2. RSI -->
+    <section class="block" aria-labelledby="rsi-title">
+      <h2 id="rsi-title" class="section-title">Does RSI actually work?</h2>
+      <p class="chart-note">Many websites say an RSI below 30 means a price is due to bounce, and above 70 that it is due to fall. Here is what happened over the following 20 trading days in each market. Each run of signals counts once.</p>
+      <div class="table-wrap"><table class="stats" id="ev-table"></table></div>
+      <p class="chart-note small" id="ev-note"></p>
+
+      <div class="chart-head chart-gap">
+        <h3 class="chart-title">Trading on RSI vs simply holding</h3>
+        <select id="bt-pick" class="picker" aria-label="Market"></select>
+      </div>
+      <p class="chart-note">The rule buys when RSI drops below 30 and sells when it rises above 70, paying 0.1% on each trade. Decisions are made at the close and take effect the next day.</p>
+      <div class="legend static">
+        <span class="key"><i style="background: var(--s1)"></i>RSI rule</span>
+        <span class="key"><i style="background: var(--ink)"></i>Buy and hold</span>
+      </div>
+      <div class="chart-wrap"><canvas id="btchart" role="img" aria-label="Growth of $100: RSI rule versus buy and hold"></canvas></div>
+      <div class="table-wrap"><table class="stats" id="bt-table"></table></div>
+    </section>
+
+    <section class="block">
+      <h2 class="section-title">Method and limits</h2>
+      <ul class="plain-list">
+        <li>Five years of daily prices. The first 500 days only train the models, which leaves about three years of out-of-sample forecasts per market. That is enough to compare models roughly, but close rankings can change with a different period.</li>
+        <li>A p-value is the chance of a difference this large from ordinary days. With 20 tests, about one would fall below 0.05 by luck alone.</li>
+        <li>A good risk forecast says how bumpy the ride may be, not which way prices will go.</li>
+      </ul>
+      <p class="more">Read the full notebooks, with code: <a href="analysis/02_volatility_forecasting.html">forecasting volatility</a> and <a href="analysis/03_does_rsi_work.html">does RSI work?</a></p>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <p>Prices from Yahoo Finance, updated every weekday. <span id="updated"></span></p>
+    <p>DataVest is a learning project. Nothing here is financial advice, and past performance does not predict future results.</p>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script type="module" src="js/models.js"></script>
+</body>
+</html>

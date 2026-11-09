@@ -17,8 +17,11 @@ OUT.mkdir(parents=True, exist_ok=True)
 PAGES = [
     ("markets", "", ["#chart", "#ddchart", "#rsichart"]),
     ("insights", "insights.html", ["#growth", "#scatter", "#rollcorr"]),
+    ("models", "models.html", ["#volchart", "#btchart"]),
     ("signin", "signin.html", []),
     ("analysis", "analysis/01_us_vs_hk_markets.html", []),
+    ("analysis-vol", "analysis/02_volatility_forecasting.html", []),
+    ("analysis-rsi", "analysis/03_does_rsi_work.html", []),
 ]
 
 problems = []
@@ -45,6 +48,9 @@ with sync_playwright() as p:
                 page.click("[data-overlay=sma200]")
                 page.click("text=Tencent")
                 page.wait_for_timeout(500)
+            if name == "models" and label == "desktop":
+                page.click("#vc-pick button >> nth=1")
+                page.select_option("#bt-pick", index=0)
             if name == "insights" and label == "desktop":
                 page.click("[data-corr=daily]")
                 page.click(".stats th button[data-k=cagr]")

@@ -6,6 +6,7 @@ const RANGES = { "1M": 1, "6M": 6, "1Y": 12, "5Y": 60 }; // months
 const RANGE_WORDS = { "1M": "a month ago", "6M": "6 months ago", "1Y": "a year ago", "5Y": "5 years ago" };
 const state = { tickers: [], current: null, series: [], range: "1Y", chart: null, dd: null, rsi: null, overlays: new Set() };
 const cache = new Map();
+let forecasts = {};
 
 // ---- metrics -------------------------------------------------------------
 function sliceRange(series, range) {
@@ -120,6 +121,9 @@ function renderDetail() {
   $("vol-figure").textContent = `±${(m.vol * 100).toFixed(0)}% a year`;
   const calm = m.vol < 0.15 ? "calmer than a typical stock index" : m.vol < 0.25 ? "about normal for a stock index" : m.vol < 0.4 ? "bumpier than a broad index, typical for a single stock" : "very bumpy, so expect big swings";
   $("vol-text").textContent = `Over this period that is ${calm}.`;
+  const f = forecasts[t.symbol];
+  $("vol-forecast").hidden = !f;
+  if (f) $("vol-forecast").innerHTML = `Forecast for the next month: <b>±${(f.garch_next_month * 100).toFixed(0)}% a year</b>, from a GARCH model. <a href="models.html">How well do forecasts work?</a>`;
 
   $("dd-figure").textContent = m.dd < -0.0005 ? pct(m.dd) : "No fall";
   $("dd-text").textContent = m.dd < -0.0005
@@ -291,6 +295,7 @@ async function init() {
     state.tickers = meta.tickers;
     if (!state.tickers.length) throw new Error("no tickers");
     $("updated").textContent = `Last updated ${new Date(meta.generated_at).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}.`;
+    try { forecasts = (await getJSON("data/models.json")).forecasts || {}; } catch { forecasts = {}; }
     await select(decodeURIComponent(location.hash.slice(1)) || "^HSI");
     onWatchlist(() => { renderList(); renderStar(); });
   } catch (err) {

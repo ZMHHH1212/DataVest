@@ -259,6 +259,35 @@ button.key[aria-pressed="false"] i { background: transparent !important; outline
 .stats tbody tr:hover { background: var(--paper-raised); }
 .more { margin-top: 1.25rem; font-weight: 500; }
 
+/* ---- models ---- */
+.section-title { font: 700 clamp(1.5rem, 1.1rem + 1.4vw, 2.25rem)/1.1 var(--display); letter-spacing: -0.02em; margin: 0 0 0.5rem; }
+.block .two-col { margin-top: 1.5rem; }
+h3.chart-title { font-size: 1rem; }
+.chart-gap { margin-top: 2.5rem; }
+.chart-note.small { font-size: 0.875rem; }
+.scorecard { display: grid; gap: 0.625rem; margin-top: 1rem; }
+.sc-row { display: grid; grid-template-columns: 9.5rem minmax(6rem, 1fr) 3.5rem; grid-template-rows: auto auto; align-items: center; column-gap: 0.75rem; }
+.sc-name { font-weight: 500; }
+.sc-track { position: relative; height: 1.25rem; }
+.sc-track b { position: absolute; left: 50%; top: -0.25rem; bottom: -0.25rem; border-left: 1.5px solid var(--ink-soft); }
+.sc-track i { position: absolute; top: 0.125rem; bottom: 0.125rem; border-radius: 3px; }
+.sc-track i.better { background: var(--s1); }
+.sc-track i.worse { background: var(--s2); }
+.sc-val { text-align: right; font-weight: 600; }
+.sc-note { grid-column: 2 / span 2; font-size: 0.8125rem; color: var(--ink-soft); }
+.sc-axis { display: grid; grid-template-columns: 9.5rem 1fr 1fr 3.5rem; column-gap: 0.75rem; font-size: 0.8125rem; color: var(--ink-soft); }
+.sc-axis span:first-child { grid-column: 2; text-align: right; padding-right: 0.5rem; }
+.sc-axis span:last-child { grid-column: 3; padding-left: 0.5rem; }
+.flag { display: inline-block; font-size: 0.75rem; font-weight: 600; padding: 0.0625rem 0.375rem; border-radius: 4px; background: var(--ink); color: var(--paper); margin-left: 0.25rem; }
+.picker { font: 500 0.9375rem/1 var(--body); padding: 0.5rem 0.75rem; border: 1px solid var(--rule); border-radius: 8px; background: var(--paper-raised); color: var(--ink); }
+.plain-list { padding-left: 1.25rem; max-width: 72ch; }
+.plain-list li { margin-bottom: 0.5rem; }
+.forecast-line { color: var(--ink-soft); font-size: 0.9375rem; }
+.forecast-line b { color: var(--ink); }
+.stats td .muted { font-size: 0.8125rem; }
+#fc-table { min-width: 0; }
+#fc-table th, #fc-table td { padding-left: 0.5rem; padding-right: 0.5rem; }
+
 /* ---- sign in ---- */
 .signin {
   display: grid;

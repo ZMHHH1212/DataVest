@@ -30,6 +30,7 @@ export function renderTopBar(active) {
   const links = [
     ["markets", "./", "Markets"],
     ["insights", "insights.html", "Insights"],
+    ["models", "models.html", "Models"],
     ["analysis", "analysis/01_us_vs_hk_markets.html", "Full analysis"],
   ];
   $("top").innerHTML = `

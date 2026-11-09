@@ -29,7 +29,8 @@ Data-first order, so the data science and AI work sits at the centre.
 - [x] **Website**: markets page, Insights page, Google sign-in with a synced watchlist; rebuilt with fresh prices every weekday
 - [x] **Phase 2 — Exploratory analysis**: [US vs Hong Kong notebook](analysis/01_us_vs_hk_markets.ipynb) on growth, volatility, drawdowns and correlations, including the time-zone effect ([read it on the site](https://zmhhh1212.github.io/DataVest/analysis/01_us_vs_hk_markets.html))
 - [x] **Phase 3 — Analytics API**: indicators (SMA, EMA, RSI, MACD, Bollinger bands), risk metrics (volatility, Sharpe, max drawdown, VaR, expected shortfall, beta); moving averages, RSI and a "bad day" lesson on the site
-- [ ] **Phase 4 — Modelling + evaluation**: volatility forecasting (GARCH vs ML) and stock clustering, always compared against a simple baseline
+- [x] **Phase 4 — Modelling + evaluation**: [volatility forecasting](analysis/02_volatility_forecasting.ipynb) (GARCH, EWMA, HAR vs baselines, walk-forward, QLIKE) and [does RSI work?](analysis/03_does_rsi_work.ipynb) (event study with bootstrap + backtest with costs); Models page on the site
+- [ ] **Phase 4b — More markets**: widen the universe so stock clustering is meaningful
 - [ ] **Phase 5 — Dashboard**: Next.js charts with every metric explained in plain language
 - [ ] **Phase 6 — Learn + money tools**: lessons, quizzes, budget tracker, savings / compound-interest calculators
 - [ ] **Phase 7 — AI tutor + deploy**: ask questions about any concept or chart; Docker deployment; project write-up
@@ -86,6 +87,9 @@ backend/app/
   pipeline/ingest.py  CLI that runs fetch -> store
   api/prices.py       REST endpoints
   analytics.py        returns, risk (VaR, beta, drawdowns), indicators (SMA, EMA, RSI, MACD, Bollinger)
+  forecast.py         GARCH(1,1) by maximum likelihood, EWMA, HAR; walk-forward evaluation
+  backtest.py         RSI event study (bootstrap) and long-only backtest with costs
+  export_models.py    model results for the website
   api/analytics.py    risk, indicators and comparison endpoints
   export_site.py      DB -> static JSON for the website
 analysis/             Jupyter notebooks (run and published by CI)
