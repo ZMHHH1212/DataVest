@@ -76,3 +76,20 @@ def test_api_returns_stored_prices(session_factory):
         assert client.get("/prices/NOPE").status_code == 404
     finally:
         app.dependency_overrides.clear()
+
+
+def test_export_site_writes_json(session_factory, tmp_path):
+    import json
+    from app.export_site import export
+
+    with session_factory() as s:
+        ingest_symbol(s, "^HSI", fetcher=lambda *a, **k: clean_prices(raw_frame(["2026-01-02", "2026-01-05"])),
+                      info_fetcher=lambda s: {"name": "HANG SENG INDEX", "currency": "HKD"})
+        assert export(s, tmp_path) == 1
+
+    meta = json.loads((tmp_path / "tickers.json").read_text())
+    t = meta["tickers"][0]
+    assert t["name"] == "Hang Seng Index" and t["group"] == "Indexes" and t["is_index"]
+    assert t["last"] == 11.5 and t["prev"] == 10.5
+    series = json.loads((tmp_path / "prices" / "_HSI.json").read_text())
+    assert series[0] == ["2026-01-02", 10.5, 10.4]

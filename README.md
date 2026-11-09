@@ -1,5 +1,7 @@
 # DataVest
 
+**Live site:** https://zmhhh1212.github.io/DataVest/
+
 A web app that teaches people how money works — budgeting, saving, building wealth —
 and explains markets (stocks, indexes, ETFs, hedge funds) using **real, live market data**.
 
@@ -24,6 +26,7 @@ Data-first order, so the data science and AI work sits at the centre.
 
 - [x] **Phase 0 — Foundations**: repo, stack, skeleton
 - [x] **Phase 1 — Market data pipeline**: fetch daily prices (US + HK), clean, store incrementally, serve via API
+- [x] **Website v1**: market explorer on GitHub Pages, rebuilt with fresh prices every weekday
 - [ ] **Phase 2 — Exploratory analysis**: Jupyter notebooks on returns, volatility, drawdowns, correlations (US vs HK)
 - [ ] **Phase 3 — Analytics API**: indicators (moving averages, RSI), risk metrics (volatility, Sharpe, max drawdown, VaR)
 - [ ] **Phase 4 — Modelling + evaluation**: volatility forecasting (GARCH vs ML) and stock clustering, always compared against a simple baseline
@@ -45,6 +48,13 @@ Data goes into a local SQLite file by default. To use Postgres/TimescaleDB inste
 Re-running the ingest only fetches days you don't have yet, so it's safe to schedule
 (e.g. a daily cron job after market close).
 
+### Website locally
+```bash
+python -m app.export_site                 # writes frontend/data/
+python -m http.server 8000 -d ../frontend # open http://localhost:8000
+```
+On GitHub, `.github/workflows/site.yml` does the same every weekday and publishes to Pages.
+
 ### API
 | Endpoint | What it returns |
 |---|---|
@@ -63,5 +73,7 @@ backend/app/
   pipeline/store.py   de-duplicated, incremental saves
   pipeline/ingest.py  CLI that runs fetch -> store
   api/prices.py       REST endpoints
+  export_site.py      DB -> static JSON for the website
+frontend/             the website (HTML, CSS, JS + Chart.js)
   models.py           tickers + prices tables
 ```

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DataVest · Market explorer</title>
+  <meta name="description" content="See how markets really behave: growth, ups and downs, and the worst falls, explained in plain language.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="./">DataVest</a>
+    <p class="tagline">Learn how markets behave, using real prices.</p>
+  </header>
+
+  <div class="layout">
+    <nav class="markets" aria-label="Markets">
+      <div id="market-list"><p class="muted">Loading markets…</p></div>
+    </nav>
+
+    <main id="main" class="detail" aria-live="polite">
+      <section class="lede">
+        <p class="kicker" id="m-name">&nbsp;</p>
+        <h1 id="m-story">&nbsp;</h1>
+        <p class="price-line" id="m-price"></p>
+      </section>
+
+      <section class="chart-block">
+        <div class="ranges" role="group" aria-label="Time period">
+          <button type="button" data-range="1M">1 month</button>
+          <button type="button" data-range="6M">6 months</button>
+          <button type="button" data-range="1Y" aria-pressed="true">1 year</button>
+          <button type="button" data-range="5Y">5 years</button>
+        </div>
+        <div class="chart-wrap"><canvas id="chart" role="img" aria-label="Price chart"></canvas></div>
+      </section>
+
+      <section class="lessons">
+        <article class="lesson">
+          <h2>How bumpy was the ride?</h2>
+          <p class="figure" id="vol-figure">–</p>
+          <p id="vol-text"></p>
+          <details>
+            <summary>What is volatility?</summary>
+            <p>Volatility measures how much the price jumps around from day to day, scaled to a year. Around 15–20% is normal for a broad stock index. Single companies are often 30% or more. Higher volatility means bigger swings both up and down, so you need to be able to sit through drops without panicking.</p>
+          </details>
+        </article>
+        <article class="lesson">
+          <h2>What was the worst fall?</h2>
+          <p class="figure loss" id="dd-figure">–</p>
+          <p id="dd-text"></p>
+          <details>
+            <summary>What is a drawdown?</summary>
+            <p>A drawdown is how far the price fell from its highest point before recovering. The maximum drawdown is the worst of these. It answers a practical question: if you had bought at the worst possible moment, how much would you have been down on paper?</p>
+          </details>
+        </article>
+        <article class="lesson">
+          <h2>Growth per year</h2>
+          <p class="figure" id="cagr-figure">–</p>
+          <p id="cagr-text"></p>
+          <details>
+            <summary>Why "per year"?</summary>
+            <p>The compound annual growth rate (CAGR) is the steady yearly rate that would turn the starting value into the ending one. It makes periods of different lengths comparable. It hides the bumps, which is why you should read it next to volatility and drawdown.</p>
+          </details>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <footer class="foot">
+    <p>Prices from Yahoo Finance, updated every weekday. Returns use adjusted prices, which include dividends. <span id="updated"></span></p>
+    <p>DataVest is a learning project. Nothing here is financial advice, and past performance does not predict future results.</p>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
