@@ -26,24 +26,24 @@ export function esc(s) {
 }
 
 // ---- top bar --------------------------------------------------------------
-export function renderTopBar(active) {
+export function renderTopBar(active, base = "") {
   const links = [
-    ["markets", "./", "Markets"],
-    ["insights", "insights.html", "Insights"],
-    ["models", "models.html", "Models"],
-    ["analysis", "analysis/01_us_vs_hk_markets.html", "Full analysis"],
+    ["markets", base || "./", "Markets"],
+    ["insights", `${base}insights.html`, "Insights"],
+    ["models", `${base}models.html`, "Models"],
+    ["analysis", `${base}analysis/`, "Analysis"],
   ];
   $("top").innerHTML = `
-    <a class="brand" href="./">DataVest</a>
+    <a class="brand" href="${base || "./"}">DataVest</a>
     <nav class="site-nav" aria-label="Site">
       ${links.map(([k, href, label]) => `<a href="${href}"${k === active ? ' aria-current="page"' : ""}>${label}</a>`).join("")}
     </nav>
-    <div class="account" id="account"><a class="btn-quiet" href="signin.html">Sign in</a></div>`;
+    <div class="account" id="account"><a class="btn-quiet" href="${base}signin.html">Sign in</a></div>`;
 
   onUser((user) => {
     const box = $("account");
     if (!user) {
-      box.innerHTML = `<a class="btn-quiet" href="signin.html">Sign in</a>`;
+      box.innerHTML = `<a class="btn-quiet" href="${base}signin.html">Sign in</a>`;
       return;
     }
     const first = (user.displayName || user.email || "You").split(" ")[0];

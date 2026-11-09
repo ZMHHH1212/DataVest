@@ -5,3 +5,5 @@ node_modules/
 .next/
 *.db
 frontend/data/
+build/
+frontend/analysis/

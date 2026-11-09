@@ -34,8 +34,10 @@ jobs:
       - name: Export JSON for the site
         working-directory: backend
         run: python -m app.export_site
-      - name: Run the analysis notebooks
-        run: jupyter nbconvert --to html --execute analysis/*.ipynb --output-dir frontend/analysis --ExecutePreprocessor.timeout=600
+      - name: Run the analysis notebooks and render them as site pages
+        run: |
+          jupyter nbconvert --to notebook --execute analysis/*.ipynb --output-dir build/notebooks --ExecutePreprocessor.timeout=600
+          python scripts/render_notebooks.py build/notebooks frontend/analysis
       - uses: actions/upload-pages-artifact@v3
         with:
           path: frontend

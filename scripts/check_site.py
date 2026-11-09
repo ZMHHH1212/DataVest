@@ -19,6 +19,7 @@ PAGES = [
     ("insights", "insights.html", ["#growth", "#scatter", "#rollcorr"]),
     ("models", "models.html", ["#volchart", "#btchart"]),
     ("signin", "signin.html", []),
+    ("analysis-index", "analysis/", []),
     ("analysis", "analysis/01_us_vs_hk_markets.html", []),
     ("analysis-vol", "analysis/02_volatility_forecasting.html", []),
     ("analysis-rsi", "analysis/03_does_rsi_work.html", []),

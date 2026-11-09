@@ -92,7 +92,8 @@ backend/app/
   export_models.py    model results for the website
   api/analytics.py    risk, indicators and comparison endpoints
   export_site.py      DB -> static JSON for the website
-analysis/             Jupyter notebooks (run and published by CI)
+analysis/             Jupyter notebooks + shared chart style (run by CI)
+scripts/render_notebooks.py  executed notebooks -> site-styled pages
 frontend/             the website (HTML, CSS, JS + Chart.js)
 scripts/check_site.py browser check of the live site after each deploy
   models.py           tickers + prices tables
