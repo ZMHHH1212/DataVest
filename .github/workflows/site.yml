@@ -38,6 +38,8 @@ jobs:
         run: |
           jupyter nbconvert --to notebook --execute analysis/*.ipynb --output-dir build/notebooks --ExecutePreprocessor.timeout=600
           python scripts/render_notebooks.py build/notebooks frontend/analysis
+      - name: Summarise results
+        run: python scripts/summarize_results.py frontend/data
       - uses: actions/upload-pages-artifact@v3
         with:
           path: frontend
