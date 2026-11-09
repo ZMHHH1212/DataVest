@@ -20,17 +20,48 @@ and explains markets (stocks, indexes, ETFs, hedge funds) using **real, live mar
 - Deploy: Docker
 
 ## Roadmap
-- [x] Phase 0 — Foundations: repo, stack, skeleton
-- [ ] Phase 1 — Accounts & money tools: login, budget tracker, savings goals, calculators
-- [ ] Phase 2 — Market data pipeline: fetch & store prices, scheduled updates, API endpoints
-- [ ] Phase 3 — Market explorer UI: charts, indexes, indicators explained
-- [ ] Phase 4 — Learn: lessons, quizzes, progress tracking
-- [ ] Phase 5 — Analysis & AI: portfolio simulator, educational insights, AI tutor, deploy
+Data-first order, so the data science and AI work sits at the centre.
 
-## Run the backend
+- [x] **Phase 0 — Foundations**: repo, stack, skeleton
+- [x] **Phase 1 — Market data pipeline**: fetch daily prices (US + HK), clean, store incrementally, serve via API
+- [ ] **Phase 2 — Exploratory analysis**: Jupyter notebooks on returns, volatility, drawdowns, correlations (US vs HK)
+- [ ] **Phase 3 — Analytics API**: indicators (moving averages, RSI), risk metrics (volatility, Sharpe, max drawdown, VaR)
+- [ ] **Phase 4 — Modelling + evaluation**: volatility forecasting (GARCH vs ML) and stock clustering, always compared against a simple baseline
+- [ ] **Phase 5 — Dashboard**: Next.js charts with every metric explained in plain language
+- [ ] **Phase 6 — Learn + money tools**: lessons, quizzes, budget tracker, savings / compound-interest calculators
+- [ ] **Phase 7 — AI tutor + deploy**: ask questions about any concept or chart; Docker deployment; project write-up
+
+## Run it
 ```bash
-docker compose up -d db
-cd backend && pip install -r requirements.txt
-uvicorn app.main:app --reload
+cd backend
+pip install -r requirements.txt
+python -m app.pipeline.ingest              # fetch the default watchlist (5 years)
+python -m app.pipeline.ingest AAPL 0700.HK # or specific symbols
+uvicorn app.main:app --reload              # API at http://localhost:8000/docs
 ```
-Open http://localhost:8000/docs
+Data goes into a local SQLite file by default. To use Postgres/TimescaleDB instead:
+`docker compose up -d db`, then copy `backend/.env.example` to `backend/.env`.
+
+Re-running the ingest only fetches days you don't have yet, so it's safe to schedule
+(e.g. a daily cron job after market close).
+
+### API
+| Endpoint | What it returns |
+|---|---|
+| `GET /tickers` | tracked symbols with date range and row count |
+| `GET /prices/{symbol}?start=&end=` | daily OHLCV prices |
+
+### Tests
+```bash
+pip install -r requirements-dev.txt && pytest
+```
+
+## Project layout
+```
+backend/app/
+  pipeline/fetch.py   download + clean (yfinance -> tidy DataFrame)
+  pipeline/store.py   de-duplicated, incremental saves
+  pipeline/ingest.py  CLI that runs fetch -> store
+  api/prices.py       REST endpoints
+  models.py           tickers + prices tables
+```
