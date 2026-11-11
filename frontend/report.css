@@ -17,7 +17,8 @@ html.report {
   --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100; --s5: #e87ba4;
   --div-pos: #2a78d6; --div-neg: #eb6834;
   /* sticker and chapter colours */
-  --k1: #ff6a2b; --k2: #3b6cff; --k3: #19b46e; --k4: #ffcd2e; --k5: #ff7ac3; --k6: #ff4b4b;
+  /* sticker colours, from the DataVest palette: mint paper, jade, desk navy; amber and red only for warnings */
+  --k1: #e3eddc; --k2: #2cc6a6; --k3: #172437; --k4: #f2a93b; --k5: #e3eddc; --k6: #f06a5f;
   --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
   --body: "Geist", system-ui, sans-serif;
   --mono: "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -84,14 +85,13 @@ html.report body { background: var(--paper); color: var(--ink); font-family: var
 }
 .chapters a { display: grid; justify-items: center; gap: 0.3rem; text-decoration: none; color: #a3a39e; }
 .chapters b {
-  font: 900 2.25rem/1 var(--display);
+  font: 800 2.25rem/1 var(--display);
   font-stretch: 115%;
-  color: var(--c);
-  text-shadow: 0 3px 0 rgba(255, 255, 255, 0.18), 0 6px 0 rgba(0, 0, 0, 0.5);
+  color: #e3eddc;
   transition: transform 0.2s;
 }
 .chapters span { font: 500 0.6875rem/1.2 var(--mono); letter-spacing: 0.04em; }
-.chapters a:hover b, .chapters a:focus-visible b { transform: translateY(-4px) rotate(-6deg); }
+.chapters a:hover b, .chapters a:focus-visible b { transform: translateY(-3px); color: #2cc6a6; }
 .chapters a:hover span { color: #fff; }
 
 .stage {
@@ -133,12 +133,9 @@ html.report body { background: var(--paper); color: var(--ink); font-family: var
   min-width: 7.5rem;
   padding: 0.9rem 1.1rem;
   color: var(--black);
-  background:
-    radial-gradient(circle at 28% 22%, rgba(255, 255, 255, 0.6), transparent 42%),
-    radial-gradient(circle at 70% 85%, rgba(0, 0, 0, 0.16), transparent 50%),
-    var(--bg);
-  border: 4px solid #fff;
-  box-shadow: 0 10px 0 -3px rgba(0, 0, 0, 0.45), 0 18px 30px rgba(0, 0, 0, 0.45), inset 0 -5px 0 rgba(0, 0, 0, 0.14);
+  background: linear-gradient(rgba(255, 255, 255, 0.16), transparent 45%), var(--bg);
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.5);
   transform: translate(var(--dx), var(--dy)) rotate(var(--tilt));
   cursor: grab;
   touch-action: none;
@@ -169,14 +166,14 @@ html.report body { background: var(--paper); color: var(--ink); font-family: var
                 radial-gradient(circle at 100% 50%, transparent 9px, #000 10px) right / 51% 100% no-repeat;
           mask: radial-gradient(circle at 0 50%, transparent 9px, #000 10px) left / 51% 100% no-repeat,
                 radial-gradient(circle at 100% 50%, transparent 9px, #000 10px) right / 51% 100% no-repeat;
-  filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.45));
-  box-shadow: inset 0 -5px 0 rgba(0, 0, 0, 0.14);
+  filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.5));
+  box-shadow: none;
 }
-.sticker.bubble { border-radius: 1.4rem 1.4rem 1.4rem 0.3rem; background-color: #fff; }
-.sticker.bubble { background: radial-gradient(circle at 28% 22%, #fff, transparent 42%), var(--bg); }
-.sticker.star { background: none; border: 0; box-shadow: none; width: 9.5rem; height: 9.5rem; min-width: 0; padding: 0; color: #fff; filter: drop-shadow(0 8px 0 rgba(0, 0, 0, 0.45)) drop-shadow(0 16px 20px rgba(0, 0, 0, 0.35)); }
+.sticker.bubble { border-radius: 1.4rem 1.4rem 1.4rem 0.3rem; }
+.sticker.dark { color: #e3eddc; border-color: rgba(227, 237, 220, 0.5); }
+.sticker.star { background: none; border: 0; box-shadow: none; width: 9.5rem; height: 9.5rem; min-width: 0; padding: 0; color: var(--black); filter: drop-shadow(0 14px 22px rgba(0, 0, 0, 0.5)); }
 .sticker.star svg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; overflow: visible; }
-.sticker.star polygon { fill: var(--bg); stroke: #fff; stroke-width: 4; stroke-linejoin: round; }
+.sticker.star polygon { fill: var(--bg); stroke: rgba(255, 255, 255, 0.85); stroke-width: 2.5; stroke-linejoin: round; }
 .sticker.star .s-big { font-size: 1.5rem; }
 
 /* ============ 2. mint body with ruler edges ============ */

@@ -58,7 +58,7 @@ function hero() {
 function stickers() {
   const st = data.stats, out = [];
   const add = (shape, color, small, big, foot, tilt, pos) => out.push(
-    `<div class="sticker ${shape}" data-sticker style="--bg: var(${color}); --tilt: ${tilt}deg; ${pos}" role="img" aria-label="${esc(`${small} ${big} ${foot}`)}">
+    `<div class="sticker ${shape}${color === "--k3" ? " dark" : ""}" data-sticker style="--bg: var(${color}); --tilt: ${tilt}deg; ${pos}" role="img" aria-label="${esc(`${small} ${big} ${foot}`)}">
       ${shape === "star" ? `<svg viewBox="0 0 100 100" aria-hidden="true"><polygon points="${starPoints(12, 50, 34)}"/></svg>` : ""}
       <span class="s-small">${esc(small)}</span><span class="s-big">${esc(big)}</span><span class="s-foot">${esc(foot)}</span>
     </div>`);
@@ -150,7 +150,7 @@ function lineArt() {
     formatDate: (iso) => fmtDate(iso),
     tipTemplate: (label, date, v) => `${esc(label)}<br>${date}<br><b>${v}%</b> below its high`,
     font: css("--mono"),
-    colors: { ink: css("--ink"), soft: css("--ink-soft"), line: css("--rule"), amber: css("--k1"), paper: css("--paper") },
+    colors: { ink: css("--ink"), soft: css("--ink-soft"), line: css("--rule"), amber: css("--k4"), paper: css("--paper") },
   });
 
   // Spade-style data card: the time window and sample
