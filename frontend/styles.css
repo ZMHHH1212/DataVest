@@ -569,6 +569,7 @@ h3.chart-title { font-size: 1rem; }
   max-width: 70ch;
 }
 .foot p { margin: 0.25rem 0; }
+.foot .credit { margin-top: 0.75rem; font-size: 0.75rem; letter-spacing: 0.04em; opacity: 0.75; }
 .muted { color: var(--ink-soft); }
 .notice { border-left: 3px solid var(--cinnabar); padding: 0.5rem 1rem; background: var(--paper-raised); }
 

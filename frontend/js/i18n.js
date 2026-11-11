@@ -61,6 +61,7 @@ const ZH = {
   "m.sfSpin": "自動旋轉", "m.sfReset": "重設視角", "m.sfIn": "放大", "m.sfOut": "縮小",
   "m.calm": "平穩", "m.stormy": "動盪",
   "m.footer1": "價格來自 Yahoo Finance，每個工作日更新。回報以已調整價格計算，已包括股息。",
+  "m.credit": "由 ZMH 製作",
   "m.footer2": "DataVest 是一個學習項目，所有內容均不構成投資建議，過往表現亦不代表將來表現。",
 
   // markets page: dynamic

@@ -24,7 +24,8 @@ FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com">'
          '<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700'
          '&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">')
 FOOTER = ('<footer class="foot"><p>Prices from Yahoo Finance. The notebooks are re-run with fresh data every weekday.</p>'
-          '<p>DataVest is a learning project. Nothing here is financial advice, and past performance does not predict future results.</p></footer>')
+          '<p>DataVest is a learning project. Nothing here is financial advice, and past performance does not predict future results.</p>'
+          '<p class="credit">Built by ZMH</p></footer>')
 PLAIN_REPR = re.compile(r"^(<|Text\(|\[<|\(<|<Figure)")
 
 markdown = mistune.create_markdown(escape=False, plugins=["table", "strikethrough"])
