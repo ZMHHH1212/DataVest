@@ -58,12 +58,14 @@ with sync_playwright() as p:
                     for (let i = 3; i < d.length; i += 4000) if (d[i] > 0) return true; return false; }""")
                 if not drawn:
                     errors.append("3D volatility landscape was not drawn")
-            if name == "markets" and label == "desktop":
+            if name in ("markets", "markets-zh") and label == "desktop":
                 page.click("[data-range='5Y']")
                 page.click("[data-overlay=sma50]")
                 page.click("[data-overlay=sma200]")
-                page.click("text=Tencent")
+                page.click(".market[data-symbol='0700.HK']")  # watchlist row, not the moving ticker tape
                 page.wait_for_timeout(500)
+                if "0700" not in page.inner_text("#m-name"):
+                    errors.append("Choosing a market from the watchlist did not switch the page")
             if name == "models" and label == "desktop":
                 page.click("#vc-pick button >> nth=1")
                 page.select_option("#bt-pick", index=0)
