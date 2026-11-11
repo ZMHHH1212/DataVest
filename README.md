@@ -40,6 +40,7 @@ Data-first order, so the data science and AI work sits at the centre.
 - **Site-wide report style**: Models, Portfolio, Learn, Tools, Analysis and Sign-in share the Insights look (black opening with the page name, mint framed body, numbered dashboard windows) and light/dark mode (`frontend/js/theme.js`); content unchanged
 - **Home page opening**: glowing 3D particle sphere (drag to spin, dots drift from the mouse), own canvas code in `frontend/js/particles.js`, English and Chinese text
 - **New home page** (`index.html`): sphere opening, what DataVest is with live numbers, our philosophy, and where to start; the market dashboard moved to `markets.html` and now uses the report style with light/dark mode
+- **Chinese on every page**: 中/EN button on all pages; fixed text is translated by its English wording (`frontend/js/zh-text.js`, `translatePage` in `i18n.js`) and sentences built from data use `tx()` templates; lesson text and the Analysis studies are next
 - [ ] **v2 — AI tutor**: chat assistant grounded in DataVest's lessons and live numbers (RAG), on a free tier; project write-up
 
 ## Run it

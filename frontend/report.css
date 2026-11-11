@@ -527,3 +527,12 @@ html.report.desk body { font-size: 0.9375rem; }
 .report.desk .panel { border-radius: 12px; box-shadow: var(--shadow); }
 @media (min-width: 1150px) { .principles { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
 #s-updated { font-size: clamp(1.25rem, 2.2vw, 1.75rem); line-height: 1.15; }
+
+/* ---- Chinese: Noto Sans HK for the characters, Latin stays in Archivo/Geist; the 中/EN button ---- */
+html.report[lang="zh-HK"] {
+  --display: "Archivo", "Noto Sans HK", "Helvetica Neue", Arial, sans-serif;
+  --body: "Geist", "Noto Sans HK", system-ui, sans-serif;
+}
+html.report[lang="zh-HK"] .display, html.report[lang="zh-HK"] .two-tone, html.report[lang="zh-HK"] .hero-h1 { letter-spacing: -0.01em; line-height: 1.15; }
+.r-hero .lang { margin-left: auto; display: inline-grid; place-items: center; min-width: 2.25rem; height: 2.25rem; padding: 0 0.6rem; border-radius: 999px; font: 600 0.875rem/1 var(--body); }
+.r-hero .lang ~ .theme-btn { margin-left: 0.5rem; }

@@ -3,10 +3,11 @@ import { FOUNDATIONS } from "./lessons.js";
 import { INVESTING } from "./lessons-investing.js";
 import { mountWidgets } from "./widgets.js";
 import { $, esc, getJSON, renderTopBar, chartDefaults } from "./common.js";
+import { tx } from "./i18n.js";
 
 const TRACKS = [
-  { title: "Money foundations", lessons: FOUNDATIONS },
-  { title: "Stock investing", lessons: INVESTING },
+  { title: tx("Money foundations"), lessons: FOUNDATIONS },
+  { title: tx("Stock investing"), lessons: INVESTING },
 ];
 const LESSONS = TRACKS.flatMap((t) => t.lessons);
 const trackOf = (l) => TRACKS.find((t) => t.lessons.includes(l));
@@ -24,7 +25,7 @@ function renderList() {
     const items = t.lessons.map((l) => {
       const p = progress[l.id];
       const state = p?.best === l.quiz.length ? "done" : p ? "tried" : "";
-      const badge = p ? `<span class="badge ${state}" aria-label="Best score ${p.best} of ${l.quiz.length}">${p.best}/${l.quiz.length}</span>` : "";
+      const badge = p ? `<span class="badge ${state}" aria-label="${tx("Best score {b} of {n}", { b: p.best, n: l.quiz.length })}">${p.best}/${l.quiz.length}</span>` : "";
       return `<li><a href="#${l.id}"${current?.id === l.id ? ' aria-current="page"' : ""}><span>${esc(l.title)}</span>${badge}</a></li>`;
     }).join("");
     const done = t.lessons.filter((l) => progress[l.id]?.best === l.quiz.length).length;
@@ -32,8 +33,8 @@ function renderList() {
   }).join("");
   const done = LESSONS.filter((l) => progress[l.id]?.best === l.quiz.length).length;
   $("progress").textContent = done === LESSONS.length
-    ? "All lessons completed with full marks."
-    : `${done} of ${LESSONS.length} lessons completed with full marks.`;
+    ? tx("All lessons completed with full marks.")
+    : tx("{d} of {n} lessons completed with full marks.", { d: done, n: LESSONS.length });
 }
 
 function renderLesson(id) {
@@ -42,7 +43,7 @@ function renderLesson(id) {
   current = l;
   document.title = `DataVest · ${l.title}`;
   const t = trackOf(l);
-  $("l-kicker").textContent = `${t.title}, lesson ${t.lessons.indexOf(l) + 1} of ${t.lessons.length}, about ${l.minutes} minutes`;
+  $("l-kicker").textContent = tx("{track}, lesson {i} of {n}, about {m} minutes", { track: t.title, i: t.lessons.indexOf(l) + 1, n: t.lessons.length, m: l.minutes });
   $("l-title").textContent = l.title;
   $("l-summary").textContent = l.summary;
   $("l-body").innerHTML = l.body(data);
@@ -61,7 +62,7 @@ function renderLesson(id) {
   const next = LESSONS[i + 1];
   $("next").hidden = true;
   $("next").href = next ? `#${next.id}` : "tools.html";
-  $("next").textContent = next ? `Next lesson: ${next.title}` : "Try the money tools";
+  $("next").textContent = next ? tx("Next lesson: {t}", { t: next.title }) : tx("Try the money tools");
   renderList();
   window.scrollTo({ top: 0 });
 }
@@ -83,18 +84,18 @@ function check() {
     box.classList.add(ok ? "right" : "wrong");
     box.querySelectorAll(".opt")[item.answer].classList.add("is-answer");
     why.hidden = false;
-    why.innerHTML = `<b>${ok ? "Correct." : "Not quite."}</b> ${esc(item.why)}`;
+    why.innerHTML = `<b>${tx(ok ? "Correct." : "Not quite.")}</b> ${esc(item.why)}`;
   });
   if (answered < l.quiz.length) {
-    $("quiz-score").textContent = `Answer all ${l.quiz.length} questions to see your score (${answered} answered so far).`;
+    $("quiz-score").textContent = tx("Answer all {n} questions to see your score ({a} answered so far).", { n: l.quiz.length, a: answered });
     return;
   }
   const prev = progress[l.id]?.best || 0;
   progress[l.id] = { best: Math.max(prev, score), last: score };
   save();
   $("quiz-score").textContent = score === l.quiz.length
-    ? `${score} out of ${l.quiz.length}. Full marks!`
-    : `${score} out of ${l.quiz.length}. Read the explanations and try again any time.`;
+    ? tx("{s} out of {n}. Full marks!", { s: score, n: l.quiz.length })
+    : tx("{s} out of {n}. Read the explanations and try again any time.", { s: score, n: l.quiz.length });
   $("next").hidden = false;
   renderList();
 }

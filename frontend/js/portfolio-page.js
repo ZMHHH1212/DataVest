@@ -1,6 +1,7 @@
 // Portfolio simulator page. Maths in portfolio.js (tested).
 import { $, css, esc, fmtDate, fmtMonth, getJSON, renderTopBar, chartDefaults, crosshair } from "./common.js";
 import * as P from "./portfolio.js";
+import { tx, marketName, marketShort } from "./i18n.js";
 
 const KEY = "datavest.portfolio";
 const SHORT = { "^GSPC": "S&P 500", "^IXIC": "Nasdaq", "^HSI": "Hang Seng", SPY: "SPY fund", "2800.HK": "Tracker Fund" };
@@ -12,16 +13,16 @@ let w = [];
 let gChart, fChart;
 let frontierCache = null;
 
-const short = (sym) => SHORT[sym] || D.labels[D.names.indexOf(sym)] || sym;
+const short = (sym) => marketShort(sym, SHORT[sym] || D.labels[D.names.indexOf(sym)] || sym);
 
 function presets() {
   const idx = (s) => D.names.indexOf(s);
   const make = (pairs) => { const v = D.names.map(() => 0); pairs.forEach(([s, x]) => { if (idx(s) >= 0) v[idx(s)] = x; }); return P.normalise(v); };
   return [
-    ["Equal mix", D.names.map(() => 1 / D.names.length)],
-    ["All Hang Seng", make([["2800.HK", 1]])],
-    ["US + HK funds 50/50", make([["SPY", 0.5], ["2800.HK", 0.5]])],
-    ["Big tech", make([["AAPL", 1], ["MSFT", 1], ["NVDA", 1], ["0700.HK", 1]])],
+    [tx("Equal mix"), D.names.map(() => 1 / D.names.length)],
+    [tx("All Hang Seng"), make([["2800.HK", 1]])],
+    [tx("US + HK funds 50/50"), make([["SPY", 0.5], ["2800.HK", 0.5]])],
+    [tx("Big tech"), make([["AAPL", 1], ["MSFT", 1], ["NVDA", 1], ["0700.HK", 1]])],
   ];
 }
 
@@ -29,7 +30,7 @@ function presets() {
 function renderWeights() {
   $("weights").innerHTML = D.names.map((s, i) => `
     <div class="w-row">
-      <label for="w${i}">${esc(D.labels[i])}</label>
+      <label for="w${i}">${esc(marketName(s, D.labels[i]))}</label>
       <input type="range" id="w${i}" min="0" max="100" step="1" value="${Math.round(w[i] * 100)}" data-i="${i}">
       <span class="w-val" id="wv${i}">${Math.round(w[i] * 100)}%</span>
     </div>`).join("");
@@ -51,7 +52,7 @@ function save() {
 function update(moveSliders = true) {
   if (moveSliders) syncSliders();
   D.names.forEach((_, i) => { $(`wv${i}`).textContent = `${Math.round(w[i] * 100)}%`; });
-  $("w-total").textContent = "Weights are scaled to add up to 100%.";
+  $("w-total").textContent = tx("Weights are scaled to add up to 100%.");
   save();
   renderGrowth();
   renderRisk();
@@ -69,17 +70,17 @@ function renderGrowth() {
   const dr = P.diversificationRatio(w, D.cov);
   const card = (label, val, sub) => `<div class="pf-stat"><span>${label}</span><b>${val}</b><small>${sub}</small></div>`;
   $("pf-stats").innerHTML = [
-    card("Growth per year", pct(m.cagr), `${short(D.names[bi])}: ${pct(bm.cagr)}`),
-    card("Volatility", vol(m.vol), `${short(D.names[bi])}: ${vol(bm.vol)}`),
-    card("Worst fall", pct(m.maxDrawdown, 0), `${short(D.names[bi])}: ${pct(bm.maxDrawdown, 0)}`),
-    card("Diversification", `${dr.toFixed(2)}×`, dr < 1.1 ? "little benefit from mixing" : "risk lowered by mixing"),
+    card(tx("Growth per year"), pct(m.cagr), `${short(D.names[bi])}: ${pct(bm.cagr)}`),
+    card(tx("Volatility"), vol(m.vol), `${short(D.names[bi])}: ${vol(bm.vol)}`),
+    card(tx("Worst fall"), pct(m.maxDrawdown, 0), `${short(D.names[bi])}: ${pct(bm.maxDrawdown, 0)}`),
+    card(tx("Diversification"), `${dr.toFixed(2)}×`, tx(dr < 1.1 ? "little benefit from mixing" : "risk lowered by mixing")),
   ].join("");
-  $("g-legend").innerHTML = `<span class="key"><i style="background: var(--s1)"></i>Your mix</span><span class="key"><i style="background: var(--ink-soft)"></i>${esc(D.labels[bi])}</span>`;
+  $("g-legend").innerHTML = `<span class="key"><i style="background: var(--s1)"></i>${tx("Your mix")}</span><span class="key"><i style="background: var(--ink-soft)"></i>${esc(marketName(D.names[bi], D.labels[bi]))}</span>`;
   const data = {
     labels: D.dates,
     datasets: [
-      { label: "Your mix", data: curve.map((x) => x * 100), borderColor: css("--s1"), borderWidth: 2, pointRadius: 0, pointHoverRadius: 4, tension: 0.1 },
-      { label: D.labels[bi], data: bench.map((x) => x * 100), borderColor: css("--ink-soft"), borderWidth: 1.5, borderDash: [5, 4], pointRadius: 0, pointHoverRadius: 4, tension: 0.1 },
+      { label: tx("Your mix"), data: curve.map((x) => x * 100), borderColor: css("--s1"), borderWidth: 2, pointRadius: 0, pointHoverRadius: 4, tension: 0.1 },
+      { label: marketName(D.names[bi], D.labels[bi]), data: bench.map((x) => x * 100), borderColor: css("--ink-soft"), borderWidth: 1.5, borderDash: [5, 4], pointRadius: 0, pointHoverRadius: 4, tension: 0.1 },
     ],
   };
   if (gChart) { gChart.data = data; gChart.update("none"); return; }
@@ -87,7 +88,7 @@ function renderGrowth() {
     type: "line", data, plugins: [crosshair],
     options: {
       maintainAspectRatio: false, animation: false, interaction: { mode: "index", intersect: false },
-      plugins: { legend: { display: false }, tooltip: { callbacks: { title: (i) => `Week of ${fmtDate(i[0].label)}`, label: (i) => ` ${i.dataset.label}: ${i.parsed.y.toFixed(1)}` } } },
+      plugins: { legend: { display: false }, tooltip: { callbacks: { title: (i) => tx("Week of {date}", { date: fmtDate(i[0].label) }), label: (i) => ` ${i.dataset.label}: ${i.parsed.y.toFixed(1)}` } } },
       scales: {
         x: { grid: { display: false }, ticks: { maxTicksLimit: 6, maxRotation: 0, callback(v) { return fmtMonth(this.getLabelForValue(v)); } } },
         y: { position: "right", grid: { color: css("--rule") }, border: { display: false }, ticks: { maxTicksLimit: 5 } },
@@ -101,9 +102,9 @@ function renderRisk() {
   const rc = P.riskContributions(w, D.cov);
   const rows = D.names.map((s, i) => ({ s, i, w: w[i], rc: rc[i] })).filter((r) => r.w > 0.0005).sort((a, b) => b.rc - a.rc);
   const max = Math.max(...rows.map((r) => Math.max(r.w, r.rc)), 0.01);
-  $("riskbars").innerHTML = `<div class="rb-head"><span></span><span>Share of money</span><span>Share of risk</span></div>` + rows.map((r) => `
+  $("riskbars").innerHTML = `<div class="rb-head"><span></span><span>${tx("Share of money")}</span><span>${tx("Share of risk")}</span></div>` + rows.map((r) => `
     <div class="rb-row">
-      <span class="rb-name">${esc(D.labels[r.i])}</span>
+      <span class="rb-name">${esc(marketName(D.names[r.i], D.labels[r.i]))}</span>
       <span class="rb-cell"><i class="money" style="width:${(r.w / max) * 100}%"></i><b>${Math.round(r.w * 100)}%</b></span>
       <span class="rb-cell"><i class="risk" style="width:${(Math.max(r.rc, 0) / max) * 100}%"></i><b>${Math.round(r.rc * 100)}%</b></span>
     </div>`).join("");
@@ -132,11 +133,11 @@ function renderFrontier() {
   const pt = (wt) => { const s = P.stats(wt, D.mu, D.cov); return { x: s.vol, y: s.ret }; };
   const singles = D.names.map((s, i) => { const e = D.names.map((_, j) => (j === i ? 1 : 0)); return { ...pt(e), label: short(s) }; });
   const datasets = [
-    { label: "Random mixes", data: f.cloud, backgroundColor: css("--rule"), pointRadius: 2, pointHoverRadius: 2 },
-    { label: "Single markets", data: singles, backgroundColor: css("--ink-soft"), pointRadius: 5, pointHoverRadius: 7 },
-    { label: "Lowest risk", data: [pt(f.minvar)], backgroundColor: css("--s3"), borderColor: css("--paper"), borderWidth: 2, pointRadius: 8, pointHoverRadius: 10 },
-    { label: "Best return for its risk", data: [pt(f.maxsharpe)], backgroundColor: css("--s2"), borderColor: css("--paper"), borderWidth: 2, pointRadius: 8, pointHoverRadius: 10 },
-    { label: "Your mix", data: [pt(w)], backgroundColor: css("--s1"), borderColor: css("--paper"), borderWidth: 2, pointRadius: 9, pointHoverRadius: 11, pointStyle: "rectRot" },
+    { label: tx("Random mixes"), data: f.cloud, backgroundColor: css("--rule"), pointRadius: 2, pointHoverRadius: 2 },
+    { label: tx("Single markets"), data: singles, backgroundColor: css("--ink-soft"), pointRadius: 5, pointHoverRadius: 7 },
+    { label: tx("Lowest risk"), data: [pt(f.minvar)], backgroundColor: css("--s3"), borderColor: css("--paper"), borderWidth: 2, pointRadius: 8, pointHoverRadius: 10 },
+    { label: tx("Best return for its risk"), data: [pt(f.maxsharpe)], backgroundColor: css("--s2"), borderColor: css("--paper"), borderWidth: 2, pointRadius: 8, pointHoverRadius: 10 },
+    { label: tx("Your mix"), data: [pt(w)], backgroundColor: css("--s1"), borderColor: css("--paper"), borderWidth: 2, pointRadius: 9, pointHoverRadius: 11, pointStyle: "rectRot" },
   ];
   if (fChart) { fChart.data.datasets = datasets; fChart.update("none"); }
   else {
@@ -156,10 +157,10 @@ function renderFrontier() {
       type: "scatter", data: { datasets }, plugins: [labelSingles],
       options: {
         maintainAspectRatio: false, animation: false,
-        plugins: { legend: { display: false }, tooltip: { filter: (i) => i.datasetIndex > 0, callbacks: { label: (i) => `${i.raw.label || i.dataset.label}: ${pct(i.raw.y)} a year, volatility ${vol(i.raw.x)}` } } },
+        plugins: { legend: { display: false }, tooltip: { filter: (i) => i.datasetIndex > 0, callbacks: { label: (i) => tx("{name}: {r} a year, volatility {v}", { name: i.raw.label || i.dataset.label, r: pct(i.raw.y), v: vol(i.raw.x) }) } } },
         scales: {
-          x: { title: { display: true, text: "Volatility (risk)" }, grid: { color: css("--rule") }, border: { display: false }, ticks: { callback: (v) => `${Math.round(v * 100)}%` } },
-          y: { title: { display: true, text: "Average return per year" }, grid: { color: (c) => (c.tick.value === 0 ? css("--ink-soft") : css("--rule")) }, border: { display: false }, ticks: { callback: (v) => `${Math.round(v * 100)}%` } },
+          x: { title: { display: true, text: tx("Volatility (risk)") }, grid: { color: css("--rule") }, border: { display: false }, ticks: { callback: (v) => `${Math.round(v * 100)}%` } },
+          y: { title: { display: true, text: tx("Average return per year") }, grid: { color: (c) => (c.tick.value === 0 ? css("--ink-soft") : css("--rule")) }, border: { display: false }, ticks: { callback: (v) => `${Math.round(v * 100)}%` } },
         },
       },
     });
@@ -173,21 +174,21 @@ function renderOutOfSample() {
   const mu = P.meanVector(train), cov = P.covMatrix(train);
   const testPrices = D.prices.slice(split), testDates = D.dates.slice(split);
   const mixes = [
-    ["Best return-for-risk mix (fitted on the first period)", P.optimise(mu, cov, "maxsharpe")],
-    ["Lowest-risk mix (fitted on the first period)", P.optimise(mu, cov, "minvar")],
-    ["Equal mix (no fitting at all)", D.names.map(() => 1 / D.names.length)],
+    [tx("Best return-for-risk mix (fitted on the first period)"), P.optimise(mu, cov, "maxsharpe")],
+    [tx("Lowest-risk mix (fitted on the first period)"), P.optimise(mu, cov, "minvar")],
+    [tx("Equal mix (no fitting at all)"), D.names.map(() => 1 / D.names.length)],
   ];
   const trainCurve = (wt) => P.curveMetrics(P.backtest(D.prices.slice(0, split + 1), D.dates.slice(0, split + 1), wt, "yearly"));
   const testCurve = (wt) => P.curveMetrics(P.backtest(testPrices, testDates, wt, "yearly"));
   const rows = mixes.map(([name, wt]) => ({ name, wt, tr: trainCurve(wt), te: testCurve(wt) }));
-  const top = (wt) => Math.max(...wt) - Math.min(...wt) < 1e-9 ? `All ${wt.length} markets, ${Math.round(100 / wt.length)}% each` : wt.map((x, i) => [x, i]).filter(([x]) => x > 0.05).sort((a, b) => b[0] - a[0]).slice(0, 3).map(([x, i]) => `${short(D.names[i])} ${Math.round(x * 100)}%`).join(", ");
-  $("o-note").textContent = `The mixes below were fitted using only ${fmtDate(D.dates[0])} to ${fmtDate(D.dates[split])}, then tested on ${fmtDate(D.dates[split])} to ${fmtDate(D.dates.at(-1))}, a period they never saw.`;
+  const top = (wt) => Math.max(...wt) - Math.min(...wt) < 1e-9 ? tx("All {n} markets, {p}% each", { n: wt.length, p: Math.round(100 / wt.length) }) : wt.map((x, i) => [x, i]).filter(([x]) => x > 0.05).sort((a, b) => b[0] - a[0]).slice(0, 3).map(([x, i]) => `${short(D.names[i])} ${Math.round(x * 100)}%`).join(", ");
+  $("o-note").textContent = tx("The mixes below were fitted using only {a} to {b}, then tested on {b} to {c}, a period they never saw.", { a: fmtDate(D.dates[0]), b: fmtDate(D.dates[split]), c: fmtDate(D.dates.at(-1)) });
   $("o-table").innerHTML = `
-    <thead><tr><th>Mix</th><th>Main holdings</th><th>Growth/yr, fitting period</th><th>Growth/yr, test period</th><th>Volatility, test period</th><th>Worst fall, test period</th></tr></thead>
+    <thead><tr><th>${tx("Mix")}</th><th>${tx("Main holdings")}</th><th>${tx("Growth/yr, fitting period")}</th><th>${tx("Growth/yr, test period")}</th><th>${tx("Volatility, test period")}</th><th>${tx("Worst fall, test period")}</th></tr></thead>
     <tbody>${rows.map((r) => `<tr><td>${esc(r.name)}</td><td>${esc(top(r.wt))}</td><td class="num">${pct(r.tr.cagr)}</td><td class="num"><b>${pct(r.te.cagr)}</b></td><td class="num">${vol(r.te.vol)}</td><td class="num down">${pct(r.te.maxDrawdown, 0)}</td></tr>`).join("")}</tbody>`;
   const [ms, , eq] = rows;
   const drop = ms.tr.cagr - ms.te.cagr;
-  $("o-note").textContent += ` The best return-for-risk mix earned ${pct(ms.tr.cagr)} a year while it was being fitted but ${pct(ms.te.cagr)} afterwards${drop > 0.02 ? ", a big drop: typical overfitting" : ""}. ${ms.te.cagr > eq.te.cagr ? "It still beat the equal mix in the test period." : "The plain equal mix did better in the test period."}`;
+  $("o-note").textContent += " " + tx(drop > 0.02 ? "The best return-for-risk mix earned {a} a year while it was being fitted but {b} afterwards, a big drop: typical overfitting." : "The best return-for-risk mix earned {a} a year while it was being fitted but {b} afterwards.", { a: pct(ms.tr.cagr), b: pct(ms.te.cagr) }) + " " + tx(ms.te.cagr > eq.te.cagr ? "It still beat the equal mix in the test period." : "The plain equal mix did better in the test period.");
 }
 
 async function init() {
@@ -208,7 +209,7 @@ async function init() {
 
     $("presets").innerHTML = presets().map(([name], i) => `<button type="button" data-p="${i}" aria-pressed="false">${esc(name)}</button>`).join("");
     $("presets").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { w = presets()[Number(b.dataset.p)][1]; update(); }));
-    $("bench").innerHTML = D.names.map((s, i) => `<option value="${i}"${s === "^HSI" ? " selected" : ""}>${esc(D.labels[i])}</option>`).join("");
+    $("bench").innerHTML = D.names.map((s, i) => `<option value="${i}"${s === "^HSI" ? " selected" : ""}>${esc(marketName(s, D.labels[i]))}</option>`).join("");
     ["rebalance", "bench"].forEach((id) => $(id).addEventListener("change", renderGrowth));
     $("cap").addEventListener("change", renderFrontier);
     $("use-minvar").addEventListener("click", () => { w = frontierData().minvar; update(); });
@@ -219,7 +220,7 @@ async function init() {
     renderOutOfSample();
   } catch (err) {
     console.error(err);
-    $("main").innerHTML = `<p class="notice">Price data isn't available yet. It is built with the rest of the site's data.</p>`;
+    $("main").innerHTML = `<p class="notice">${tx("Price data isn't available yet. It is built with the rest of the site's data.")}</p>`;
   }
 }
 

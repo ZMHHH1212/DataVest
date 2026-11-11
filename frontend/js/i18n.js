@@ -1,6 +1,8 @@
 // Language support: English and Traditional Chinese (Hong Kong style, keeping common English finance terms).
 // Choose with the 中/EN button or a link with ?lang=zh / ?lang=en. The choice is remembered in this browser.
 
+import { ZH_TEXT } from "./zh-text.js";
+
 const KEY = "datavest.lang";
 
 function detect() {
@@ -33,6 +35,35 @@ const ZH = {
 
   // markets page: static
   "m.watchlist": "Watchlist",
+  "m.eyebrow": "市場 Dashboard · 每個工作日更新",
+
+  // home page
+  "h.hint": "拖動可旋轉",
+  "h.title": "看清市場的<br>真實走勢",
+  "h.sub": "增長、起落和最大跌幅（Max drawdown），用淺白的語言解釋。",
+  "h.openMarkets": "打開市場 Dashboard", "h.startLearning": "開始學習",
+  "h.k0": "00 / 甚麼是 DataVest",
+  "h.introTitle": "<span class=\"dim\">一個免費的地方，</span>學習金錢和市場的真正運作。",
+  "h.intro": "DataVest 用美國和香港市場的真實價格，以淺白的語言教投資。每幅圖表都由數據計算出來，每個模型都用它從未見過的數據測試，這裡沒有任何東西想向你推銷。",
+  "h.sMarkets": "追蹤市場", "h.sStocks": "研究股票", "h.sYears": "價格年數", "h.sLessons": "課堂", "h.sUpdated": "最後更新",
+  "h.k1": "01 / 理念 Philosophy",
+  "h.phTitle": "<span>我們</span>相信甚麼",
+  "h.phNote": "五個理念貫穿 DataVest 的每一頁，它們也是思考金錢的好方法。",
+  "h.p1t": "數據先於意見", "h.p1": "網站上的每個說法都來自你可以核實的真實價格。數據不支持的，我們不會說。",
+  "h.p2t": "用淺白的話說", "h.p2": "金融充滿術語。每個概念先用日常用語解釋，再給你它的正式名稱。",
+  "h.p3t": "先測試，後信任", "h.p3": "模型要用它從未見過的數據評分。失敗的時候，例如模型頁的 RSI 訊號，我們也會照樣展示。",
+  "h.p4t": "風險是另一半故事", "h.p4": "增長總伴隨下跌。每個市場除了回報，都會顯示最大跌幅和起伏有多大。",
+  "h.p5t": "學習，不是建議", "h.p5": "DataVest 免費，不賣任何東西。它是幫你獨立思考，而不是叫你買甚麼。",
+  "h.k2": "02 / 探索 Explore",
+  "h.exTitle": "<span>從哪裡</span>開始",
+  "h.exNote": "投資新手？從學習開始。對數字好奇？打開市場或洞察。",
+  "h.e1": "看清市場的真實走勢：增長、起落和最大跌幅，用淺白的語言解釋。",
+  "h.e2": "美股與港股的五年比較：增長、風險，以及兩者連動有多緊密。",
+  "h.e3": "我們能預測下個月的市場風險嗎？RSI 指標真的有用嗎？用樣本外數據測試。",
+  "h.e4": "用真實市場建立一個練習組合，看看它過去的表現。",
+  "h.e5": "由預算到估值和行為金融的理財與股票投資課堂，配合真實數據、工具和小測。",
+  "h.e6": "免費計算機：看儲蓄增長、為目標規劃、看等待的代價，以及分配你的人工。",
+  "h.e7": "DataVest 背後的研究：附完整程式碼的專題，每個工作日用最新數據重新運行。",
   "m.close": "收市 {date}",
   "m.addWatch": "加入 Watchlist", "m.inWatch": "已在 Watchlist",
   "m.sma50": "50 天線", "m.sma200": "200 天線",
@@ -109,7 +140,50 @@ export function t(key, en, vars = {}) {
   return s.replace(/\{(\w+)\}/g, (_, k) => (vars[k] ?? `{${k}}`));
 }
 
-/** Replace the text of every element marked data-i18n="key" (keeps the English in the HTML). */
+/** Translate by the English text itself (for sentences built in code). {name} placeholders are filled in. */
+export function tx(en, vars = {}) {
+  const s = isZh && ZH_TEXT[en] != null ? ZH_TEXT[en] : en;
+  return s.replace(/\{(\w+)\}/g, (_, k) => (vars[k] ?? `{${k}}`));
+}
+
+const norm = (s) => s.replace(/\s+/g, " ").trim();
+const SKIP = "script, style, code, pre, .hl, .nb-md, .nb-out, .mega, [data-zh-skip]";
+const BLOCKS = "h1, h2, h3, p, li, summary, dt, dd, td, th, label, legend, option, figcaption, span, a, button, small, b";
+
+/**
+ * Translate a page (or part of one) from its English text: whole elements first (so sentences with
+ * <b> or <a> inside stay intact), then single pieces of text, then labels for screen readers.
+ */
+export function translatePage(root = document) {
+  if (!isZh) return;
+  const scope = root.querySelectorAll ? root : document;
+  scope.querySelectorAll(BLOCKS).forEach((el) => {
+    if (el.closest(SKIP) || el.closest("[data-zh]")) return;
+    const zh = ZH_TEXT[norm(el.innerHTML)];
+    if (zh != null) { el.innerHTML = zh; el.dataset.zh = ""; }
+  });
+  const walker = document.createTreeWalker(scope === document ? document.body : scope, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach((n) => {
+    const key = norm(n.nodeValue);
+    if (!key || ZH_TEXT[key] == null || n.parentElement?.closest(SKIP)) return;
+    const lead = n.nodeValue.match(/^\s*/)[0], tail = n.nodeValue.match(/\s*$/)[0];
+    n.nodeValue = lead + ZH_TEXT[key] + tail;
+  });
+  scope.querySelectorAll("[aria-label], [title], [placeholder]").forEach((el) => {
+    for (const a of ["aria-label", "title", "placeholder"]) {
+      const v = el.getAttribute(a);
+      if (v && ZH_TEXT[norm(v)] != null) el.setAttribute(a, ZH_TEXT[norm(v)]);
+    }
+  });
+  if (scope === document) {
+    const [brand, page] = document.title.split(" · ");
+    if (page && ZH_TEXT[page]) document.title = `${brand} · ${ZH_TEXT[page]}`;
+  }
+}
+
+/** Replace the text of every element marked data-i18n="key" (keeps the English in the HTML), then the rest by text. */
 export function applyStatic(root = document) {
   if (!isZh) return;
   root.querySelectorAll("[data-i18n]").forEach((el) => {
@@ -120,7 +194,11 @@ export function applyStatic(root = document) {
     const s = ZH[el.dataset.i18nLabel];
     if (s != null) el.setAttribute("aria-label", s);
   });
+  translatePage(root);
 }
+
+/** Chinese-aware short date and month for charts and sentences. */
+export const zhMonth = (iso) => `${iso.slice(0, 4)}年${Number(iso.slice(5, 7))}月`;
 
 // ---- names and dates -------------------------------------------------------------------
 const NAMES_ZH = {

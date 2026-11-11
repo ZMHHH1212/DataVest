@@ -1,6 +1,6 @@
 // Shared helpers: formatting, data loading, the top bar, chart defaults.
 import { onUser, signOut } from "./auth.js";
-import { t, isZh, switchLang } from "./i18n.js";
+import { t, isZh, switchLang, applyStatic, zhMonth } from "./i18n.js";
 import { mountThemeButton } from "./theme.js";
 
 export const $ = (id) => document.getElementById(id);
@@ -8,9 +8,14 @@ export const css = (name) => getComputedStyle(document.documentElement).getPrope
 
 export const pct = (x, digits = 1) => `${x >= 0 ? "+" : "−"}${Math.abs(x * 100).toFixed(digits)}%`;
 export const money = (x) => x.toLocaleString("en-US", { maximumFractionDigits: 0 });
-export const fmtDate = (iso) =>
-  new Date(iso + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
-export const fmtMonth = (iso) => fmtDate(iso).replace(/^\d+ /, "");
+export const fmtDate = (iso) => {
+  const d = new Date(iso + "T00:00:00");
+  if (isZh) return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+  return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+};
+export const fmtMonth = (iso) => (isZh ? zhMonth(iso) : fmtDate(iso).replace(/^\d+ /, ""));
+/** "12 Nov 2026, 02:40" or the Chinese equivalent, for "last updated" lines. */
+export const fmtWhen = (iso) => new Date(iso).toLocaleString(isZh ? "zh-HK" : "en-GB", { dateStyle: "medium", timeStyle: "short" });
 
 export function priceText(t, v) {
   const n = v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -28,8 +33,8 @@ export function esc(s) {
 }
 
 // ---- top bar --------------------------------------------------------------
-export function renderTopBar(active, base = "", { i18n = false } = {}) {
-  // Chinese navigation only on pages that are translated (opted in with i18n: true)
+export function renderTopBar(active, base = "", { i18n = true } = {}) {
+  // every page is translated now; the 中/EN button and Chinese navigation are on by default
   const tr = (key, en) => (i18n ? t(key, en) : en);
   const links = [
     ["markets", `${base}markets.html`, tr("nav.markets", "Markets")],
@@ -54,6 +59,7 @@ export function renderTopBar(active, base = "", { i18n = false } = {}) {
   if (i18n) $("lang").addEventListener("click", switchLang);
   // report-style pages get the light/dark button
   if (document.documentElement.classList.contains("report")) mountThemeButton($("top"));
+  if (i18n) applyStatic(); // translate the page's fixed text (Chinese only)
 
   onUser((user) => {
     const box = $("account");

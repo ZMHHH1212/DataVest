@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#0a0a0a">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&family=Noto+Sans+HK:wght@300;400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="report.css">
   <script>try { const t = localStorage.getItem("datavest.theme"); if (t === "dark" || t === "light") document.documentElement.dataset.theme = t; } catch {}</script>
@@ -45,25 +45,26 @@
   <script type="module">
     import { authConfigured, onUser, signInWithGoogle, signOut } from "./js/auth.js";
     import { $, esc, renderTopBar } from "./js/common.js";
+    import { tx } from "./js/i18n.js";
 
     renderTopBar(null);
     const btn = $("google"), msg = $("msg");
 
     if (!authConfigured) {
       btn.disabled = true;
-      msg.textContent = "Sign-in isn't switched on for this site yet. Your watchlist is still saved in this browser.";
+      msg.textContent = tx("Sign-in isn't switched on for this site yet. Your watchlist is still saved in this browser.");
     }
 
     btn.addEventListener("click", async () => {
       btn.disabled = true;
-      msg.textContent = "Waiting for Google…";
+      msg.textContent = tx("Waiting for Google…");
       try {
         await signInWithGoogle();
       } catch (err) {
         const closed = err && (err.code === "auth/popup-closed-by-user" || err.code === "auth/cancelled-popup-request");
-        msg.textContent = closed ? "The Google window was closed before you finished. Try again when you're ready."
-          : err && err.code === "auth/popup-blocked" ? "Your browser blocked the Google window. Allow pop-ups for this site and try again."
-          : `Sign-in failed: ${err.message}`;
+        msg.textContent = closed ? tx("The Google window was closed before you finished. Try again when you're ready.")
+          : err && err.code === "auth/popup-blocked" ? tx("Your browser blocked the Google window. Allow pop-ups for this site and try again.")
+          : tx("Sign-in failed: {m}", { m: err.message });
         btn.disabled = false;
       }
     });
@@ -71,9 +72,9 @@
     onUser((user) => {
       if (!user) return;
       $("panel").innerHTML = `
-        <h2>You're signed in</h2>
-        <p>Signed in as <strong>${esc(user.email || user.displayName)}</strong>. Star any market to add it to your watchlist.</p>
-        <p class="actions"><a class="btn" href="markets.html">Go to markets</a><button type="button" class="btn-quiet" id="out">Sign out</button></p>`;
+        <h2>${tx("You're signed in")}</h2>
+        <p>${tx("Signed in as <strong>{who}</strong>. Star any market to add it to your watchlist.", { who: esc(user.email || user.displayName) })}</p>
+        <p class="actions"><a class="btn" href="markets.html">${tx("Go to markets")}</a><button type="button" class="btn-quiet" id="out">${tx("Sign out")}</button></p>`;
       $("out").addEventListener("click", () => signOut().then(() => location.reload()));
     });
   </script>

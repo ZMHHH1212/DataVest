@@ -1,5 +1,6 @@
 // Insights page: US vs Hong Kong over 5 years. Data from data/insights.json (export_site.py).
-import { $, css, pct, fmtDate, fmtMonth, getJSON, esc, renderTopBar, chartDefaults, crosshair, endLabels } from "./common.js";
+import { $, css, pct, fmtDate, fmtMonth, fmtWhen, getJSON, esc, renderTopBar, chartDefaults, crosshair, endLabels } from "./common.js";
+import { tx, marketName, marketShort } from "./i18n.js";
 import { mountSurface } from "./surface3d.js";
 import { drawdownSeries, mountStickers } from "./report.js";
 import { onThemeChange } from "./theme.js";
@@ -17,43 +18,43 @@ const isHK = (s) => s.endsWith(".HK") || s === "^HSI";
 
 let names = {};
 let data = null;
-const nm = (s) => names[s] || s;
+const nm = (s) => marketName(s, names[s] || s);
 
 function findings() {
   const st = data.stats;
   const out = [];
   const us = st["^GSPC"], hk = st["^HSI"];
   if (us && hk) {
-    out.push(`<p><span class="mono">► Growth</span>Over five years the <b>S&amp;P 500</b> grew <b>${pct(us.cagr)} a year</b>, while the <b>Hang Seng</b> managed <b>${pct(hk.cagr)} a year</b> (index levels, before dividends).</p>`);
+    out.push(`<p>${tx('<span class="mono">► Growth</span>Over five years the <b>S&amp;P 500</b> grew <b>{us} a year</b>, while the <b>Hang Seng</b> managed <b>{hk} a year</b> (index levels, before dividends).', { us: pct(us.cagr), hk: pct(hk.cagr) })}</p>`);
     const [bumpier, calmer, bv, cv] = hk.volatility >= us.volatility
-      ? ["Hong Kong", "the S&amp;P 500", hk.volatility, us.volatility]
-      : ["The US", "the Hang Seng", us.volatility, hk.volatility];
-    out.push(`<p><span class="mono">► Risk</span>${bumpier} was the bumpier ride: volatility of ${(bv * 100).toFixed(0)}% against ${(cv * 100).toFixed(0)}% for ${calmer}. The worst falls were ${pct(hk.max_drawdown, 0)} for the Hang Seng and ${pct(us.max_drawdown, 0)} for the S&amp;P 500.</p>`);
+      ? [tx("Hong Kong"), tx("the S&amp;P 500"), hk.volatility, us.volatility]
+      : [tx("The US"), tx("the Hang Seng"), us.volatility, hk.volatility];
+    out.push(`<p>${tx('<span class="mono">► Risk</span>{bumpier} was the bumpier ride: volatility of {bv}% against {cv}% for {calmer}. The worst falls were {hkdd} for the Hang Seng and {usdd} for the S&amp;P 500.', { bumpier, calmer, bv: (bv * 100).toFixed(0), cv: (cv * 100).toFixed(0), hkdd: pct(hk.max_drawdown, 0), usdd: pct(us.max_drawdown, 0) })}</p>`);
     const gap = us.cagr - hk.cagr;
     $("headline").innerHTML = Math.abs(gap) < 0.02
-      ? `<span class="dim">US and Hong Kong markets</span> grew at a similar pace.`
-      : `${gap > 0 ? "The US" : "Hong Kong"} pulled ahead <span class="dim">by ${(Math.abs(gap) * 100).toFixed(0)} percentage points a year.</span>`;
+      ? tx('<span class="dim">US and Hong Kong markets</span> grew at a similar pace.')
+      : tx('{who} pulled ahead <span class="dim">by {n} percentage points a year.</span>', { who: tx(gap > 0 ? "The US" : "Hong Kong"), n: (Math.abs(gap) * 100).toFixed(0) });
   }
   const i = data.symbols.indexOf("^HSI"), j = data.symbols.indexOf("^GSPC");
   if (i >= 0 && j >= 0) {
     const w = data.corr_weekly[i][j], d = data.corr_daily[i][j];
     if (w != null && d != null) {
-      out.push(`<p><span class="mono">► Link</span>The two markets move together more than same-day numbers suggest: correlation is <b>${d.toFixed(2)}</b> on same-day returns but <b>${w.toFixed(2)}</b> on weekly returns, because Hong Kong closes before New York opens.</p>`);
+      out.push(`<p>${tx('<span class="mono">► Link</span>The two markets move together more than same-day numbers suggest: correlation is <b>{d}</b> on same-day returns but <b>{w}</b> on weekly returns, because Hong Kong closes before New York opens.', { d: d.toFixed(2), w: w.toFixed(2) })}</p>`);
     }
   }
   const ranked = Object.entries(st).filter(([, v]) => v.sharpe != null).sort((a, b) => b[1].sharpe - a[1].sharpe);
-  if (ranked.length) out.push(`<p><span class="mono">► Best for the risk</span>Best growth for the risk taken: <b>${esc(nm(ranked[0][0]))}</b>. Weakest: <b>${esc(nm(ranked[ranked.length - 1][0]))}</b>.</p>`);
+  if (ranked.length) out.push(`<p>${tx('<span class="mono">► Best for the risk</span>Best growth for the risk taken: <b>{best}</b>. Weakest: <b>{worst}</b>.', { best: esc(nm(ranked[0][0])), worst: esc(nm(ranked[ranked.length - 1][0])) })}</p>`);
   $("findings").innerHTML = out.join("");
 }
 
 // ---- opening: date range and stickers -------------------------------------------
 const SHORT_NAMES = { "^GSPC": "S&P 500", "^IXIC": "Nasdaq", "^HSI": "Hang Seng", SPY: "SPY", "2800.HK": "Tracker 2800", "0700.HK": "Tencent", "0005.HK": "HSBC" };
-const short = (s) => SHORT_NAMES[s] || nm(s);
+const short = (s) => marketShort(s, SHORT_NAMES[s] || nm(s));
 const year = (iso) => iso.slice(0, 4);
 
 function hero() {
   const d = data.growth.dates;
-  $("hero-range").textContent = `DataVest report · ${year(d[0])}–${year(d[d.length - 1])} · ${data.symbols.length} markets`;
+  $("hero-range").textContent = tx("DataVest report · {y0}–{y1} · {n} markets", { y0: year(d[0]), y1: year(d[d.length - 1]), n: data.symbols.length });
 }
 
 function stickers() {
@@ -63,17 +64,17 @@ function stickers() {
       ${shape === "star" ? `<svg viewBox="0 0 100 100" aria-hidden="true"><polygon points="${starPoints(12, 50, 34)}"/></svg>` : ""}
       <span class="s-small">${esc(small)}</span><span class="s-big">${esc(big)}</span><span class="s-foot">${esc(foot)}</span>
     </div>`);
-  if (st["^GSPC"]) add("blob", "--k1", "S&P 500", pct(st["^GSPC"].cagr, 0), "a year", -8, "left: 3%; top: 8%;");
-  if (st["^HSI"]) add("disc", "--k5", "Hang Seng", pct(st["^HSI"].cagr, 0), "a year", 7, "right: 4%; top: 2%;");
+  if (st["^GSPC"]) add("blob", "--k1", short("^GSPC"), pct(st["^GSPC"].cagr, 0), tx("a year"), -8, "left: 3%; top: 8%;");
+  if (st["^HSI"]) add("disc", "--k5", short("^HSI"), pct(st["^HSI"].cagr, 0), tx("a year"), 7, "right: 4%; top: 2%;");
   const i = data.symbols.indexOf("^HSI"), j = data.symbols.indexOf("^GSPC");
-  if (i >= 0 && j >= 0 && data.corr_weekly[i][j] != null) add("star", "--k2", "US–HK link", data.corr_weekly[i][j].toFixed(2), "weekly", -4, "left: 9%; bottom: -16%;");
+  if (i >= 0 && j >= 0 && data.corr_weekly[i][j] != null) add("star", "--k2", tx("US–HK link"), data.corr_weekly[i][j].toFixed(2), tx("weekly"), -4, "left: 9%; bottom: -16%;");
   const worst = Object.entries(st).filter(([, v]) => v.max_drawdown != null).sort((a, b) => a[1].max_drawdown - b[1].max_drawdown)[0];
-  if (worst) add("ticket", "--k4", "Worst fall", pct(worst[1].max_drawdown, 0), short(worst[0]), 9, "right: 18%; bottom: -4%;");
-  if (patterns?.map) add("pill", "--k3", "ML found", `${patterns.map.k} groups`, `in ${patterns.map.stocks.length} stocks`, -5, "right: 1%; top: 46%;");
+  if (worst) add("ticket", "--k4", tx("Worst fall"), pct(worst[1].max_drawdown, 0), short(worst[0]), 9, "right: 18%; bottom: -4%;");
+  if (patterns?.map) add("pill", "--k3", tx("ML found"), tx("{k} groups", { k: patterns.map.k }), tx("in {n} stocks", { n: patterns.map.stocks.length }), -5, "right: 1%; top: 46%;");
   const r = patterns?.regimes?.["^GSPC"];
   if (r) {
     const p = r.today_p_turbulent, stormy = p > 0.5;
-    add("bubble", stormy ? "--k6" : "--k3", "S&P 500 now", stormy ? "Stormy" : "Calm", `${Math.round((stormy ? p : 1 - p) * 100)}% sure`, 4, "left: 1%; top: 52%;");
+    add("bubble", stormy ? "--k6" : "--k3", tx("S&P 500 now"), tx(stormy ? "Stormy" : "Calm"), tx("{p}% sure", { p: Math.round((stormy ? p : 1 - p) * 100) }), 4, "left: 1%; top: 52%;");
   }
   $("stickers").innerHTML = out.join("");
   mountStickers($("stickers"));
@@ -117,14 +118,14 @@ function lineArt() {
     rows, dates: g.dates, mode: "line",
     ...(window.matchMedia("(max-width: 760px)").matches ? { zoom: 0.72, shift: 0.08 } : {}),
     formatDate: (iso) => fmtDate(iso),
-    tipTemplate: (label, date, v) => `${esc(label)}<br>${date}<br><b>${v}%</b> below its high`,
+    tipTemplate: (label, date, v) => `${esc(label)}<br>${date}<br>${tx("<b>{v}%</b> below its high", { v })}`,
     font: css("--mono"),
     colors: { ink: css("--ink"), soft: css("--ink-soft"), line: css("--rule"), amber: css("--k4"), paper: css("--paper") },
   });
 
   // Spade-style data card: the time window and sample
-  $("call-a").innerHTML = `<p>► Window</p><p>${esc(g.dates[0])} → ${esc(g.dates[g.dates.length - 1])}</p>
-    <p>► Sample</p><p>${syms.length} markets · ${g.dates.length} weeks<br>US + Hong Kong</p>`;
+  $("call-a").innerHTML = `<p>${tx("► Window")}</p><p>${esc(g.dates[0])} → ${esc(g.dates[g.dates.length - 1])}</p>
+    <p>${tx("► Sample")}</p><p>${tx("{n} markets · {w} weeks", { n: syms.length, w: g.dates.length })}<br>${tx("US + Hong Kong")}</p>`;
 }
 
 // ---- growth of $100 --------------------------------------------------------
@@ -148,7 +149,7 @@ function growth() {
       interaction: { mode: "index", intersect: false },
       plugins: {
         legend: { display: false },
-        tooltip: { itemSort: (a, b) => b.parsed.y - a.parsed.y, callbacks: { title: (i) => `Week ending ${fmtDate(i[0].label)}`, label: (i) => ` ${i.dataset.label}: $${i.parsed.y.toFixed(0)}` } },
+        tooltip: { itemSort: (a, b) => b.parsed.y - a.parsed.y, callbacks: { title: (i) => tx("Week ending {date}", { date: fmtDate(i[0].label) }), label: (i) => ` ${i.dataset.label}: $${i.parsed.y.toFixed(0)}` } },
       },
       scales: {
         x: { grid: { display: false }, ticks: { maxTicksLimit: 6, maxRotation: 0, callback(v) { return fmtMonth(this.getLabelForValue(v)); } } },
@@ -202,18 +203,18 @@ function scatter() {
   });
   new Chart($("scatter"), {
     type: "scatter",
-    data: { datasets: [ds(false, "--s1", "United States"), ds(true, "--s2", "Hong Kong")] },
+    data: { datasets: [ds(false, "--s1", tx("United States")), ds(true, "--s2", tx("Hong Kong"))] },
     plugins: [dotLabels],
     options: {
       maintainAspectRatio: false, animation: false,
       layout: { padding: { right: 8, top: 8 } },
       plugins: {
         legend: { display: false },
-        tooltip: { callbacks: { title: (i) => i[0].raw.name, label: (i) => [`Growth ${pct(i.raw.y)} a year`, `Volatility ${(i.raw.x * 100).toFixed(0)}%`] } },
+        tooltip: { callbacks: { title: (i) => i[0].raw.name, label: (i) => [tx("Growth {g} a year", { g: pct(i.raw.y) }), tx("Volatility {v}%", { v: (i.raw.x * 100).toFixed(0) })] } },
       },
       scales: {
-        x: { title: { display: true, text: "Volatility (how bumpy)" }, grid: { color: css("--rule") }, border: { display: false }, ticks: { callback: (v) => `${Math.round(v * 100)}%` } },
-        y: { title: { display: true, text: "Growth per year" }, grid: { color: (c) => (c.tick.value === 0 ? css("--ink-soft") : css("--rule")) }, border: { display: false }, ticks: { callback: (v) => `${Math.round(v * 100)}%` } },
+        x: { title: { display: true, text: tx("Volatility (how bumpy)") }, grid: { color: css("--rule") }, border: { display: false }, ticks: { callback: (v) => `${Math.round(v * 100)}%` } },
+        y: { title: { display: true, text: tx("Growth per year") }, grid: { color: (c) => (c.tick.value === 0 ? css("--ink-soft") : css("--rule")) }, border: { display: false }, ticks: { callback: (v) => `${Math.round(v * 100)}%` } },
       },
     },
   });
@@ -224,22 +225,22 @@ function heatmap(kind) {
   const m = kind === "weekly" ? data.corr_weekly : data.corr_daily;
   const syms = data.symbols;
   const SHORT = { "^GSPC": "S&P 500", "^IXIC": "Nasdaq", "^HSI": "Hang Seng", SPY: "SPY fund", "2800.HK": "Tracker Fund" };
-  const short = (s) => SHORT[s] || nm(s);
+  const short = (s) => marketShort(s, SHORT[s] || nm(s));
   const cell = (v, i, j) => {
     if (i === j) return `<td class="self" title="${esc(nm(syms[i]))}"></td>`;
     if (v == null) return `<td class="na">–</td>`;
     const strength = Math.min(Math.abs(v), 1);
     const hue = v >= 0 ? "var(--div-pos)" : "var(--div-neg)";
     const dark = strength > 0.6 ? " strong" : "";
-    const title = `${nm(syms[i])} and ${nm(syms[j])}: ${v.toFixed(2)}`;
+    const title = tx("{a} and {b}: {v}", { a: nm(syms[i]), b: nm(syms[j]), v: v.toFixed(2) });
     return `<td class="c${dark}" style="--mix:${(strength * 100).toFixed(0)}%; --hue:${hue}" title="${esc(title)}">${v.toFixed(2)}</td>`;
   };
   $("heatmap").innerHTML = `
     <thead><tr><th></th>${syms.map((s) => `<th scope="col"><span>${esc(short(s))}</span></th>`).join("")}</tr></thead>
     <tbody>${m.map((row, i) => `<tr><th scope="row">${esc(short(syms[i]))}</th>${row.map((v, j) => cell(v, i, j)).join("")}</tr>`).join("")}</tbody>`;
   $("corr-note").textContent = kind === "weekly"
-    ? "Weekly returns line up both markets' trading sessions. Darker blue means they tend to rise and fall together."
-    : "Same-day returns understate the link between US and Hong Kong, because Hong Kong trades while New York sleeps. Compare the US–HK cells with the weekly view.";
+    ? tx("Weekly returns line up both markets' trading sessions. Darker blue means they tend to rise and fall together.")
+    : tx("Same-day returns understate the link between US and Hong Kong, because Hong Kong trades while New York sleeps. Compare the US–HK cells with the weekly view.");
   document.querySelectorAll("[data-corr]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.corr === kind)));
 }
 
@@ -254,7 +255,7 @@ function rollingCorr() {
     options: {
       maintainAspectRatio: false, animation: false,
       interaction: { mode: "index", intersect: false },
-      plugins: { legend: { display: false }, tooltip: { displayColors: false, callbacks: { title: (i) => `Year to ${fmtDate(i[0].label)}`, label: (i) => `Correlation ${i.parsed.y.toFixed(2)}` } } },
+      plugins: { legend: { display: false }, tooltip: { displayColors: false, callbacks: { title: (i) => tx("Year to {date}", { date: fmtDate(i[0].label) }), label: (i) => tx("Correlation {v}", { v: i.parsed.y.toFixed(2) }) } } },
       scales: {
         x: { grid: { display: false }, ticks: { maxTicksLimit: 6, maxRotation: 0, callback(v) { return fmtMonth(this.getLabelForValue(v)); } } },
         y: { min: -0.25, max: 1, grid: { color: (c) => (c.tick.value === 0 ? css("--ink-soft") : css("--rule")) }, border: { display: false }, ticks: { stepSize: 0.25 } },
@@ -265,12 +266,12 @@ function rollingCorr() {
 
 // ---- table -------------------------------------------------------------------
 const COLS = [
-  ["name", "Market", (v) => esc(v)],
-  ["cagr", "Growth per year", (v) => pct(v)],
-  ["volatility", "Volatility", (v) => `${(v * 100).toFixed(0)}%`],
-  ["sharpe", "Sharpe ratio", (v) => (Math.abs(v) < 0.005 ? "0.00" : v.toFixed(2).replace("-", "−"))],
-  ["max_drawdown", "Worst fall", (v) => pct(v, 0)],
-  ["dd_recovered", "Back to old high", (v) => (v ? fmtDate(v) : "Not yet")],
+  ["name", tx("Market"), (v) => esc(v)],
+  ["cagr", tx("Growth per year"), (v) => pct(v)],
+  ["volatility", tx("Volatility"), (v) => `${(v * 100).toFixed(0)}%`],
+  ["sharpe", tx("Sharpe ratio"), (v) => (Math.abs(v) < 0.005 ? "0.00" : v.toFixed(2).replace("-", "−"))],
+  ["max_drawdown", tx("Worst fall"), (v) => pct(v, 0)],
+  ["dd_recovered", tx("Back to old high"), (v) => (v ? fmtDate(v) : tx("Not yet"))],
 ];
 let sort = { key: "sharpe", dir: -1 };
 function table() {
@@ -300,19 +301,20 @@ function marketMap() {
   const m = patterns?.map;
   if (!m) { $("map-block").hidden = true; return; }
   const color = (c) => css(CLUSTER_COLORS[(c - 1) % CLUSTER_COLORS.length]);
-  const groupName = (g) => `${g.region === "Mixed" ? "Mixed US and HK" : g.region === "Hong Kong" ? "Mostly Hong Kong" : "Mostly US"}: ${g.top_sectors.slice(0, 2).join(", ").toLowerCase()}`;
-  $("map-legend").innerHTML = m.clusters.map((g) => `<span class="key"><i style="background: var(${CLUSTER_COLORS[(g.id - 1) % 5]})"></i>Group ${g.id}</span>`).join("");
+  const groupName = (g) => `${tx(g.region === "Mixed" ? "Mixed US and HK" : g.region === "Hong Kong" ? "Mostly Hong Kong" : "Mostly US")}: ${g.top_sectors.slice(0, 2).map((x) => tx(x)).join(", ").toLowerCase()}`;
+  const groupLabel = (id) => tx("Group {n}", { n: id });
+  $("map-legend").innerHTML = m.clusters.map((g) => `<span class="key"><i style="background: var(${CLUSTER_COLORS[(g.id - 1) % 5]})"></i>${groupLabel(g.id)}</span>`).join("");
   const weak = Math.max(m.ari_region, m.ari_sector) < 0.1;
-  const verdict = weak ? "match neither country nor industry closely"
-    : m.ari_region > m.ari_sector ? "line up with country much more than with industry" : "line up with industry more than with country";
-  $("map-note").textContent = `An unsupervised model grouped ${m.stocks.length} large US and Hong Kong stocks into ${m.k} groups using only how their weekly returns moved together. Nobody told it about countries or industries. The groups ${verdict} (agreement ${m.ari_region.toFixed(2)} for country and ${m.ari_sector.toFixed(2)} for industry, where 1 is a perfect match and 0 is random).`;
+  const verdict = tx(weak ? "match neither country nor industry closely"
+    : m.ari_region > m.ari_sector ? "line up with country much more than with industry" : "line up with industry more than with country");
+  $("map-note").textContent = tx("An unsupervised model grouped {n} large US and Hong Kong stocks into {k} groups using only how their weekly returns moved together. Nobody told it about countries or industries. The groups {verdict} (agreement {a} for country and {b} for industry, where 1 is a perfect match and 0 is random).", { n: m.stocks.length, k: m.k, verdict, a: m.ari_region.toFixed(2), b: m.ari_sector.toFixed(2) });
 
-  const pcLabel = (i) => `Pattern ${i} (${Math.round(m.explained[i - 1] * 100)}% of movement)`;
+  const pcLabel = (i) => tx("Pattern {i} ({p}% of movement)", { i, p: Math.round(m.explained[i - 1] * 100) });
   new Chart($("mapchart"), {
     type: "scatter",
     data: {
       datasets: m.clusters.map((g) => ({
-        label: `Group ${g.id}`,
+        label: groupLabel(g.id),
         data: m.stocks.filter((s) => s.cluster === g.id).map((s) => ({ x: s.pc2, y: s.pc3, s })),
         backgroundColor: color(g.id), borderColor: css("--paper"), borderWidth: 1.5,
         pointStyle: (ctx) => (ctx.raw?.s.region === "Hong Kong" ? "rectRot" : "circle"),
@@ -323,7 +325,7 @@ function marketMap() {
       maintainAspectRatio: false, animation: false,
       plugins: {
         legend: { display: false },
-        tooltip: { callbacks: { title: (i) => `${i[0].raw.s.name} (${i[0].raw.s.symbol})`, label: (i) => [`${i.raw.s.sector}, ${i.raw.s.region}`, `Group ${i.raw.s.cluster}`] } },
+        tooltip: { callbacks: { title: (i) => `${i[0].raw.s.name} (${i[0].raw.s.symbol})`, label: (i) => [`${tx(i.raw.s.sector)}, ${tx(i.raw.s.region)}`, groupLabel(i.raw.s.cluster)] } },
       },
       scales: {
         x: { title: { display: true, text: pcLabel(2) }, grid: { color: css("--rule") }, border: { display: false }, ticks: { display: false } },
@@ -332,12 +334,12 @@ function marketMap() {
     },
   });
 
-  $("map-groups").innerHTML = `<p class="chart-note">Circles are US stocks, diamonds are Hong Kong stocks. Pattern 1 (${Math.round(m.explained[0] * 100)}% of movement) is the whole market rising and falling together, so the map shows patterns 2 and 3.</p>` +
+  $("map-groups").innerHTML = `<p class="chart-note">${tx("Circles are US stocks, diamonds are Hong Kong stocks. Pattern 1 ({p}% of movement) is the whole market rising and falling together, so the map shows patterns 2 and 3.", { p: Math.round(m.explained[0] * 100) })}</p>` +
     m.clusters.map((g) => {
       const members = m.stocks.filter((s) => s.cluster === g.id);
       return `<div class="group">
-        <h3><i style="background: var(${CLUSTER_COLORS[(g.id - 1) % 5]})"></i>Group ${g.id}: ${esc(groupName(g))}</h3>
-        <p class="muted">${g.size} stocks${g.avg_within_corr != null ? `, average correlation ${g.avg_within_corr.toFixed(2)} within the group` : ""}</p>
+        <h3><i style="background: var(${CLUSTER_COLORS[(g.id - 1) % 5]})"></i>${groupLabel(g.id)}: ${esc(groupName(g))}</h3>
+        <p class="muted">${tx("{n} stocks", { n: g.size })}${g.avg_within_corr != null ? tx(", average correlation {c} within the group", { c: g.avg_within_corr.toFixed(2) }) : ""}</p>
         <p class="chips">${members.map((s) => `<span title="${esc(s.sector)}">${esc(s.name)}</span>`).join("")}</p>
       </div>`;
     }).join("");
@@ -375,12 +377,12 @@ function regimeFor(sym) {
   const r = patterns.regimes[sym];
   const [calm, storm] = r.states;
   const p = r.today_p_turbulent;
-  const phase = p > 0.5 ? "stormy" : "calm";
+  const phase = tx(p > 0.5 ? "stormy" : "calm");
   const sure = Math.round((p > 0.5 ? p : 1 - p) * 100);
-  $("reg-note").innerHTML = `As of ${fmtDate(r.today_date)}, the model puts the <b>${esc(nm(sym))}</b> in a <b>${phase}</b> phase (${sure}% probability). Stormy phases had a typical yearly swing of ±${(storm.volatility * 100).toFixed(0)}%, against ±${(calm.volatility * 100).toFixed(0)}% in calm ones.`;
+  $("reg-note").innerHTML = tx("As of {date}, the model puts the <b>{name}</b> in a <b>{phase}</b> phase ({sure}% probability). Stormy phases had a typical yearly swing of ±{s}%, against ±{c}% in calm ones.", { date: fmtDate(r.today_date), name: esc(nm(sym)), phase, sure, s: (storm.volatility * 100).toFixed(0), c: (calm.volatility * 100).toFixed(0) });
   $("reg-table").innerHTML = `
-    <thead><tr><th scope="col">${esc(nm(sym))}</th><th scope="col">Typical yearly swing</th><th scope="col">Average length</th><th scope="col">Share of the 5 years</th></tr></thead>
-    <tbody>${r.states.map((st) => `<tr><td>${st.name === "calm" ? "Calm phase" : "Stormy phase"}</td><td class="num">±${(st.volatility * 100).toFixed(0)}%</td><td class="num">${Math.round(st.avg_days)} trading days</td><td class="num">${Math.round(st.share_of_time * 100)}%</td></tr>`).join("")}</tbody>`;
+    <thead><tr><th scope="col">${esc(nm(sym))}</th><th scope="col">${tx("Typical yearly swing")}</th><th scope="col">${tx("Average length")}</th><th scope="col">${tx("Share of the 5 years")}</th></tr></thead>
+    <tbody>${r.states.map((st) => `<tr><td>${tx(st.name === "calm" ? "Calm phase" : "Stormy phase")}</td><td class="num">±${(st.volatility * 100).toFixed(0)}%</td><td class="num">${tx("{n} trading days", { n: Math.round(st.avg_days) })}</td><td class="num">${Math.round(st.share_of_time * 100)}%</td></tr>`).join("")}</tbody>`;
   document.querySelectorAll("#reg-pick button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.sym === sym)));
 
   const data = { labels: r.weekly.dates, datasets: [{ data: r.weekly.close, borderColor: css("--ink"), borderWidth: 1.75, pointRadius: 0, pointHoverRadius: 4, tension: 0.15 }] };
@@ -397,7 +399,7 @@ function regimeFor(sym) {
       interaction: { mode: "index", intersect: false },
       plugins: {
         legend: { display: false },
-        tooltip: { displayColors: false, callbacks: { title: (i) => `Week of ${fmtDate(i[0].label)}`, label: (i) => [`Level ${i.parsed.y.toLocaleString("en-US", { maximumFractionDigits: 0 })}`, `Stormy: ${Math.round((stormP?.[i.dataIndex] ?? 0) * 100)}% likely`] } },
+        tooltip: { displayColors: false, callbacks: { title: (i) => tx("Week of {date}", { date: fmtDate(i[0].label) }), label: (i) => [tx("Level {v}", { v: i.parsed.y.toLocaleString("en-US", { maximumFractionDigits: 0 }) }), tx("Stormy: {p}% likely", { p: Math.round((stormP?.[i.dataIndex] ?? 0) * 100) })] } },
       },
       scales: {
         x: { grid: { display: false }, ticks: { maxTicksLimit: 6, maxRotation: 0, callback(v) { return fmtMonth(this.getLabelForValue(v)); } } },
@@ -410,8 +412,7 @@ function regimeFor(sym) {
 function regimes() {
   const syms = Object.keys(patterns?.regimes || {});
   if (!syms.length) { $("reg-block").hidden = true; return; }
-  const SHORTN = { "^GSPC": "S&P 500", "^HSI": "Hang Seng" };
-  $("reg-pick").innerHTML = syms.map((s) => `<button type="button" data-sym="${esc(s)}" aria-pressed="false">${esc(SHORTN[s] || nm(s))}</button>`).join("");
+  $("reg-pick").innerHTML = syms.map((s) => `<button type="button" data-sym="${esc(s)}" aria-pressed="false">${esc(short(s))}</button>`).join("");
   $("reg-pick").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => regimeFor(b.dataset.sym)));
   regimeFor(syms.includes("^HSI") ? "^HSI" : syms[0]);
 }
@@ -425,7 +426,7 @@ async function init() {
     const [meta, ins] = await Promise.all([getJSON("data/tickers.json"), getJSON("data/insights.json")]);
     names = Object.fromEntries(meta.tickers.map((t) => [t.symbol, t.name]));
     data = ins;
-    $("updated").textContent = `Last updated ${new Date(ins.generated_at).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}.`;
+    $("updated").textContent = tx("Last updated {when}.", { when: fmtWhen(ins.generated_at) });
     findings();
     hero();
     try { lineArt(); } catch (e) { console.error(e); $("lede").querySelector(".art").hidden = true; }
@@ -441,7 +442,7 @@ async function init() {
     stickers();
   } catch (err) {
     console.error(err);
-    $("main").innerHTML = `<p class="notice">The insights data isn't available yet. It is built together with the market data: run <code>python -m app.export_site</code> in the backend folder.</p>`;
+    $("main").innerHTML = `<p class="notice">${tx("The insights data isn't available yet. It is built together with the market data.")}</p>`;
   }
 }
 
