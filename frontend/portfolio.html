@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DataVest · Portfolio simulator</title>
+  <meta name="description" content="Build a practice portfolio from real markets and see how it would have done: growth, risk, worst fall, diversification and the efficient frontier.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top" id="top"></header>
+
+  <main id="main" class="page">
+    <section class="lede">
+      <p class="kicker">Portfolio simulator</p>
+      <h1>Build a practice portfolio and see how it would have done.</h1>
+      <p class="nb-lead">Mix DataVest's markets, then test the mix on real weekly prices from the last five years. It's for learning only: past results don't predict the future.</p>
+    </section>
+
+    <section class="block" aria-labelledby="b-title">
+      <h2 id="b-title" class="section-title">Your mix</h2>
+      <div class="pf-grid">
+        <div>
+          <div class="segmented pf-presets" id="presets" role="group" aria-label="Start from a preset"></div>
+          <div id="weights" class="weights"></div>
+          <p class="muted small" id="w-total"></p>
+          <div class="pf-options">
+            <label>Rebalance
+              <select id="rebalance" class="picker">
+                <option value="none">Never (buy and hold)</option>
+                <option value="yearly" selected>Every year</option>
+                <option value="monthly">Every month</option>
+              </select>
+            </label>
+            <label>Compare with
+              <select id="bench" class="picker"></select>
+            </label>
+          </div>
+        </div>
+        <div>
+          <div class="pf-stats" id="pf-stats"></div>
+          <div class="legend static" id="g-legend"></div>
+          <div class="chart-wrap"><canvas id="g-chart" role="img" aria-label="Growth of 100: your portfolio vs the benchmark"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="r-title">
+      <h2 id="r-title" class="chart-title">Where your risk comes from</h2>
+      <p class="chart-note">Each holding's share of the money compared with its share of the portfolio's ups and downs. A holding can be a small slice of the money but a big slice of the risk.</p>
+      <div id="riskbars" class="riskbars"></div>
+    </section>
+
+    <section class="block" aria-labelledby="f-title">
+      <div class="chart-head">
+        <h2 id="f-title" class="chart-title">The efficient frontier</h2>
+        <label class="check small-check"><input type="checkbox" id="cap"> Limit any one market to 30%</label>
+      </div>
+      <p class="chart-note">Each grey dot is a random mix of the same markets. The upper-left edge is the "efficient frontier": the most return for each level of risk, as measured over the past five years.</p>
+      <div class="legend static">
+        <span class="key"><i style="background: var(--rule)"></i>Random mixes</span>
+        <span class="key"><i style="background: var(--ink-soft)"></i>Single markets</span>
+        <span class="key"><i style="background: var(--s3)"></i>Lowest risk</span>
+        <span class="key"><i style="background: var(--s2)"></i>Best return for its risk</span>
+        <span class="key"><i style="background: var(--s1)"></i>Your mix</span>
+      </div>
+      <div class="chart-wrap tall"><canvas id="f-chart" role="img" aria-label="Efficient frontier scatter plot"></canvas></div>
+      <div class="quiz-actions">
+        <button type="button" class="btn-quiet" id="use-minvar">Use the lowest-risk mix</button>
+        <button type="button" class="btn-quiet" id="use-maxsharpe">Use the best return-for-risk mix</button>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="o-title">
+      <h2 id="o-title" class="chart-title">Would the "optimal" mix really have worked?</h2>
+      <p class="chart-note" id="o-note"></p>
+      <div class="table-wrap"><table class="stats" id="o-table"></table></div>
+      <details class="inline-help">
+        <summary>Why do optimised portfolios often disappoint?</summary>
+        <p>The optimiser treats past average returns as if they were known facts, but five years of returns are a very noisy estimate of the future. It piles into whatever happened to do best, which is often just luck. This is the same overfitting problem seen in machine learning: a model that fits past data perfectly can do badly on new data. Volatility and correlations are more stable than returns, which is why lowest-risk portfolios usually hold up better out of sample. A simple equal mix is a surprisingly tough benchmark.</p>
+      </details>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <p>Weekly prices from Yahoo Finance. Funds and stocks include dividends; index levels don't. No trading costs or taxes are included. Your mix is saved in this browser only.</p>
+    <p>DataVest is a learning project. Nothing here is financial advice.</p>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script type="module" src="js/portfolio-page.js"></script>
+</body>
+</html>

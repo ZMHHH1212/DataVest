@@ -18,6 +18,7 @@ PAGES = [
     ("markets", "", ["#chart", "#ddchart", "#rsichart"]),
     ("insights", "insights.html", ["#growth", "#scatter", "#rollcorr", "#mapchart", "#regchart"]),
     ("models", "models.html", ["#volchart", "#btchart"]),
+    ("portfolio", "portfolio.html", ["#g-chart", "#f-chart"]),
     ("tools", "tools.html", ["#g-chart"]),
     ("learn", "learn.html", []),
     ("signin", "signin.html", []),
@@ -72,6 +73,12 @@ with sync_playwright() as p:
                 page.click("#check")
                 if "out of 3" not in page.inner_text("#quiz-score"):
                     errors.append("quiz did not score")
+            if name == "portfolio" and label == "desktop":
+                page.click("#use-minvar")
+                page.click("#use-maxsharpe")
+                page.select_option("#rebalance", "monthly")
+                if not page.inner_text("#o-table").strip():
+                    errors.append("out-of-sample table is empty")
             if name == "tools" and label == "desktop":
                 page.fill("#g-monthly", "3000")
                 page.click("#currency button >> nth=1")
