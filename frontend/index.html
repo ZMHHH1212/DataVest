@@ -8,7 +8,7 @@
   <meta name="theme-color" content="#0d1626">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+HK:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="desk.css">
 </head>
@@ -31,7 +31,7 @@
           </div>
           <button type="button" class="star" id="star" aria-pressed="false" hidden>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.8z"/></svg>
-            <span id="star-label">Add to watchlist</span>
+            <span id="star-label" data-i18n="m.addWatch">Add to watchlist</span>
           </button>
         </div>
         <p class="price-line" id="m-price"></p>
@@ -45,91 +45,91 @@
             <button type="button" data-range="5Y">5Y</button>
           </div>
           <div class="overlays" role="group" aria-label="Show on the chart">
-            <button type="button" class="key" data-overlay="sma50" aria-pressed="false"><i class="sw sw-50"></i>50-day avg</button>
-            <button type="button" class="key" data-overlay="sma200" aria-pressed="false"><i class="sw sw-200"></i>200-day avg</button>
+            <button type="button" class="key" data-overlay="sma50" aria-pressed="false"><i class="sw sw-50"></i><span data-i18n="m.sma50">50-day avg</span></button>
+            <button type="button" class="key" data-overlay="sma200" aria-pressed="false"><i class="sw sw-200"></i><span data-i18n="m.sma200">200-day avg</span></button>
           </div>
         </div>
         <div class="chart-wrap price-wrap"><canvas id="chart" role="img" aria-label="Price chart"></canvas></div>
         <details class="inline-help">
-          <summary>What is a moving average?</summary>
-          <p>A moving average is the average closing price over the last 50 or 200 trading days. It smooths out daily noise so the trend is easier to see. When the price sits above its 200-day average, the market is usually described as being in an uptrend. Treat crossings as descriptions of what has happened, not predictions.</p>
+          <summary data-i18n="m.maHelp">What is a moving average?</summary>
+          <p data-i18n="m.maHelpBody">A moving average is the average closing price over the last 50 or 200 trading days. It smooths out daily noise so the trend is easier to see. When the price sits above its 200-day average, the market is usually described as being in an uptrend. Treat crossings as descriptions of what has happened, not predictions.</p>
         </details>
       </section>
 
       <div class="minis">
         <section class="panel">
-          <div class="panel-head"><h2>Falls from the peak</h2></div>
-          <p class="chart-note">How far below its previous high the price was. Zero means a new high.</p>
+          <div class="panel-head"><h2 data-i18n="m.ddTitle">Falls from the peak</h2></div>
+          <p class="chart-note" data-i18n="m.ddNote">How far below its previous high the price was. Zero means a new high.</p>
           <div class="chart-wrap short"><canvas id="ddchart" role="img" aria-label="Drawdown chart"></canvas></div>
         </section>
         <section class="panel">
-          <div class="panel-head"><h2>Momentum (RSI 14)</h2></div>
+          <div class="panel-head"><h2 data-i18n="m.rsiTitle">Momentum (RSI 14)</h2></div>
           <p class="chart-note" id="rsi-note">Compares the size of recent gains with recent losses on a 0–100 scale.</p>
           <div class="chart-wrap short"><canvas id="rsichart" role="img" aria-label="Relative Strength Index chart"></canvas></div>
           <details class="inline-help">
-            <summary>How is RSI used?</summary>
-            <p>Above 70 is often called "overbought" and below 30 "oversold". These are rules of thumb: DataVest's own tests on the Models page found RSI signals no better than chance.</p>
+            <summary data-i18n="m.rsiHelp">How is RSI used?</summary>
+            <p data-i18n="m.rsiHelpBody">Above 70 is often called "overbought" and below 30 "oversold". These are rules of thumb: DataVest's own tests on the Models page found RSI signals no better than chance.</p>
           </details>
         </section>
       </div>
     </main>
 
     <aside class="panel rail" aria-label="Risk dashboard">
-      <div class="panel-head"><h2>Risk dashboard</h2><span class="muted small" id="rail-range"></span></div>
+      <div class="panel-head"><h2 data-i18n="m.risk">Risk dashboard</h2><span class="muted small" id="rail-range"></span></div>
       <article class="kpi" id="regime-tile" hidden>
-        <h3>Market phase</h3>
+        <h3 data-i18n="m.phase">Market phase</h3>
         <p class="figure" id="m-regime">–</p>
         <p id="m-regime-text"></p>
       </article>
       <article class="kpi">
-        <h3>Volatility</h3>
+        <h3 data-i18n="m.vol">Volatility</h3>
         <p class="figure" id="vol-figure">–</p>
         <p id="vol-text"></p>
         <p class="forecast-line" id="vol-forecast" hidden></p>
-        <details><summary>What is volatility?</summary><p>How much the price jumps around, scaled to a year. Around 15–20% is normal for a broad stock index; single companies are often 30% or more.</p></details>
+        <details><summary data-i18n="m.volHelp">What is volatility?</summary><p data-i18n="m.volHelpBody">How much the price jumps around, scaled to a year. Around 15–20% is normal for a broad stock index; single companies are often 30% or more.</p></details>
       </article>
       <article class="kpi">
-        <h3>Worst fall</h3>
+        <h3 data-i18n="m.worst">Worst fall</h3>
         <p class="figure loss" id="dd-figure">–</p>
         <p id="dd-text"></p>
-        <details><summary>What is a drawdown?</summary><p>The fall from a high point to the following low. The worst one answers: if you had bought at the worst moment, how far down would you have been?</p></details>
+        <details><summary data-i18n="m.ddHelp">What is a drawdown?</summary><p data-i18n="m.ddHelpBody">The fall from a high point to the following low. The worst one answers: if you had bought at the worst moment, how far down would you have been?</p></details>
       </article>
       <article class="kpi">
-        <h3>Growth per year</h3>
+        <h3 data-i18n="m.cagr">Growth per year</h3>
         <p class="figure" id="cagr-figure">–</p>
         <p id="cagr-text"></p>
-        <details><summary>Why "per year"?</summary><p>The compound annual growth rate is the steady yearly rate that turns the start value into the end value. It hides the bumps, so read it next to volatility and the worst fall.</p></details>
+        <details><summary data-i18n="m.cagrHelp">Why "per year"?</summary><p data-i18n="m.cagrHelpBody">The compound annual growth rate is the steady yearly rate that turns the start value into the end value. It hides the bumps, so read it next to volatility and the worst fall.</p></details>
       </article>
       <article class="kpi">
-        <h3>A bad day (95% VaR)</h3>
+        <h3 data-i18n="m.var">A bad day (95% VaR)</h3>
         <p class="figure loss" id="var-figure">–</p>
         <p id="var-text"></p>
-        <details><summary>What is Value at Risk?</summary><p>The daily fall that was beaten only on 1 day in 20. Expected shortfall is the average fall on those worst days.</p></details>
+        <details><summary data-i18n="m.varHelp">What is Value at Risk?</summary><p data-i18n="m.varHelpBody">The daily fall that was beaten only on 1 day in 20. Expected shortfall is the average fall on those worst days.</p></details>
       </article>
     </aside>
 
     <section class="panel surface-panel" aria-labelledby="sf-title">
       <div class="panel-head">
-        <h2 id="sf-title">Volatility landscape (3D)</h2>
+        <h2 id="sf-title" data-i18n="m.sfTitle">Volatility landscape (3D)</h2>
         <div class="sf-tools">
-          <button type="button" class="tool" id="sf-out" aria-label="Zoom out">−</button>
-          <button type="button" class="tool" id="sf-in" aria-label="Zoom in">+</button>
-          <button type="button" class="tool" id="sf-spin" aria-pressed="true">Auto-rotate</button>
-          <button type="button" class="tool" id="sf-reset">Reset view</button>
+          <button type="button" class="tool" id="sf-out" aria-label="Zoom out" data-i18n-label="m.sfOut">−</button>
+          <button type="button" class="tool" id="sf-in" aria-label="Zoom in" data-i18n-label="m.sfIn">+</button>
+          <button type="button" class="tool" id="sf-spin" aria-pressed="true" data-i18n="m.sfSpin">Auto-rotate</button>
+          <button type="button" class="tool" id="sf-reset" data-i18n="m.sfReset">Reset view</button>
         </div>
       </div>
       <p class="chart-note" id="sf-note">Each ridge is one market's 3-month volatility over five years: peaks are stormy periods. Drag to rotate, hover for values.</p>
       <div class="sf-wrap">
         <canvas id="surface" tabindex="0" role="img" aria-label="3D landscape of each market's volatility over time"></canvas>
         <div class="sf-tip" id="sf-tip" hidden></div>
-        <div class="sf-scale" aria-hidden="true"><span>calm</span><i></i><span>stormy</span></div>
+        <div class="sf-scale" aria-hidden="true"><span data-i18n="m.calm">calm</span><i></i><span data-i18n="m.stormy">stormy</span></div>
       </div>
     </section>
   </div>
 
   <footer class="foot">
-    <p>Prices from Yahoo Finance, updated every weekday. Returns use adjusted prices, which include dividends. <span id="updated"></span></p>
-    <p>DataVest is a learning project. Nothing here is financial advice, and past performance does not predict future results.</p>
+    <p><span data-i18n="m.footer1">Prices from Yahoo Finance, updated every weekday. Returns use adjusted prices, which include dividends.</span> <span id="updated"></span></p>
+    <p data-i18n="m.footer2">DataVest is a learning project. Nothing here is financial advice, and past performance does not predict future results.</p>
   </footer>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>

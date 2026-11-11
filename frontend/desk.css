@@ -194,3 +194,7 @@ html.desk body {
   .desk .site-nav a { white-space: nowrap; }
   .desk .account { flex: none; }
 }
+
+.desk .lang { margin-left: auto; font: 600 0.875rem/1 var(--body); padding: 0.5rem 0.75rem; min-width: 2.75rem; justify-content: center; }
+.desk .lang + .account { margin-left: 0; }
+html.desk[lang="zh-HK"] { --body: "IBM Plex Sans", "PingFang HK", "Noto Sans HK", "Microsoft JhengHei", system-ui, sans-serif; --display: var(--body); }

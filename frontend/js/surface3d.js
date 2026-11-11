@@ -175,7 +175,9 @@ export function mountSurface(canvas, tip, opts) {
     hover = q ? { q } : null;
     if (!q) { tip.hidden = true; draw(); return; }
     const row = rows[q.r], v = row.values[q.col];
-    tip.innerHTML = `${row.label}<br>${opts.formatDate(dates[q.col])}<br>volatility <b>${Math.round(v * 100)}%</b>`;
+    tip.innerHTML = opts.tipTemplate
+      ? opts.tipTemplate(row.label, opts.formatDate(dates[q.col]), Math.round(v * 100))
+      : `${row.label}<br>${opts.formatDate(dates[q.col])}<br>volatility <b>${Math.round(v * 100)}%</b>`;
     tip.hidden = false;
     const tx = Math.min(px + 14, w - tip.offsetWidth - 6), ty = Math.max(py - tip.offsetHeight - 10, 6);
     tip.style.left = `${tx}px`; tip.style.top = `${ty}px`;

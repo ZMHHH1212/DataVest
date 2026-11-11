@@ -2,9 +2,13 @@
 import { onWatchlist, getWatchlist, isWatched, toggleWatch } from "./auth.js";
 import { $, css, pct, money, fmtDate, fmtMonth, priceText, getJSON, esc, renderTopBar, chartDefaults, crosshair } from "./common.js";
 import { mountSurface } from "./surface3d.js";
+import { t as tr, isZh, applyStatic, marketName, marketShort, dateText } from "./i18n.js";
 
 const SHORT = { "^GSPC": "S&P 500", "^IXIC": "Nasdaq", "^HSI": "Hang Seng", SPY: "SPY", "2800.HK": "Tracker 2800", "0700.HK": "Tencent", "0005.HK": "HSBC" };
-const shortName = (t) => SHORT[t.symbol] || t.name;
+const shortName = (t) => marketShort(t.symbol, SHORT[t.symbol] || t.name);
+const nameOf = (t) => marketName(t.symbol, t.name);
+const D = (iso) => dateText(iso);
+const M = (iso) => (isZh ? `${iso.slice(0, 4)}年${Number(iso.slice(5, 7))}月` : fmtMonth(iso));
 let regimes = {};
 let surface = null;
 let lastShown = null;
@@ -75,8 +79,8 @@ function sparkline(values, up) {
 function marketButton(t) {
   const day = t.last / t.prev - 1;
   const spark = t.spark && t.spark.length > 2 ? sparkline(t.spark, t.spark[t.spark.length - 1] >= t.spark[0]) : "";
-  return `<button type="button" class="market" data-symbol="${esc(t.symbol)}" title="${esc(t.name)}: ${pct(day, 2)} on the last trading day">
-      <span class="nm">${esc(t.name)}</span>
+  return `<button type="button" class="market" data-symbol="${esc(t.symbol)}" title="${esc(nameOf(t))}: ${pct(day, 2)}">
+      <span class="nm">${esc(nameOf(t))}</span>
       <span class="sym">${esc(t.symbol)}</span>
       ${spark}
       <span class="chg ${day >= 0 ? "up" : "down"}">${pct(day, 2)}</span>
@@ -95,7 +99,7 @@ function renderList() {
     g[1].push(t);
   }
   $("market-list").innerHTML = groups
-    .map(([name, items]) => `<p class="group-name${name === "Your watchlist" ? " mine" : ""}">${esc(name)}</p>${items.map(marketButton).join("")}`)
+    .map(([name, items]) => `<p class="group-name${name === "Your watchlist" ? " mine" : ""}">${esc(tr(`m.groups.${name}`, name))}</p>${items.map(marketButton).join("")}`)
     .join("");
   document.querySelectorAll(".market").forEach((b) => {
     b.addEventListener("click", () => select(b.dataset.symbol));
@@ -109,7 +113,7 @@ function renderStar() {
   const star = $("star");
   star.hidden = false;
   star.setAttribute("aria-pressed", String(on));
-  $("star-label").textContent = on ? "In your watchlist" : "Add to watchlist";
+  $("star-label").textContent = on ? tr("m.inWatch", "In your watchlist") : tr("m.addWatch", "Add to watchlist");
 }
 
 function renderDetail() {
@@ -118,60 +122,65 @@ function renderDetail() {
   const m = metrics(rows);
   const up = m.growth >= 1;
 
-  $("m-name").textContent = `${t.name} (${t.symbol})`;
+  $("m-name").textContent = `${nameOf(t)} (${t.symbol})`;
   renderLast(t);
   renderRegime(t);
   surface?.setHighlight(shortName(t));
-  $("rail-range").textContent = { "1M": "last month", "6M": "last 6 months", "1Y": "last year", "5Y": "last 5 years" }[state.range];
-  $("m-story").innerHTML = `$100 invested ${RANGE_WORDS[state.range]} is now worth <span class="amount ${up ? "" : "down"}">$${money(100 * m.growth)}</span>.`;
+  $("rail-range").textContent = tr(`m.range.${state.range}`, { "1M": "last month", "6M": "last 6 months", "1Y": "last year", "5Y": "last 5 years" }[state.range]);
+  const amount = `<span class="amount ${up ? "" : "down"}">$${money(100 * m.growth)}</span>`;
+  $("m-story").innerHTML = tr("m.story", `$100 invested ${RANGE_WORDS[state.range]} is now worth {amount}.`, { ago: tr(`m.ago.${state.range}`, ""), amount });
   const last = state.series[state.series.length - 1];
   const day = t.last / t.prev - 1;
-  $("m-price").innerHTML = `Last close <strong>${priceText(t, last[1])}</strong> on ${fmtDate(last[0])}, <span class="${day >= 0 ? "up" : "down"}">${pct(day, 2)}</span> on the day.`;
+  const priceStr = isZh && t.is_index ? `${last[1].toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${tr("m.pts", "points")}` : priceText(t, last[1]);
+  const chg = `<span class="${day >= 0 ? "up" : "down"}">${pct(day, 2)}</span>`;
+  $("m-price").innerHTML = tr("m.priceLine", "Last close <strong>{price}</strong> on {date}, {chg} on the day.", { price: priceStr, date: D(last[0]), chg });
   renderStar();
 
-  $("vol-figure").textContent = `±${(m.vol * 100).toFixed(0)}% a year`;
-  const calm = m.vol < 0.15 ? "calmer than a typical stock index" : m.vol < 0.25 ? "about normal for a stock index" : m.vol < 0.4 ? "bumpier than a broad index, typical for a single stock" : "very bumpy, so expect big swings";
-  $("vol-text").textContent = `Over this period that is ${calm}.`;
+  $("vol-figure").textContent = tr("m.volFigure", "±{v}% a year", { v: (m.vol * 100).toFixed(0) });
+  const level = m.vol < 0.15 ? 0 : m.vol < 0.25 ? 1 : m.vol < 0.4 ? 2 : 3;
+  const calmEn = ["calmer than a typical stock index", "about normal for a stock index", "bumpier than a broad index, typical for a single stock", "very bumpy, so expect big swings"][level];
+  $("vol-text").textContent = tr("m.volText", "Over this period that is {calm}.", { calm: tr(`m.volCalm${level}`, calmEn) });
   const f = forecasts[t.symbol];
   $("vol-forecast").hidden = !f;
-  if (f) $("vol-forecast").innerHTML = `Forecast for the next month: <b>±${(f.garch_next_month * 100).toFixed(0)}% a year</b>, from a GARCH model. <a href="models.html">How well do forecasts work?</a>`;
+  if (f) $("vol-forecast").innerHTML = tr("m.forecast", 'Forecast for the next month: <b>±{v}% a year</b>, from a GARCH model. <a href="models.html">How well do forecasts work?</a>', { v: (f.garch_next_month * 100).toFixed(0) });
 
-  $("dd-figure").textContent = m.dd < -0.0005 ? pct(m.dd) : "No fall";
+  $("dd-figure").textContent = m.dd < -0.0005 ? pct(m.dd) : tr("m.noFall", "No fall");
   $("dd-text").textContent = m.dd < -0.0005
-    ? `From its high on ${fmtDate(m.ddPeak)} it fell to its low on ${fmtDate(m.ddTrough)}. $100 at that high became $${money(100 * (1 + m.dd))}.`
-    : "The price only went up in this period.";
+    ? tr("m.ddText", "From its high on {peak} it fell to its low on {trough}. $100 at that high became ${x}.", { peak: D(m.ddPeak), trough: D(m.ddTrough), x: money(100 * (1 + m.dd)) })
+    : tr("m.onlyUp", "The price only went up in this period.");
 
   if (m.cagr === null) {
     $("cagr-figure").textContent = pct(m.growth - 1);
-    $("cagr-text").textContent = "Total change for this period. Pick 1 year or longer to see a yearly rate.";
+    $("cagr-text").textContent = tr("m.cagrTotal", "Total change for this period. Pick 1 year or longer to see a yearly rate.");
   } else {
-    $("cagr-figure").textContent = `${pct(m.cagr)} a year`;
-    $("cagr-text").textContent = `The steady yearly rate that matches a total change of ${pct(m.growth - 1)} over ${m.years.toFixed(1)} years.`;
+    $("cagr-figure").textContent = tr("m.cagrFigure", "{v} a year", { v: pct(m.cagr) });
+    $("cagr-text").textContent = tr("m.cagrText", "The steady yearly rate that matches a total change of {total} over {years} years.", { total: pct(m.growth - 1), years: m.years.toFixed(1) });
   }
 
   if (m.days >= 20) {
-    $("var-figure").textContent = `${pct(m.var95)} in a day`;
-    $("var-text").textContent = `On 1 trading day in 20 it fell this much or more. On those days the average fall was ${pct(m.es95)}.`;
+    $("var-figure").textContent = tr("m.varFigure", "{v} in a day", { v: pct(m.var95) });
+    $("var-text").textContent = tr("m.varText", "On 1 trading day in 20 it fell this much or more. On those days the average fall was {es}.", { es: pct(m.es95) });
   } else {
     $("var-figure").textContent = "–";
-    $("var-text").textContent = "Pick 6 months or longer: this needs at least 20 trading days.";
+    $("var-text").textContent = tr("m.varShort", "Pick 6 months or longer: this needs at least 20 trading days.");
   }
 
   const lastRsi = rows[rows.length - 1][5] == null ? null : Math.round(rows[rows.length - 1][5]);
+  const zone = lastRsi >= 70 ? tr("m.rsiHigh", "above 70, the zone often called overbought") : lastRsi <= 30 ? tr("m.rsiLow", "below 30, the zone often called oversold") : tr("m.rsiMid", "between 30 and 70, the neutral zone");
   $("rsi-note").textContent = lastRsi == null
-    ? "Compares the size of recent gains with recent losses on a 0–100 scale."
-    : `Latest reading ${lastRsi}: ${lastRsi >= 70 ? "above 70, the zone often called overbought" : lastRsi <= 30 ? "below 30, the zone often called oversold" : "between 30 and 70, the neutral zone"}.`;
+    ? tr("m.rsiNone", "Compares the size of recent gains with recent losses on a 0–100 scale.")
+    : tr("m.rsiNote", "Latest reading {n}: {zone}.", { n: lastRsi, zone });
 
   document.querySelectorAll("[data-overlay]").forEach((b) => b.setAttribute("aria-pressed", String(state.overlays.has(b.dataset.overlay))));
   document.querySelectorAll(".ranges button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.range === state.range)));
   document.querySelectorAll(".market").forEach((b) => b.setAttribute("aria-current", String(b.dataset.symbol === t.symbol)));
-  $("chart").setAttribute("aria-label", `${t.name} price from ${fmtDate(m.start)} to ${fmtDate(m.end)}, ${pct(m.growth - 1)} in total.`);
+  $("chart").setAttribute("aria-label", tr("m.chartLabel", "{name} price from {start} to {end}, {total} in total.", { name: nameOf(t), start: D(m.start), end: D(m.end), total: pct(m.growth - 1) }));
   $("ddchart").setAttribute("aria-label", `Falls from the peak for ${t.name}. Worst: ${pct(m.dd)}.`);
   drawCharts(rows, m, up);
 }
 
 function xTicks() {
-  return { maxTicksLimit: 6, maxRotation: 0, callback(v) { return fmtMonth(this.getLabelForValue(v)); } };
+  return { maxTicksLimit: 6, maxRotation: 0, callback(v) { return M(this.getLabelForValue(v)); } };
 }
 
 function drawCharts(rows, m, up) {
@@ -185,8 +194,8 @@ function drawCharts(rows, m, up) {
     label, data: rows.map((r) => r[col]), borderColor: css(varName), borderWidth: 1.5,
     borderDash: dash, pointRadius: 0, pointHoverRadius: 0, tension: 0.1, fill: false, spanGaps: false,
   });
-  if (state.overlays.has("sma50")) priceData.datasets.push(overlay("sma50", 3, "50-day", "--s1", []));
-  if (state.overlays.has("sma200")) priceData.datasets.push(overlay("sma200", 4, "200-day", "--ink-soft", [6, 4]));
+  if (state.overlays.has("sma50")) priceData.datasets.push(overlay("sma50", 3, tr("m.sma50", "50-day"), "--s1", []));
+  if (state.overlays.has("sma200")) priceData.datasets.push(overlay("sma200", 4, tr("m.sma200", "200-day"), "--ink-soft", [6, 4]));
   const rsiData = {
     labels,
     datasets: [{ data: rows.map((r) => r[5]), borderColor: css("--ink"), borderWidth: 1.5, pointRadius: 0, pointHoverRadius: 3, tension: 0.1, spanGaps: false }],
@@ -217,7 +226,7 @@ function drawCharts(rows, m, up) {
     plugins: [crosshair],
     options: {
       ...base,
-      plugins: { ...base.plugins, tooltip: { displayColors: false, callbacks: { title: (i) => fmtDate(i[0].label), label: (i) => (i.datasetIndex === 0 ? priceText(state.current, i.parsed.y) : `${i.dataset.label} average: ${priceText(state.current, i.parsed.y)}`) } } },
+      plugins: { ...base.plugins, tooltip: { displayColors: false, callbacks: { title: (i) => D(i[0].label), label: (i) => (i.datasetIndex === 0 ? priceText(state.current, i.parsed.y) : tr("m.avgLabel", "{label} average: {price}", { label: i.dataset.label, price: priceText(state.current, i.parsed.y) })) } } },
       scales: {
         x: { grid: { display: false }, ticks: xTicks() },
         y: { position: "right", grid: { color: css("--rule") }, border: { display: false }, ticks: { maxTicksLimit: 6 } },
@@ -230,7 +239,7 @@ function drawCharts(rows, m, up) {
     plugins: [crosshair],
     options: {
       ...base,
-      plugins: { ...base.plugins, tooltip: { displayColors: false, callbacks: { title: (i) => fmtDate(i[0].label), label: (i) => (i.parsed.y > -0.0005 ? "At a new high" : `${pct(i.parsed.y)} below the previous high`) } } },
+      plugins: { ...base.plugins, tooltip: { displayColors: false, callbacks: { title: (i) => D(i[0].label), label: (i) => (i.parsed.y > -0.0005 ? tr("m.newHigh", "At a new high") : tr("m.belowHigh", "{x} below the previous high", { x: pct(i.parsed.y) })) } } },
       scales: {
         x: { grid: { display: false }, ticks: { display: false } },
         y: { position: "right", max: 0, grid: { color: css("--rule") }, border: { display: false }, ticks: { maxTicksLimit: 3, callback: (v) => `${Math.round(v * 100)}%` } },
@@ -268,7 +277,7 @@ function drawRsi(rsiData) {
       maintainAspectRatio: false,
       animation: false,
       interaction: { mode: "index", intersect: false },
-      plugins: { legend: { display: false }, tooltip: { displayColors: false, callbacks: { title: (i) => fmtDate(i[0].label), label: (i) => `RSI ${i.parsed.y.toFixed(0)}` } } },
+      plugins: { legend: { display: false }, tooltip: { displayColors: false, callbacks: { title: (i) => D(i[0].label), label: (i) => `RSI ${i.parsed.y.toFixed(0)}` } } },
       scales: {
         x: { grid: { display: false }, ticks: { display: false } },
         y: { position: "right", min: 0, max: 100, grid: { display: false }, border: { display: false }, ticks: { stepSize: 50 } },
@@ -282,7 +291,7 @@ function renderLast(t) {
   const el = $("m-last");
   if (!el) return;
   const target = t.last;
-  const ccy = t.is_index ? "pts" : t.currency || "";
+  const ccy = t.is_index ? tr("m.pts", "pts") : t.currency || "";
   const fmt = (v) => v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
   if (lastShown === t.symbol) return;
@@ -303,10 +312,10 @@ function renderRegime(t) {
   $("regime-tile").hidden = !r;
   if (!r) return;
   const p = r.today_p_turbulent, storm = p > 0.5;
-  $("m-regime").textContent = storm ? "Stormy" : "Calm";
+  $("m-regime").textContent = storm ? tr("m.stormy", "Stormy") : tr("m.calm", "Calm");
   $("m-regime").className = `figure ${storm ? "storm" : "calm"}`;
   const [calm, st] = r.states;
-  $("m-regime-text").textContent = `${Math.round((storm ? p : 1 - p) * 100)}% probability, from a Hidden Markov Model. Calm phases swing about ±${Math.round(calm.volatility * 100)}% a year, stormy ones ±${Math.round(st.volatility * 100)}%.`;
+  $("m-regime-text").textContent = tr("m.regimeText", "{p}% probability, from a Hidden Markov Model. Calm phases swing about ±{c}% a year, stormy ones ±{s}%.", { p: Math.round((storm ? p : 1 - p) * 100), c: Math.round(calm.volatility * 100), s: Math.round(st.volatility * 100) });
 }
 
 function renderTape() {
@@ -334,7 +343,8 @@ function initSurface(ins) {
   surface = mountSurface($("surface"), $("sf-tip"), {
     rows: trimmed,
     dates: dates.slice(Math.max(first, 0)),
-    formatDate: (d) => `week of ${fmtDate(d)}`,
+    formatDate: (d) => tr("m.sfWeek", "week of {date}", { date: D(d) }),
+    tipTemplate: isZh ? (label, date, v) => tr("m.sfTip", "", { label, date, v }) : null,
     font: css("--mono"),
     colors: { ink: css("--ink"), soft: css("--ink-soft"), line: css("--rule"), amber: css("--amber") },
     highlight: state.current ? shortName(state.current) : null,
@@ -352,7 +362,7 @@ function initSurface(ins) {
   // where was it stormiest?
   let best = null;
   trimmed.forEach((r) => r.values.forEach((v, c) => { if (v != null && (!best || v > best.v)) best = { v, label: r.label, c }; }));
-  if (best) $("sf-note").textContent = `Each market's 3-month volatility over the last five years, one ridge per market: peaks are stormy periods. The highest peak is ${best.label} around ${fmtDate(dates.slice(Math.max(first, 0))[best.c])} (±${Math.round(best.v * 100)}% a year). Drag to rotate, hover for values.`;
+  if (best) $("sf-note").textContent = tr("m.sfNote", "Each market's 3-month volatility over the last five years, one ridge per market: peaks are stormy periods. The highest peak is {label} around {date} (±{v}% a year). Drag to rotate, hover for values.", { label: best.label, date: D(dates.slice(Math.max(first, 0))[best.c]), v: Math.round(best.v * 100) });
 }
 
 async function select(symbol) {
@@ -365,7 +375,8 @@ async function select(symbol) {
 }
 
 async function init() {
-  renderTopBar("markets");
+  renderTopBar("markets", "", { i18n: true });
+  applyStatic();
   chartDefaults();
   document.querySelectorAll(".ranges button").forEach((b) =>
     b.addEventListener("click", () => { state.range = b.dataset.range; renderDetail(); })
@@ -383,9 +394,10 @@ async function init() {
     const meta = await getJSON("data/tickers.json");
     state.tickers = meta.tickers;
     if (!state.tickers.length) throw new Error("no tickers");
-    $("updated").textContent = `Last updated ${new Date(meta.generated_at).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}.`;
+    const when = new Date(meta.generated_at).toLocaleString(isZh ? "zh-HK" : "en-GB", { dateStyle: "medium", timeStyle: "short" });
+    $("updated").textContent = tr("m.updated", "Last updated {when}.", { when });
     const lastDate = state.tickers.map((t) => t.last_date).sort().at(-1);
-    if ($("asof")) $("asof").textContent = `Close ${fmtDate(lastDate)}`;
+    if ($("asof")) $("asof").textContent = tr("m.close", "Close {date}", { date: D(lastDate) });
     if ($("tape")) renderTape();
     const [models, patterns, ins] = await Promise.all(["data/models.json", "data/patterns.json", "data/insights.json"].map((u) => getJSON(u).catch(() => null)));
     forecasts = models?.forecasts || {};

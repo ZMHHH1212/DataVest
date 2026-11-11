@@ -1,5 +1,6 @@
 // Shared helpers: formatting, data loading, the top bar, chart defaults.
 import { onUser, signOut } from "./auth.js";
+import { t, isZh, switchLang } from "./i18n.js";
 
 export const $ = (id) => document.getElementById(id);
 export const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -26,34 +27,42 @@ export function esc(s) {
 }
 
 // ---- top bar --------------------------------------------------------------
-export function renderTopBar(active, base = "") {
+export function renderTopBar(active, base = "", { i18n = false } = {}) {
+  // Chinese navigation only on pages that are translated (opted in with i18n: true)
+  const tr = (key, en) => (i18n ? t(key, en) : en);
   const links = [
-    ["markets", base || "./", "Markets"],
-    ["insights", `${base}insights.html`, "Insights"],
-    ["models", `${base}models.html`, "Models"],
-    ["portfolio", `${base}portfolio.html`, "Portfolio"],
-    ["learn", `${base}learn.html`, "Learn"],
-    ["tools", `${base}tools.html`, "Tools"],
-    ["analysis", `${base}analysis/`, "Analysis"],
+    ["markets", base || "./", tr("nav.markets", "Markets")],
+    ["insights", `${base}insights.html`, tr("nav.insights", "Insights")],
+    ["models", `${base}models.html`, tr("nav.models", "Models")],
+    ["portfolio", `${base}portfolio.html`, tr("nav.portfolio", "Portfolio")],
+    ["learn", `${base}learn.html`, tr("nav.learn", "Learn")],
+    ["tools", `${base}tools.html`, tr("nav.tools", "Tools")],
+    ["analysis", `${base}analysis/`, tr("nav.analysis", "Analysis")],
   ];
+  const langBtn = i18n
+    ? `<button type="button" class="btn-quiet lang" id="lang" lang="${isZh ? "en" : "zh-HK"}" aria-label="${isZh ? "Switch to English" : "切換至中文"}">${isZh ? "EN" : "中"}</button>`
+    : "";
+  const signIn = tr("nav.signin", "Sign in");
   $("top").innerHTML = `
     <a class="brand" href="${base || "./"}">DataVest</a>
     <nav class="site-nav" aria-label="Site">
       ${links.map(([k, href, label]) => `<a href="${href}"${k === active ? ' aria-current="page"' : ""}>${label}</a>`).join("")}
     </nav>
-    <div class="account" id="account"><a class="btn-quiet" href="${base}signin.html">Sign in</a></div>`;
+    ${langBtn}
+    <div class="account" id="account"><a class="btn-quiet" href="${base}signin.html">${signIn}</a></div>`;
+  if (i18n) $("lang").addEventListener("click", switchLang);
 
   onUser((user) => {
     const box = $("account");
     if (!user) {
-      box.innerHTML = `<a class="btn-quiet" href="${base}signin.html">Sign in</a>`;
+      box.innerHTML = `<a class="btn-quiet" href="${base}signin.html">${signIn}</a>`;
       return;
     }
     const first = (user.displayName || user.email || "You").split(" ")[0];
     const avatar = user.photoURL
       ? `<img class="avatar" src="${esc(user.photoURL)}" alt="" referrerpolicy="no-referrer">`
       : `<span class="avatar avatar-letter" aria-hidden="true">${esc(first[0])}</span>`;
-    box.innerHTML = `${avatar}<span class="who">${esc(first)}</span><button type="button" class="btn-quiet" id="sign-out">Sign out</button>`;
+    box.innerHTML = `${avatar}<span class="who">${esc(first)}</span><button type="button" class="btn-quiet" id="sign-out">${tr("nav.signout", "Sign out")}</button>`;
     $("sign-out").addEventListener("click", () => signOut());
   });
 }

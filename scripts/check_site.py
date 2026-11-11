@@ -16,6 +16,7 @@ OUT.mkdir(parents=True, exist_ok=True)
 
 PAGES = [
     ("markets", "", ["#chart", "#ddchart", "#rsichart"]),  # plus the 3D landscape, checked below
+    ("markets-zh", "?lang=zh", ["#chart", "#ddchart", "#rsichart"]),
     ("insights", "insights.html", ["#growth", "#scatter", "#rollcorr", "#mapchart", "#regchart"]),
     ("models", "models.html", ["#volchart", "#btchart"]),
     ("portfolio", "portfolio.html", ["#g-chart", "#f-chart"]),
@@ -48,7 +49,10 @@ with sync_playwright() as p:
             for sel in canvases:
                 if not page.evaluate(f"!!(window.Chart && Chart.getChart(document.querySelector('{sel}')))"):
                     errors.append(f"chart {sel} was not drawn")
-            if name == "markets":
+            if name == "markets-zh":
+                if page.evaluate("document.documentElement.lang") != "zh-HK" or "投資" not in page.inner_text("#m-story"):
+                    errors.append("Chinese version did not load")
+            if name in ("markets", "markets-zh"):
                 drawn = page.evaluate("""() => { const c = document.getElementById('surface'); if (!c || !c.width) return false;
                     const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
                     for (let i = 3; i < d.length; i += 4000) if (d[i] > 0) return true; return false; }""")
