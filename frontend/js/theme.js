@@ -1,14 +1,11 @@
 // Light / dark mode for the report-style pages.
-// Follows the device setting until the reader presses the sun/moon button; that choice is remembered.
+// Dark by default; the sun/moon button switches to light and the choice is remembered.
 // (A tiny inline script in each page's <head> applies a saved choice before the page paints.)
 
 const KEY = "datavest.theme";
 const handlers = [];
 
-export const isDark = () => {
-  const t = document.documentElement.dataset.theme;
-  return t ? t === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
-};
+export const isDark = () => document.documentElement.dataset.theme !== "light";
 
 /** Pages whose charts can redraw in place register here; other pages simply reload on a switch. */
 export function onThemeChange(fn) { handlers.push(fn); }
@@ -40,9 +37,6 @@ export function mountThemeButton(top) {
     try { localStorage.setItem(KEY, next); } catch { /* storage blocked */ }
     paint();
     changed();
-  });
-  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
-    if (!document.documentElement.dataset.theme) { paint(); changed(); }
   });
   top.insertBefore(b, top.querySelector("#account"));
   paint();

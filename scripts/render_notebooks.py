@@ -25,8 +25,8 @@ FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com">'
          '&family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&family=Noto+Sans+HK:wght@300;400;500;700&display=swap" rel="stylesheet">')
 # report look (same as the rest of the site) + saved light/dark choice applied before paint
 STYLE = ('<link rel="stylesheet" href="../styles.css"><link rel="stylesheet" href="../report.css">'
-         '<script>try { const t = localStorage.getItem("datavest.theme"); '
-         'if (t === "dark" || t === "light") document.documentElement.dataset.theme = t; } catch {}</script>')
+         '<script>let t = null; try { t = localStorage.getItem("datavest.theme"); } catch {} '
+         'document.documentElement.dataset.theme = t === "light" ? "light" : "dark";</script>')
 
 
 def hero(eyebrow: str, extra: str = "") -> str:

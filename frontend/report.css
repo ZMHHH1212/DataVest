@@ -535,4 +535,5 @@ html.report[lang="zh-HK"] {
 }
 html.report[lang="zh-HK"] .display, html.report[lang="zh-HK"] .two-tone, html.report[lang="zh-HK"] .hero-h1 { letter-spacing: -0.01em; line-height: 1.15; }
 .r-hero .lang { margin-left: auto; display: inline-grid; place-items: center; min-width: 2.25rem; height: 2.25rem; padding: 0 0.6rem; border-radius: 999px; font: 600 0.875rem/1 var(--body); }
-.r-hero .lang ~ .theme-btn { margin-left: 0.5rem; }
+.r-hero .lang ~ .theme-btn { margin-left: 0.35rem; }  /* language and light/dark sit together */
+.r-hero .lang ~ .theme-btn + .account { margin-left: 0.75rem; }
