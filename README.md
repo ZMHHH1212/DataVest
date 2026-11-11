@@ -38,6 +38,7 @@ Data-first order, so the data science and AI work sits at the centre.
 - [x] **Trading-desk redesign (Markets page)**: dark data-desk theme (`frontend/desk.css`), live ticker tape, animated price readout, risk dashboard with market phase from the HMM, and a dependency-free 3D volatility landscape (`frontend/js/surface3d.js`: drag to rotate, hover for values, keyboard controls); Traditional Chinese version (Hong Kong style, English finance terms kept) via the 中/EN button or `?lang=zh`, in `frontend/js/i18n.js`
 - **Insights redesign**: editorial report style (black opening with numbered chapters and draggable number stickers, mint lede with a line-art 3D drawdown landscape and data cards, framed chapters with dashboard-style chart windows); `frontend/report.css`, `frontend/js/report.js`
 - **Site-wide report style**: Models, Portfolio, Learn, Tools, Analysis and Sign-in share the Insights look (black opening with the page name, mint framed body, numbered dashboard windows) and light/dark mode (`frontend/js/theme.js`); content unchanged
+- **Home page opening**: glowing 3D particle sphere (drag to spin, dots drift from the mouse), own canvas code in `frontend/js/particles.js`, English and Chinese text
 - [ ] **v2 — AI tutor**: chat assistant grounded in DataVest's lessons and live numbers (RAG), on a free tier; project write-up
 
 ## Run it

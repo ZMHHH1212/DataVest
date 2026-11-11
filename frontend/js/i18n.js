@@ -33,6 +33,10 @@ const ZH = {
 
   // markets page: static
   "m.watchlist": "Watchlist",
+  "m.orbHint": "拖動可旋轉",
+  "m.orbTitle": "看清市場的<br>真實走勢",
+  "m.orbSub": "增長、起落和最大跌幅（Max drawdown），用淺白的語言解釋。",
+  "m.orbDesk": "打開 Dashboard", "m.orbLearn": "開始學習",
   "m.close": "收市 {date}",
   "m.addWatch": "加入 Watchlist", "m.inWatch": "已在 Watchlist",
   "m.sma50": "50 天線", "m.sma200": "200 天線",

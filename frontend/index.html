@@ -16,7 +16,21 @@
   <div class="tape" id="tape" aria-label="Latest market moves"></div>
   <header class="top" id="top"></header>
 
-  <div class="desk-grid">
+  <section class="orb-hero" aria-labelledby="orb-title">
+    <canvas id="orb" aria-hidden="true"></canvas>
+    <p class="orb-hint" aria-hidden="true" data-i18n="m.orbHint">Drag to spin</p>
+    <div class="orb-copy">
+      <p class="orb-brand">DataVest</p>
+      <h2 class="orb-title" id="orb-title" data-i18n="m.orbTitle">See how markets<br>really behave</h2>
+      <p class="orb-sub" data-i18n="m.orbSub">Growth, ups and downs, and the worst falls, explained in plain language.</p>
+    </div>
+    <div class="orb-actions">
+      <a class="orb-btn primary" href="#desk" data-i18n="m.orbDesk">Open the dashboard</a>
+      <a class="orb-btn" href="learn.html" data-i18n="m.orbLearn">Start learning</a>
+    </div>
+  </section>
+
+  <div class="desk-grid" id="desk">
     <nav class="panel watch" aria-label="Markets">
       <div class="panel-head"><h2>Watchlist</h2><span class="live" id="asof"></span></div>
       <div id="market-list"><p class="muted">Loading markets…</p></div>
