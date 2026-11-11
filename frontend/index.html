@@ -1,153 +1,100 @@
 <!doctype html>
-<html lang="en" class="desk">
+<html lang="en" class="report home">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>DataVest · Markets</title>
-  <meta name="description" content="See how markets really behave: growth, ups and downs, and the worst falls, explained in plain language.">
-  <meta name="theme-color" content="#0d1626">
+  <title>DataVest · Learn how markets really behave</title>
+  <meta name="description" content="DataVest is a free place to learn how money and markets work, using real prices from US and Hong Kong markets, explained in plain language.">
+  <meta name="theme-color" content="#06080c">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+HK:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Geist:wght@300..700&family=Geist+Mono:wght@400..600&family=Noto+Sans+HK:wght@300;400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="desk.css">
+  <link rel="stylesheet" href="report.css">
+  <script>try { const t = localStorage.getItem("datavest.theme"); if (t === "dark" || t === "light") document.documentElement.dataset.theme = t; } catch {}</script>
 </head>
 <body>
-  <div class="tape" id="tape" aria-label="Latest market moves"></div>
-  <header class="top" id="top"></header>
-
-  <section class="orb-hero" aria-labelledby="orb-title">
-    <canvas id="orb" aria-hidden="true"></canvas>
-    <p class="orb-hint" aria-hidden="true" data-i18n="m.orbHint">Drag to spin</p>
-    <div class="orb-copy">
-      <p class="orb-brand">DataVest</p>
-      <h2 class="orb-title" id="orb-title" data-i18n="m.orbTitle">See how markets<br>really behave</h2>
-      <p class="orb-sub" data-i18n="m.orbSub">Growth, ups and downs, and the worst falls, explained in plain language.</p>
-    </div>
-    <div class="orb-actions">
-      <a class="orb-btn primary" href="#desk" data-i18n="m.orbDesk">Open the dashboard</a>
-      <a class="orb-btn" href="learn.html" data-i18n="m.orbLearn">Start learning</a>
-    </div>
-  </section>
-
-  <div class="desk-grid" id="desk">
-    <nav class="panel watch" aria-label="Markets">
-      <div class="panel-head"><h2>Watchlist</h2><span class="live" id="asof"></span></div>
-      <div id="market-list"><p class="muted">Loading markets…</p></div>
-    </nav>
-
-    <main id="main" class="desk-main" aria-live="polite">
-      <section class="panel quote">
-        <div class="quote-head">
-          <div>
-            <p class="kicker" id="m-name">&nbsp;</p>
-            <p class="last" id="m-last">&nbsp;</p>
-          </div>
-          <button type="button" class="star" id="star" aria-pressed="false" hidden>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.8z"/></svg>
-            <span id="star-label" data-i18n="m.addWatch">Add to watchlist</span>
-          </button>
-        </div>
-        <p class="price-line" id="m-price"></p>
-        <h1 id="m-story">&nbsp;</h1>
-
-        <div class="toolbar">
-          <div class="ranges" role="group" aria-label="Time period">
-            <button type="button" data-range="1M">1M</button>
-            <button type="button" data-range="6M">6M</button>
-            <button type="button" data-range="1Y" aria-pressed="true">1Y</button>
-            <button type="button" data-range="5Y">5Y</button>
-          </div>
-          <div class="overlays" role="group" aria-label="Show on the chart">
-            <button type="button" class="key" data-overlay="sma50" aria-pressed="false"><i class="sw sw-50"></i><span data-i18n="m.sma50">50-day avg</span></button>
-            <button type="button" class="key" data-overlay="sma200" aria-pressed="false"><i class="sw sw-200"></i><span data-i18n="m.sma200">200-day avg</span></button>
-          </div>
-        </div>
-        <div class="chart-wrap price-wrap"><canvas id="chart" role="img" aria-label="Price chart"></canvas></div>
-        <details class="inline-help">
-          <summary data-i18n="m.maHelp">What is a moving average?</summary>
-          <p data-i18n="m.maHelpBody">A moving average is the average closing price over the last 50 or 200 trading days. It smooths out daily noise so the trend is easier to see. When the price sits above its 200-day average, the market is usually described as being in an uptrend. Treat crossings as descriptions of what has happened, not predictions.</p>
-        </details>
-      </section>
-
-      <div class="minis">
-        <section class="panel">
-          <div class="panel-head"><h2 data-i18n="m.ddTitle">Falls from the peak</h2></div>
-          <p class="chart-note" data-i18n="m.ddNote">How far below its previous high the price was. Zero means a new high.</p>
-          <div class="chart-wrap short"><canvas id="ddchart" role="img" aria-label="Drawdown chart"></canvas></div>
-        </section>
-        <section class="panel">
-          <div class="panel-head"><h2 data-i18n="m.rsiTitle">Momentum (RSI 14)</h2></div>
-          <p class="chart-note" id="rsi-note">Compares the size of recent gains with recent losses on a 0–100 scale.</p>
-          <div class="chart-wrap short"><canvas id="rsichart" role="img" aria-label="Relative Strength Index chart"></canvas></div>
-          <details class="inline-help">
-            <summary data-i18n="m.rsiHelp">How is RSI used?</summary>
-            <p data-i18n="m.rsiHelpBody">Above 70 is often called "overbought" and below 30 "oversold". These are rules of thumb: DataVest's own tests on the Models page found RSI signals no better than chance.</p>
-          </details>
-        </section>
+  <!-- opening: glowing particle sphere -->
+  <div class="r-hero orb-wrap">
+    <header class="top" id="top"></header>
+    <section class="orb-hero" aria-labelledby="orb-title">
+      <canvas id="orb" aria-hidden="true"></canvas>
+      <p class="orb-hint mono" aria-hidden="true" data-i18n="h.hint">Drag to spin</p>
+      <div class="orb-copy">
+        <p class="orb-brand">DataVest</p>
+        <h1 class="orb-title" id="orb-title" data-i18n="h.title">See how markets<br>really behave</h1>
+        <p class="orb-sub" data-i18n="h.sub">Growth, ups and downs, and the worst falls, explained in plain language.</p>
       </div>
-    </main>
-
-    <aside class="panel rail" aria-label="Risk dashboard">
-      <div class="panel-head"><h2 data-i18n="m.risk">Risk dashboard</h2><span class="muted small" id="rail-range"></span></div>
-      <article class="kpi" id="regime-tile" hidden>
-        <h3 data-i18n="m.phase">Market phase</h3>
-        <p class="figure" id="m-regime">–</p>
-        <p id="m-regime-text"></p>
-      </article>
-      <article class="kpi">
-        <h3 data-i18n="m.vol">Volatility</h3>
-        <p class="figure" id="vol-figure">–</p>
-        <p id="vol-text"></p>
-        <p class="forecast-line" id="vol-forecast" hidden></p>
-        <details><summary data-i18n="m.volHelp">What is volatility?</summary><p data-i18n="m.volHelpBody">How much the price jumps around, scaled to a year. Around 15–20% is normal for a broad stock index; single companies are often 30% or more.</p></details>
-      </article>
-      <article class="kpi">
-        <h3 data-i18n="m.worst">Worst fall</h3>
-        <p class="figure loss" id="dd-figure">–</p>
-        <p id="dd-text"></p>
-        <details><summary data-i18n="m.ddHelp">What is a drawdown?</summary><p data-i18n="m.ddHelpBody">The fall from a high point to the following low. The worst one answers: if you had bought at the worst moment, how far down would you have been?</p></details>
-      </article>
-      <article class="kpi">
-        <h3 data-i18n="m.cagr">Growth per year</h3>
-        <p class="figure" id="cagr-figure">–</p>
-        <p id="cagr-text"></p>
-        <details><summary data-i18n="m.cagrHelp">Why "per year"?</summary><p data-i18n="m.cagrHelpBody">The compound annual growth rate is the steady yearly rate that turns the start value into the end value. It hides the bumps, so read it next to volatility and the worst fall.</p></details>
-      </article>
-      <article class="kpi">
-        <h3 data-i18n="m.var">A bad day (95% VaR)</h3>
-        <p class="figure loss" id="var-figure">–</p>
-        <p id="var-text"></p>
-        <details><summary data-i18n="m.varHelp">What is Value at Risk?</summary><p data-i18n="m.varHelpBody">The daily fall that was beaten only on 1 day in 20. Expected shortfall is the average fall on those worst days.</p></details>
-      </article>
-    </aside>
-
-    <section class="panel surface-panel" aria-labelledby="sf-title">
-      <div class="panel-head">
-        <h2 id="sf-title" data-i18n="m.sfTitle">Volatility landscape (3D)</h2>
-        <div class="sf-tools">
-          <button type="button" class="tool" id="sf-out" aria-label="Zoom out" data-i18n-label="m.sfOut">−</button>
-          <button type="button" class="tool" id="sf-in" aria-label="Zoom in" data-i18n-label="m.sfIn">+</button>
-          <button type="button" class="tool" id="sf-spin" aria-pressed="true" data-i18n="m.sfSpin">Auto-rotate</button>
-          <button type="button" class="tool" id="sf-reset" data-i18n="m.sfReset">Reset view</button>
-        </div>
-      </div>
-      <p class="chart-note" id="sf-note">Each ridge is one market's 3-month volatility over five years: peaks are stormy periods. Drag to rotate, hover for values.</p>
-      <div class="sf-wrap">
-        <canvas id="surface" tabindex="0" role="img" aria-label="3D landscape of each market's volatility over time"></canvas>
-        <div class="sf-tip" id="sf-tip" hidden></div>
-        <div class="sf-scale" aria-hidden="true"><span data-i18n="m.calm">calm</span><i></i><span data-i18n="m.stormy">stormy</span></div>
+      <div class="orb-actions">
+        <a class="orb-btn primary" href="markets.html" data-i18n="h.openMarkets">Open the markets</a>
+        <a class="orb-btn" href="learn.html" data-i18n="h.startLearning">Start learning</a>
       </div>
     </section>
   </div>
 
-  <footer class="foot">
-    <p><span data-i18n="m.footer1">Prices from Yahoo Finance, updated every weekday. Returns use adjusted prices, which include dividends.</span> <span id="updated"></span></p>
+  <div class="r-body">
+    <main id="main" class="frame home-main">
+      <!-- what DataVest is -->
+      <section class="lede-x intro" aria-labelledby="intro-title">
+        <span class="tri l" aria-hidden="true"></span><span class="tri r" aria-hidden="true"></span>
+        <p class="ch-num mono" data-i18n="h.k0">00 / What is DataVest</p>
+        <h2 id="intro-title" class="display" data-i18n="h.introTitle"><span class="dim">A free place to learn</span> how money and markets really work.</h2>
+        <p class="art-note" data-i18n="h.intro">DataVest uses real prices from US and Hong Kong markets to teach investing in plain language. Every chart is calculated from data, every model is tested on data it has never seen, and nothing here is trying to sell you anything.</p>
+        <dl class="stat-strip" id="stats">
+          <div><dt data-i18n="h.sMarkets">Markets tracked</dt><dd id="s-markets">–</dd></div>
+          <div><dt data-i18n="h.sStocks">Stocks studied</dt><dd id="s-stocks">–</dd></div>
+          <div><dt data-i18n="h.sYears">Years of prices</dt><dd>5</dd></div>
+          <div><dt data-i18n="h.sLessons">Lessons</dt><dd id="s-lessons">–</dd></div>
+          <div><dt data-i18n="h.sUpdated">Last update</dt><dd id="s-updated">–</dd></div>
+        </dl>
+      </section>
+
+      <!-- philosophy -->
+      <section class="chapter" id="philosophy" aria-labelledby="ph-title">
+        <div class="ch-head">
+          <div>
+            <p class="ch-num mono" data-i18n="h.k1">01 / Philosophy</p>
+            <h2 id="ph-title" class="two-tone" data-i18n="h.phTitle"><span>What we</span> believe</h2>
+          </div>
+          <p class="chart-note" data-i18n="h.phNote">Five ideas shape every page on DataVest. They are also a good way to think about money in general.</p>
+        </div>
+        <ol class="principles">
+          <li class="window"><span class="p-num mono">01</span><h3 data-i18n="h.p1t">Data before opinion</h3><p data-i18n="h.p1">Every claim on this site comes from real prices you can check. If the data doesn't support something, we don't say it.</p></li>
+          <li class="window"><span class="p-num mono">02</span><h3 data-i18n="h.p2t">Say it plainly</h3><p data-i18n="h.p2">Finance is full of jargon. Each idea is explained in everyday words first, then given its proper name.</p></li>
+          <li class="window"><span class="p-num mono">03</span><h3 data-i18n="h.p3t">Test, then trust</h3><p data-i18n="h.p3">Models are judged on data they never saw. When something fails, like the RSI signals on the Models page, we show that too.</p></li>
+          <li class="window"><span class="p-num mono">04</span><h3 data-i18n="h.p4t">Risk is half the story</h3><p data-i18n="h.p4">Growth always comes with falls. Every market is shown with its worst drop and how bumpy the ride was, not just its return.</p></li>
+          <li class="window"><span class="p-num mono">05</span><h3 data-i18n="h.p5t">Learning, not advice</h3><p data-i18n="h.p5">DataVest is free and sells nothing. It is here to help you think for yourself, not to tell you what to buy.</p></li>
+        </ol>
+      </section>
+
+      <!-- explore -->
+      <section class="chapter" id="explore" aria-labelledby="ex-title">
+        <div class="ch-head">
+          <div>
+            <p class="ch-num mono" data-i18n="h.k2">02 / Explore</p>
+            <h2 id="ex-title" class="two-tone" data-i18n="h.exTitle"><span>Where to</span> start</h2>
+          </div>
+          <p class="chart-note" data-i18n="h.exNote">New to investing? Start with Learn. Curious about the numbers? Open Markets or Insights.</p>
+        </div>
+        <div class="explore">
+          <a class="window go" href="markets.html"><span class="mono" data-i18n="nav.markets">Markets</span><p data-i18n="h.e1">See how markets really behave: growth, ups and downs, and the worst falls, explained in plain language.</p><i aria-hidden="true">→</i></a>
+          <a class="window go" href="insights.html"><span class="mono" data-i18n="nav.insights">Insights</span><p data-i18n="h.e2">US vs Hong Kong markets over five years: growth, risk and how closely they move together.</p><i aria-hidden="true">→</i></a>
+          <a class="window go" href="models.html"><span class="mono" data-i18n="nav.models">Models</span><p data-i18n="h.e3">Can we forecast next month's market risk, and does the RSI indicator really work? Tested out of sample.</p><i aria-hidden="true">→</i></a>
+          <a class="window go" href="portfolio.html"><span class="mono" data-i18n="nav.portfolio">Portfolio</span><p data-i18n="h.e4">Build a practice portfolio from real markets and see how it would have done.</p><i aria-hidden="true">→</i></a>
+          <a class="window go" href="learn.html"><span class="mono" data-i18n="nav.learn">Learn</span><p data-i18n="h.e5">Lessons on money and stock investing, from budgeting to valuation and behavioural finance, with real data, tools and quizzes.</p><i aria-hidden="true">→</i></a>
+          <a class="window go" href="tools.html"><span class="mono" data-i18n="nav.tools">Tools</span><p data-i18n="h.e6">Free calculators: watch savings grow, plan for a goal, see the cost of waiting, and split your pay.</p><i aria-hidden="true">→</i></a>
+          <a class="window go" href="analysis/"><span class="mono" data-i18n="nav.analysis">Analysis</span><p data-i18n="h.e7">The research behind DataVest: full studies with code, re-run with fresh data every weekday.</p><i aria-hidden="true">→</i></a>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer class="foot r-foot">
+    <p class="wordmark" aria-hidden="true">DataVest</p>
     <p data-i18n="m.footer2">DataVest is a learning project. Nothing here is financial advice, and past performance does not predict future results.</p>
     <p class="credit" data-i18n="m.credit">Built by ZMH</p>
   </footer>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-  <script type="module" src="js/markets.js"></script>
+  <script type="module" src="js/home.js"></script>
 </body>
 </html>

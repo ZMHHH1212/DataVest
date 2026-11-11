@@ -446,3 +446,84 @@ html.report body { background: var(--paper); color: var(--ink); font-family: var
   .r-body .nb-layout { grid-template-columns: 1fr; }
   .auto > .block { margin-left: 0; margin-right: 0; }
 }
+
+/* ======================================================================================
+   Home page: particle sphere opening, intro with live numbers, philosophy, explore cards
+   ====================================================================================== */
+.orb-wrap { padding-bottom: 0; }
+.orb-hero { position: relative; height: clamp(500px, 82vh, 760px); overflow: hidden;
+  background: radial-gradient(ellipse 70% 80% at 62% 48%, rgba(56, 120, 220, 0.16) 0%, rgba(20, 40, 80, 0.08) 40%, transparent 75%); }
+.orb-hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; cursor: grab; touch-action: pan-y; }
+.orb-hero canvas:active { cursor: grabbing; }
+.orb-hero::after { /* shade under the words */
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(to top, rgba(6, 8, 12, 0.85) 0%, rgba(6, 8, 12, 0.35) 32%, transparent 55%);
+}
+.orb-copy, .orb-actions, .orb-hint { z-index: 1; }
+.orb-copy { position: absolute; left: clamp(1.25rem, 4vw, 3.5rem); bottom: clamp(2rem, 8vh, 4.5rem); max-width: 46rem; pointer-events: none; }
+.orb-brand { margin: 0 0 1.1rem; font: 600 1.375rem/1 var(--display); letter-spacing: -0.02em; color: #f4f6fa; }
+.orb-title { margin: 0; font: 300 clamp(1.8rem, 4.4vw, 3.75rem)/1.16 var(--body); letter-spacing: 0.2em; text-transform: uppercase; color: #eef2f8; }
+html[lang="zh-HK"] .orb-title { letter-spacing: 0.12em; font-family: "Noto Sans HK", var(--body); font-weight: 400; }
+.orb-sub { margin: 1.1rem 0 0; max-width: 34rem; color: #9aa6b8; font-size: 1.0625rem; }
+.orb-actions { position: absolute; right: clamp(1.25rem, 4vw, 3.5rem); bottom: clamp(2rem, 8vh, 4.5rem); display: flex; gap: 0.6rem; }
+.orb-btn {
+  padding: 0.75rem 1.15rem; border-radius: 6px;
+  border: 1px solid rgba(219, 230, 245, 0.16); background: rgba(219, 230, 245, 0.06);
+  color: #e6ecf5; font: 500 0.9375rem/1 var(--body); text-decoration: none; backdrop-filter: blur(6px);
+}
+.orb-btn:hover { background: rgba(219, 230, 245, 0.13); }
+.orb-btn.primary { background: #38bdf8; border-color: transparent; color: #04121c; }
+.orb-btn.primary:hover { filter: brightness(1.08); }
+.orb-hint { position: absolute; right: clamp(1.25rem, 4vw, 3.5rem); top: 1.25rem; margin: 0; font-size: 0.75rem; color: #7d8aa0; pointer-events: none; }
+
+.home-main .intro { padding-left: clamp(1rem, 3vw, 2.5rem); padding-right: clamp(1rem, 3vw, 2.5rem); }
+.home-main .intro .ch-num { margin-bottom: 1.25rem; }
+.home-main .intro .display { max-width: 20ch; }
+.home-main .intro .art-note { max-width: 40rem; margin-top: 1.5rem; font-size: 1.0625rem; }
+.stat-strip {
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin: clamp(2rem, 5vw, 3rem) 0 0; border-top: 1px solid var(--ink); text-align: left;
+}
+.stat-strip > div { padding: 1rem 1.25rem 0.5rem 0; }
+.stat-strip > div + div { padding-left: 1.25rem; border-left: 1px solid var(--rule); }
+.stat-strip dt { font: 500 0.6875rem/1.2 var(--mono); color: var(--ink-soft); letter-spacing: 0.02em; }
+.stat-strip dd { margin: 0.5rem 0 0; font: 700 clamp(1.75rem, 3.4vw, 2.75rem)/1 var(--display); letter-spacing: -0.03em; }
+
+.principles { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 1rem; }
+.principles .window { padding: 1.25rem 1.25rem 1.4rem; }
+.p-num { display: inline-block; font-size: 0.6875rem; color: var(--accent); padding: 0.2rem 0.45rem; border: 1px solid currentColor; border-radius: 4px; }
+.principles h3 { margin: 1rem 0 0.5rem; font: 700 1.375rem/1.15 var(--display); letter-spacing: -0.025em; }
+.principles p { margin: 0; color: var(--ink-soft); line-height: 1.55; }
+
+.explore { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1rem; }
+.window.go { position: relative; display: block; padding: 1.15rem 2.75rem 1.25rem 1.25rem; text-decoration: none; color: var(--ink); transition: transform 0.2s, border-color 0.2s; }
+.window.go .mono { font-size: 0.75rem; color: var(--accent); }
+.window.go p { margin: 0.5rem 0 0; color: var(--ink-soft); font-size: 0.9375rem; line-height: 1.5; }
+.window.go i { position: absolute; right: 1.1rem; top: 1rem; font-style: normal; color: var(--ink-soft); transition: transform 0.2s, color 0.2s; }
+.window.go:hover { transform: translateY(-2px); border-color: var(--accent); }
+.window.go:hover i { transform: translateX(3px); color: var(--accent); }
+
+@media (max-width: 760px) {
+  .orb-hero { height: 580px; }
+  .orb-copy { bottom: 6rem; right: clamp(1.25rem, 4vw, 3.5rem); }
+  .orb-actions { left: clamp(1.25rem, 4vw, 3.5rem); right: auto; bottom: 1.75rem; }
+  .stat-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stat-strip > div, .stat-strip > div + div { padding: 0.9rem 0.75rem 0.6rem 0; border-left: 0; border-bottom: 1px solid var(--rule); }
+}
+
+/* ======================================================================================
+   Markets: the trading desk recoloured with the report palette (light and dark)
+   ====================================================================================== */
+html.report.desk { --panel: var(--paper-raised); --panel-line: var(--edge); --amber: #c47a06; }
+@media (prefers-color-scheme: dark) { html.report.desk:not([data-theme="light"]) { --amber: #f2a93b; } }
+html.report.desk[data-theme="dark"] { --amber: #f2a93b; }
+html.report.desk body { font-size: 0.9375rem; }
+.report .brand::before { display: none; }
+.r-hero .tape { background: transparent; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+.r-hero .tape .t-sym { color: #7d8aa0; }
+.r-hero .tape .t-px { color: #e6ecf5; }
+.report.desk .page-hero { padding-bottom: clamp(1.75rem, 4vw, 2.75rem); }
+.report.desk .r-body > .desk-grid { padding-top: clamp(1.5rem, 4vw, 2.5rem); padding-bottom: clamp(2rem, 5vw, 3rem); }
+.report.desk .panel { border-radius: 12px; box-shadow: var(--shadow); }
+@media (min-width: 1150px) { .principles { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+#s-updated { font-size: clamp(1.25rem, 2.2vw, 1.75rem); line-height: 1.15; }

@@ -2,7 +2,6 @@
 import { onWatchlist, getWatchlist, isWatched, toggleWatch } from "./auth.js";
 import { $, css, pct, money, fmtDate, fmtMonth, priceText, getJSON, esc, renderTopBar, chartDefaults, crosshair } from "./common.js";
 import { mountSurface } from "./surface3d.js";
-import { mountSphere } from "./particles.js";
 import { t as tr, isZh, applyStatic, marketName, marketShort, dateText } from "./i18n.js";
 
 const SHORT = { "^GSPC": "S&P 500", "^IXIC": "Nasdaq", "^HSI": "Hang Seng", SPY: "SPY", "2800.HK": "Tracker 2800", "0700.HK": "Tencent", "0005.HK": "HSBC" };
@@ -378,10 +377,6 @@ async function select(symbol) {
 async function init() {
   renderTopBar("markets", "", { i18n: true });
   applyStatic();
-  if ($("orb")) {
-    const small = window.matchMedia("(max-width: 760px)").matches;
-    mountSphere($("orb"), { count: small ? 4500 : 9000, cx: small ? 0.5 : 0.6, cy: small ? 0.36 : 0.5, size: small ? 0.4 : 0.36 });
-  }
   chartDefaults();
   document.querySelectorAll(".ranges button").forEach((b) =>
     b.addEventListener("click", () => { state.range = b.dataset.range; renderDetail(); })

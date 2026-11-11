@@ -73,7 +73,7 @@
       $("panel").innerHTML = `
         <h2>You're signed in</h2>
         <p>Signed in as <strong>${esc(user.email || user.displayName)}</strong>. Star any market to add it to your watchlist.</p>
-        <p class="actions"><a class="btn" href="./">Go to markets</a><button type="button" class="btn-quiet" id="out">Sign out</button></p>`;
+        <p class="actions"><a class="btn" href="markets.html">Go to markets</a><button type="button" class="btn-quiet" id="out">Sign out</button></p>`;
       $("out").addEventListener("click", () => signOut().then(() => location.reload()));
     });
   </script>

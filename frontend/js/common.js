@@ -32,7 +32,7 @@ export function renderTopBar(active, base = "", { i18n = false } = {}) {
   // Chinese navigation only on pages that are translated (opted in with i18n: true)
   const tr = (key, en) => (i18n ? t(key, en) : en);
   const links = [
-    ["markets", base || "./", tr("nav.markets", "Markets")],
+    ["markets", `${base}markets.html`, tr("nav.markets", "Markets")],
     ["insights", `${base}insights.html`, tr("nav.insights", "Insights")],
     ["models", `${base}models.html`, tr("nav.models", "Models")],
     ["portfolio", `${base}portfolio.html`, tr("nav.portfolio", "Portfolio")],

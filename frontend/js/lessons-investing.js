@@ -71,7 +71,7 @@ export const INVESTING = [
         <tr><td>Upside</td><td>Unlimited if the company grows</td><td>Limited, behaves more like a bond</td></tr>
       </table>
       <h3>Why invest in shares at all?</h3>
-      <p>Over long periods, shares have historically grown faster than cash and bonds, because owners share in company profits and growth. The price for that is volatility: shares can fall a lot, sometimes for years. The <a href="./">Markets</a> page shows real worst falls.</p>
+      <p>Over long periods, shares have historically grown faster than cash and bonds, because owners share in company profits and growth. The price for that is volatility: shares can fall a lot, sometimes for years. The <a href="markets.html">Markets</a> page shows real worst falls.</p>
       <h3>Primary and secondary markets</h3>
       <p>In the <b>primary market</b> a company sells new shares to raise money, for example through an initial public offering (IPO). This is the only time the company itself receives the money. Afterwards, investors trade those shares with each other in the <b>secondary market</b>, the stock exchange. Hong Kong's exchange is run by HKEX, with a Main Board for established companies and GEM for smaller ones.</p>
       <h3>Trading in Hong Kong: the basics</h3>
