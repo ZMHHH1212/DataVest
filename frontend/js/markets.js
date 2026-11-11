@@ -1,6 +1,13 @@
 // Markets page: list of markets, price + drawdown charts, plain-language lessons.
 import { onWatchlist, getWatchlist, isWatched, toggleWatch } from "./auth.js";
 import { $, css, pct, money, fmtDate, fmtMonth, priceText, getJSON, esc, renderTopBar, chartDefaults, crosshair } from "./common.js";
+import { mountSurface } from "./surface3d.js";
+
+const SHORT = { "^GSPC": "S&P 500", "^IXIC": "Nasdaq", "^HSI": "Hang Seng", SPY: "SPY", "2800.HK": "Tracker 2800", "0700.HK": "Tencent", "0005.HK": "HSBC" };
+const shortName = (t) => SHORT[t.symbol] || t.name;
+let regimes = {};
+let surface = null;
+let lastShown = null;
 
 const RANGES = { "1M": 1, "6M": 6, "1Y": 12, "5Y": 60 }; // months
 const RANGE_WORDS = { "1M": "a month ago", "6M": "6 months ago", "1Y": "a year ago", "5Y": "5 years ago" };
@@ -112,6 +119,10 @@ function renderDetail() {
   const up = m.growth >= 1;
 
   $("m-name").textContent = `${t.name} (${t.symbol})`;
+  renderLast(t);
+  renderRegime(t);
+  surface?.setHighlight(shortName(t));
+  $("rail-range").textContent = { "1M": "last month", "6M": "last 6 months", "1Y": "last year", "5Y": "last 5 years" }[state.range];
   $("m-story").innerHTML = `$100 invested ${RANGE_WORDS[state.range]} is now worth <span class="amount ${up ? "" : "down"}">$${money(100 * m.growth)}</span>.`;
   const last = state.series[state.series.length - 1];
   const day = t.last / t.prev - 1;
@@ -266,6 +277,84 @@ function drawRsi(rsiData) {
   });
 }
 
+// Big price readout with a short count animation when switching markets
+function renderLast(t) {
+  const el = $("m-last");
+  if (!el) return;
+  const target = t.last;
+  const ccy = t.is_index ? "pts" : t.currency || "";
+  const fmt = (v) => v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  if (lastShown === t.symbol) return;
+  lastShown = t.symbol;
+  if (reduce) { el.innerHTML = `${fmt(target)}<span class="ccy">${esc(ccy)}</span>`; return; }
+  const start = performance.now(), from = target * 0.97;
+  const step = (now) => {
+    const k = Math.min((now - start) / 450, 1), e = 1 - (1 - k) ** 3;
+    el.innerHTML = `${fmt(from + (target - from) * e)}<span class="ccy">${esc(ccy)}</span>`;
+    if (k < 1 && lastShown === t.symbol) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+  el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash");
+}
+
+function renderRegime(t) {
+  const r = regimes[t.symbol];
+  $("regime-tile").hidden = !r;
+  if (!r) return;
+  const p = r.today_p_turbulent, storm = p > 0.5;
+  $("m-regime").textContent = storm ? "Stormy" : "Calm";
+  $("m-regime").className = `figure ${storm ? "storm" : "calm"}`;
+  const [calm, st] = r.states;
+  $("m-regime-text").textContent = `${Math.round((storm ? p : 1 - p) * 100)}% probability, from a Hidden Markov Model. Calm phases swing about ±${Math.round(calm.volatility * 100)}% a year, stormy ones ±${Math.round(st.volatility * 100)}%.`;
+}
+
+function renderTape() {
+  const item = (t) => {
+    const day = t.last / t.prev - 1;
+    return `<button type="button" data-symbol="${esc(t.symbol)}"><span class="t-sym">${esc(shortName(t))}</span><span class="t-px">${t.last.toLocaleString("en-US", { maximumFractionDigits: 2 })}</span><span class="${day >= 0 ? "up" : "down"}">${day >= 0 ? "▲" : "▼"} ${Math.abs(day * 100).toFixed(2)}%</span></button>`;
+  };
+  const once = state.tickers.map(item).join("");
+  $("tape").innerHTML = `<div class="tape-track">${once}${once.replace(/<button /g, '<button tabindex="-1" aria-hidden="true" ')}</div>`;
+  $("tape").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => select(b.dataset.symbol)));
+}
+
+function initSurface(ins) {
+  const rv = ins?.rolling_vol;
+  if (!rv || !$("surface")) { document.querySelector(".surface-panel")?.setAttribute("hidden", ""); return; }
+  const keep = rv.dates.map((_, i) => i).filter((i) => i % 2 === 0);
+  const rows = state.tickers
+    .filter((t) => rv.series[t.symbol])
+    .map((t) => ({ label: shortName(t), values: keep.map((i) => rv.series[t.symbol][i]) }));
+  const dates = keep.map((i) => rv.dates[i]);
+  // start where every market has data
+  const first = dates.findIndex((_, c) => rows.every((r) => r.values[c] != null));
+  const trimmed = rows.map((r) => ({ ...r, values: r.values.slice(Math.max(first, 0)) }));
+  const spinBtn = $("sf-spin");
+  surface = mountSurface($("surface"), $("sf-tip"), {
+    rows: trimmed,
+    dates: dates.slice(Math.max(first, 0)),
+    formatDate: (d) => `week of ${fmtDate(d)}`,
+    font: css("--mono"),
+    colors: { ink: css("--ink"), soft: css("--ink-soft"), line: css("--rule"), amber: css("--amber") },
+    highlight: state.current ? shortName(state.current) : null,
+    onSpin: (on) => spinBtn.setAttribute("aria-pressed", String(on)),
+  });
+  if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) spinBtn.setAttribute("aria-pressed", "false");
+  $("sf-in").addEventListener("click", () => surface.zoom(1.15));
+  $("sf-out").addEventListener("click", () => surface.zoom(1 / 1.15));
+  $("sf-reset").addEventListener("click", () => surface.reset());
+  spinBtn.addEventListener("click", () => {
+    const on = spinBtn.getAttribute("aria-pressed") !== "true";
+    spinBtn.setAttribute("aria-pressed", String(on));
+    surface.spin(on);
+  });
+  // where was it stormiest?
+  let best = null;
+  trimmed.forEach((r) => r.values.forEach((v, c) => { if (v != null && (!best || v > best.v)) best = { v, label: r.label, c }; }));
+  if (best) $("sf-note").textContent = `Each market's 3-month volatility over the last five years, one ridge per market: peaks are stormy periods. The highest peak is ${best.label} around ${fmtDate(dates.slice(Math.max(first, 0))[best.c])} (±${Math.round(best.v * 100)}% a year). Drag to rotate, hover for values.`;
+}
+
 async function select(symbol) {
   const t = state.tickers.find((x) => x.symbol === symbol) || state.tickers[0];
   state.current = t;
@@ -295,8 +384,14 @@ async function init() {
     state.tickers = meta.tickers;
     if (!state.tickers.length) throw new Error("no tickers");
     $("updated").textContent = `Last updated ${new Date(meta.generated_at).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}.`;
-    try { forecasts = (await getJSON("data/models.json")).forecasts || {}; } catch { forecasts = {}; }
+    const lastDate = state.tickers.map((t) => t.last_date).sort().at(-1);
+    if ($("asof")) $("asof").textContent = `Close ${fmtDate(lastDate)}`;
+    if ($("tape")) renderTape();
+    const [models, patterns, ins] = await Promise.all(["data/models.json", "data/patterns.json", "data/insights.json"].map((u) => getJSON(u).catch(() => null)));
+    forecasts = models?.forecasts || {};
+    regimes = patterns?.regimes || {};
     await select(decodeURIComponent(location.hash.slice(1)) || "^HSI");
+    if ($("surface")) initSurface(ins);
     onWatchlist(() => { renderList(); renderStar(); });
   } catch (err) {
     console.error(err);

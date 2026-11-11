@@ -15,7 +15,7 @@ OUT = Path(sys.argv[2] if len(sys.argv) > 2 else "screenshots")
 OUT.mkdir(parents=True, exist_ok=True)
 
 PAGES = [
-    ("markets", "", ["#chart", "#ddchart", "#rsichart"]),
+    ("markets", "", ["#chart", "#ddchart", "#rsichart"]),  # plus the 3D landscape, checked below
     ("insights", "insights.html", ["#growth", "#scatter", "#rollcorr", "#mapchart", "#regchart"]),
     ("models", "models.html", ["#volchart", "#btchart"]),
     ("portfolio", "portfolio.html", ["#g-chart", "#f-chart"]),
@@ -48,6 +48,12 @@ with sync_playwright() as p:
             for sel in canvases:
                 if not page.evaluate(f"!!(window.Chart && Chart.getChart(document.querySelector('{sel}')))"):
                     errors.append(f"chart {sel} was not drawn")
+            if name == "markets":
+                drawn = page.evaluate("""() => { const c = document.getElementById('surface'); if (!c || !c.width) return false;
+                    const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+                    for (let i = 3; i < d.length; i += 4000) if (d[i] > 0) return true; return false; }""")
+                if not drawn:
+                    errors.append("3D volatility landscape was not drawn")
             if name == "markets" and label == "desktop":
                 page.click("[data-range='5Y']")
                 page.click("[data-overlay=sma50]")
