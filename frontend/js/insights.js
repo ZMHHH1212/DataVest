@@ -87,12 +87,64 @@ function starPoints(n, R, r) {
   return pts.join(" ");
 }
 
+// ---- light / dark ---------------------------------------------------------------------
+let surface = null;
+const THEME_KEY = "datavest.theme";
+const isDark = () => {
+  const t = document.documentElement.dataset.theme;
+  return t ? t === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+};
+const SUN = `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>`;
+const MOON = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>`;
+
+function themeButton() {
+  const b = document.createElement("button");
+  b.type = "button";
+  b.className = "btn-quiet theme-btn";
+  b.id = "theme";
+  const paint = () => {
+    const dark = isDark();
+    b.innerHTML = dark ? SUN : MOON;
+    b.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
+    b.title = b.getAttribute("aria-label");
+  };
+  b.addEventListener("click", () => {
+    const next = isDark() ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem(THEME_KEY, next); } catch { /* storage blocked */ }
+    paint();
+    redraw();
+  });
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+    if (!document.documentElement.dataset.theme) { paint(); redraw(); }
+  });
+  $("top").insertBefore(b, $("account"));
+  paint();
+}
+
+// Charts read their colours when drawn, so a theme change redraws them.
+function redraw() {
+  if (!data) return;
+  Object.values(Chart.instances).forEach((c) => c.destroy());
+  growthChart = null;
+  regChart = null;
+  chartDefaults();
+  Chart.defaults.font.family = css("--body");
+  try { lineArt(); } catch (e) { console.error(e); }
+  growth();
+  scatter();
+  rollingCorr();
+  marketMap();
+  regimes();
+}
+
 // ---- line-art landscape: how far each market sat below its previous high ---------------
 function lineArt() {
   const g = data.growth;
   const syms = data.symbols.filter((s) => g.series[s]);
   const rows = syms.map((s) => ({ label: short(s), values: drawdownSeries(g.series[s]).map((v) => (v == null ? null : -v)) }));
-  mountSurface($("lineart"), $("lineart-tip"), {
+  surface?.destroy();
+  surface = mountSurface($("lineart"), $("lineart-tip"), {
     rows, dates: g.dates, mode: "line",
     ...(window.matchMedia("(max-width: 760px)").matches ? { zoom: 0.72, shift: 0.08 } : {}),
     formatDate: (iso) => fmtDate(iso),
@@ -397,6 +449,7 @@ function regimes() {
 
 async function init() {
   renderTopBar("insights");
+  themeButton();
   chartDefaults();
   Chart.defaults.font.family = css("--body");
   try {

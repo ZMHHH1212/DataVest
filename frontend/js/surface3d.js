@@ -243,6 +243,15 @@ export function mountSurface(canvas, tip, opts) {
     zoom(f) { view.zoom = Math.min(2.2, Math.max(0.6, view.zoom * f)); draw(); },
     spin(on) { view.spin = on; },
     reset() { Object.assign(view, home); draw(); },
-    destroy() { cancelAnimationFrame(raf); ro.disconnect(); },
+    destroy() {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+      canvas.removeEventListener("pointerdown", onDown);
+      canvas.removeEventListener("pointermove", onMove);
+      canvas.removeEventListener("pointerup", onUp);
+      canvas.removeEventListener("pointerleave", onLeave);
+      canvas.removeEventListener("keydown", onKey);
+      tip.hidden = true;
+    },
   };
 }

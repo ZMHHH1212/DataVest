@@ -22,9 +22,36 @@ html.report {
   --body: "Geist", system-ui, sans-serif;
   --mono: "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
   --gutter: clamp(1rem, 4vw, 3rem);
+  --edge: rgba(15, 18, 13, 0.08);
+  --shadow: 0 1px 2px rgba(15, 18, 13, 0.05), 0 18px 40px -18px rgba(30, 50, 20, 0.22);
   color-scheme: light;
   scroll-behavior: smooth;
 }
+
+/* Dark mode: follows the device unless the reader picked a theme with the button (data-theme on <html>).
+   The opening and footer are black in both; the mint paper turns into a deep green-black. */
+@media (prefers-color-scheme: dark) {
+  html.report:not([data-theme="light"]) {
+    --paper: #0f1611; --paper-raised: #172019; --ink: #e2ebdc; --ink-soft: #9ba795; --dim: #6f7d69; --rule: #2b3829;
+    --jade: #3fbfa8; --cinnabar: #ef7a63;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --div-pos: #3987e5; --div-neg: #d95926;
+    --edge: rgba(226, 235, 220, 0.08);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 18px 40px -18px rgba(0, 0, 0, 0.7);
+    color-scheme: dark;
+  }
+}
+html.report[data-theme="dark"] {
+  --paper: #0f1611; --paper-raised: #172019; --ink: #e2ebdc; --ink-soft: #9ba795; --dim: #6f7d69; --rule: #2b3829;
+  --jade: #3fbfa8; --cinnabar: #ef7a63;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --div-pos: #3987e5; --div-neg: #d95926;
+  --edge: rgba(226, 235, 220, 0.08);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 18px 40px -18px rgba(0, 0, 0, 0.7);
+  color-scheme: dark;
+}
+.r-hero .theme-btn { margin-left: auto; }
+.r-hero .theme-btn + .account { margin-left: 0; }
+.r-hero .theme-btn { display: inline-grid; place-items: center; width: 2.25rem; height: 2.25rem; padding: 0; border-radius: 50%; }
+.theme-btn svg { width: 1.05rem; height: 1.05rem; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
 @media (prefers-reduced-motion: reduce) { html.report { scroll-behavior: auto; } }
 html.report body { background: var(--paper); color: var(--ink); font-family: var(--body); }
 .report .mono { font-family: var(--mono); letter-spacing: 0.02em; }
@@ -245,17 +272,17 @@ html.report body { background: var(--paper); color: var(--ink); font-family: var
 
 .window {
   background: var(--paper-raised);
-  border: 1px solid rgba(15, 18, 13, 0.08);
+  border: 1px solid var(--edge);
   border-radius: 10px;
   padding: 0 1.25rem 1.25rem;
-  box-shadow: 0 1px 2px rgba(15, 18, 13, 0.05), 0 18px 40px -18px rgba(30, 50, 20, 0.22);
+  box-shadow: var(--shadow);
   min-width: 0;
 }
 .win-bar {
   display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem 1rem;
   margin: 0 -1.25rem 1rem;
   padding: 0.7rem 1.25rem;
-  border-bottom: 1px solid rgba(15, 18, 13, 0.08);
+  border-bottom: 1px solid var(--edge);
 }
 .win-bar > .mono, .win-bar h3.mono { margin: 0; font-size: 0.6875rem; font-weight: 500; color: var(--ink-soft); }
 .win-bar > .mono::before, .win-bar h3.mono::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 0.55rem; border-radius: 50%; background: var(--k3); vertical-align: 0.05em; }
@@ -272,7 +299,7 @@ html.report body { background: var(--paper); color: var(--ink); font-family: var
 .report .stats { font-variant-numeric: tabular-nums; }
 .report .stats th { font-family: var(--mono); font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.02em; color: var(--ink-soft); }
 .report .stats td.num { font-family: var(--mono); font-size: 0.875rem; }
-.report .groups .group { background: var(--paper-raised); border: 1px solid rgba(15, 18, 13, 0.08); border-radius: 10px; padding: 0.9rem 1rem; }
+.report .groups .group { background: var(--paper-raised); border: 1px solid var(--edge); border-radius: 10px; padding: 0.9rem 1rem; }
 .report .groups { display: grid; gap: 0.75rem; }
 .report .groups > .chart-note { margin: 0 0 0.25rem; color: var(--ink-soft); }
 .report .chips span { background: var(--paper); }
