@@ -77,7 +77,7 @@ html.report body { background: var(--paper); color: var(--ink); font-family: var
 .eyebrow { margin: 0 0 1rem; font-size: 0.75rem; color: #a3a39e; }
 .mega {
   margin: 0;
-  font: 800 clamp(4.5rem, 17vw, 15rem)/0.86 var(--display);
+  font: 800 clamp(3.25rem, 15vw, 14rem)/0.9 var(--display);
   font-stretch: 125%;
   letter-spacing: -0.045em;
   background: linear-gradient(90deg, #ffffff 0%, #ffffff 55%, #a9a9a4 100%);
@@ -85,8 +85,8 @@ html.report body { background: var(--paper); color: var(--ink); font-family: var
   background-clip: text;
   color: transparent;
   user-select: none;
+  padding-bottom: 0.12em; /* room for the g's tail: text clipping ends at the box edge */
 }
-.mega .vs { font-weight: 400; font-stretch: 100%; font-size: 0.42em; vertical-align: 0.55em; letter-spacing: -0.02em; -webkit-text-fill-color: #8d8d88; }
 .hero-sub { margin: clamp(1.75rem, 4vw, 2.75rem) auto 0; max-width: 34rem; font-size: 1.0625rem; color: #d7d7d2; }
 .hero-sub b { color: #fff; }
 .scroll { margin: 1.25rem 0 0; font-size: 0.75rem; }
@@ -205,23 +205,6 @@ html.report body { background: var(--paper); color: var(--ink); font-family: var
 .callout.box p { margin: 0; }
 .callout.box p:nth-child(odd) { color: var(--ink-soft); }
 .callout.box p:nth-child(3) { margin-top: 0.55rem; padding-top: 0.55rem; border-top: 1.5px dashed var(--ink); }
-.callout.card {
-  right: 0; top: 0;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.85rem 1rem;
-  min-width: 17rem;
-  background: var(--paper-raised);
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05), 0 10px 30px rgba(30, 50, 20, 0.12);
-}
-.badge { display: grid; place-items: center; width: 2.25rem; height: 2.25rem; border-radius: 6px; color: #fff; font: 700 0.75rem var(--mono); }
-.badge.hk { background: var(--s2); }
-.badge.us { background: var(--s1); }
-.who { display: grid; gap: 0.1rem; font-size: 0.8125rem; }
-.who .mono { font-size: 0.625rem; color: var(--ink-soft); }
-.amt { font: 700 1.5rem/1 var(--display); letter-spacing: -0.02em; }
 .art-note { max-width: 34rem; margin: 0.5rem auto 0; font-size: 0.9375rem; color: var(--ink-soft); }
 
 .findings {
@@ -311,7 +294,7 @@ html.report body { background: var(--paper); color: var(--ink); font-family: var
   max-width: none;
   margin: 0 0 1.5rem;
   padding-top: 1rem;
-  font: 900 clamp(4rem, 19vw, 17rem)/0.9 var(--display);
+  font: 900 clamp(3rem, 14vw, 14rem)/0.9 var(--display);
   font-stretch: 125%;
   letter-spacing: -0.05em;
   text-align: center;
@@ -325,7 +308,6 @@ html.report body { background: var(--paper); color: var(--ink); font-family: var
 /* ============ responsive ============ */
 @media (max-width: 1000px) {
   .ch-head, .win-grid, .win-grid.wide-left { grid-template-columns: 1fr; }
-  .callout.card { top: auto; bottom: 0; }
   .callout.box { top: 0; }
 }
 @media (max-width: 760px) {

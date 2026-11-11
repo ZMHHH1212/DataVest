@@ -1,7 +1,7 @@
 // Insights page: US vs Hong Kong over 5 years. Data from data/insights.json (export_site.py).
 import { $, css, pct, fmtDate, fmtMonth, getJSON, esc, renderTopBar, chartDefaults, crosshair, endLabels } from "./common.js";
 import { mountSurface } from "./surface3d.js";
-import { drawdownSeries, deepest, mountStickers } from "./report.js";
+import { drawdownSeries, mountStickers } from "./report.js";
 
 // Fixed series slots: colour follows the market, never its position in the list.
 const GROWTH = [
@@ -101,15 +101,9 @@ function lineArt() {
     colors: { ink: css("--ink"), soft: css("--ink-soft"), line: css("--rule"), amber: css("--k1"), paper: css("--paper") },
   });
 
-  // Spade-style data cards: the window, and the deepest fall
-  const worst = syms.map((s) => ({ s, ...deepest(g.series[s]) })).sort((a, b) => a.value - b.value)[0];
+  // Spade-style data card: the time window and sample
   $("call-a").innerHTML = `<p>► Window</p><p>${esc(g.dates[0])} → ${esc(g.dates[g.dates.length - 1])}</p>
     <p>► Sample</p><p>${syms.length} markets · ${g.dates.length} weeks<br>US + Hong Kong</p>`;
-  if (worst && worst.index >= 0) {
-    $("call-b").innerHTML = `<span class="badge ${isHK(worst.s) ? "hk" : "us"}">${isHK(worst.s) ? "HK" : "US"}</span>
-      <span class="who"><b>${esc(short(worst.s))}</b><span class="mono">${esc(g.dates[worst.index])} · deepest point</span></span>
-      <span class="amt">${pct(worst.value, 0)}</span>`;
-  } else $("call-b").hidden = true;
 }
 
 // ---- growth of $100 --------------------------------------------------------
