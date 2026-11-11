@@ -355,3 +355,86 @@ html.report body { background: var(--paper); color: var(--ink); font-family: var
   .window { padding: 0 0.85rem 1rem; }
   .win-bar { margin: 0 -0.85rem 0.85rem; padding: 0.6rem 0.85rem; }
 }
+
+/* ======================================================================================
+   Other pages: the same look, built from each page's existing parts (content unchanged).
+   Opening: the page's kicker, a giant page name, then its own title and intro.
+   Body: every section becomes a framed, numbered dashboard window.
+   ====================================================================================== */
+.page-hero .stage { max-width: 78rem; text-align: left; padding-top: clamp(2rem, 5vw, 3.5rem); }
+.page-hero .eyebrow { margin-bottom: 0.75rem; }
+.mega.mega-page { font-size: clamp(3rem, 12.5vw, 11.5rem); margin-left: -0.05em; text-align: left; }
+.hero-h1 {
+  margin: 1.25rem 0 0;
+  max-width: 24ch;
+  font: 700 clamp(1.6rem, 3.4vw, 2.75rem)/1.08 var(--display);
+  letter-spacing: -0.03em;
+  color: #f4f4f1;
+  text-wrap: balance;
+}
+.page-hero .hero-sub, .page-hero .nb-lead { margin: 1rem 0 0; max-width: 46ch; text-align: left; color: #b9b9b3; font-size: 1.0625rem; }
+.page-hero .currency .muted { color: #a3a39e; }
+.page-hero .segmented { background: rgba(255, 255, 255, 0.08); border-color: transparent; }
+.page-hero .segmented button { color: #d7d7d2; }
+.page-hero .segmented button[aria-pressed="true"] { background: #e3eddc; color: var(--black); }
+
+.auto { counter-reset: ch; padding: clamp(1.75rem, 4vw, 3rem) 0 clamp(2rem, 5vw, 3.5rem); }
+.auto > .block {
+  margin: 0 clamp(0.75rem, 3vw, 2.5rem) clamp(1.25rem, 3vw, 2rem);
+  padding: 0 clamp(1rem, 2.5vw, 1.75rem) 1.5rem;
+  background: var(--paper-raised);
+  border: 1px solid var(--edge);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+.auto > .block::before {
+  /* the window's top bar: a status dot and the section number */
+  counter-increment: ch;
+  content: counter(ch, decimal-leading-zero);
+  display: block;
+  margin: 0 calc(-1 * clamp(1rem, 2.5vw, 1.75rem)) 1.25rem;
+  padding: 0.7rem clamp(1rem, 2.5vw, 1.75rem) 0.7rem calc(clamp(1rem, 2.5vw, 1.75rem) + 1.1rem);
+  border-bottom: 1px solid var(--edge);
+  font: 500 0.6875rem/1.2 var(--mono);
+  letter-spacing: 0.02em;
+  color: var(--ink-soft);
+  background: radial-gradient(circle, #2cc6a6 3.5px, transparent 4px) calc(clamp(1rem, 2.5vw, 1.75rem) + 0.2rem) 50% / 9px 9px no-repeat;
+}
+.auto > .block > h2.section-title, .auto > .block > h2.chart-title, .auto > .block > .chart-head h2,
+.auto > .block .tool-grid ~ h2 {
+  font: 700 clamp(1.6rem, 2.8vw, 2.4rem)/1.06 var(--display);
+  letter-spacing: -0.035em;
+  margin: 0 0 0.6rem;
+}
+.auto .chart-title { font-family: var(--body); }
+.auto .chart-note, .auto .nb-lead { color: var(--ink-soft); }
+.auto > .lede-x { padding-top: 0; padding-left: clamp(0.75rem, 3vw, 2.5rem); padding-right: clamp(0.75rem, 3vw, 2.5rem); }
+.auto > .lede-x .findings { margin-top: 0; }
+
+/* lesson and notebook pages: contents list on the left, the reading column as one big window */
+.r-body .nb-layout { max-width: 78rem; margin: 0 auto; padding: clamp(1.75rem, 4vw, 3rem) clamp(0.75rem, 3vw, 2.5rem) clamp(2rem, 5vw, 3.5rem); border-left: 1px solid var(--rule); border-right: 1px solid var(--rule); }
+.report .nb {
+  max-width: none;
+  padding: clamp(1.25rem, 3vw, 2.25rem) clamp(1rem, 3vw, 2.5rem);
+  background: var(--paper-raised);
+  border: 1px solid var(--edge);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+.report .nb h1 { font-family: var(--display); letter-spacing: -0.035em; }
+.report .nb-md h2 { font-family: var(--display); letter-spacing: -0.03em; border-top-color: var(--rule); }
+.report .nb-toc .toc-title { font: 500 0.75rem/1.2 var(--mono); color: var(--ink-soft); letter-spacing: 0.02em; }
+.report .nb-toc { top: 1rem; }
+
+/* analysis list and sign-in */
+.report .nb-index .nb-list { margin: 0 clamp(0.75rem, 3vw, 2.5rem); max-width: none; display: grid; gap: 1rem; }
+.report .nb-item { background: var(--paper-raised); border: 1px solid var(--edge); border-radius: 12px; box-shadow: var(--shadow); padding: 1.25rem 1.5rem; }
+.report .nb-index > .nb-meta { margin: 1.5rem clamp(0.75rem, 3vw, 2.5rem) 0; }
+.r-body .signin { max-width: 78rem; margin: 0 auto; padding: clamp(2rem, 5vw, 3.5rem) clamp(1rem, 3vw, 2.5rem); border-left: 1px solid var(--rule); border-right: 1px solid var(--rule); }
+.report .signin-copy h1 { font-family: var(--display); letter-spacing: -0.035em; }
+.report .signin-panel { border-color: var(--edge); box-shadow: var(--shadow); }
+
+@media (max-width: 760px) {
+  .r-body .nb-layout { grid-template-columns: 1fr; }
+  .auto > .block { margin-left: 0; margin-right: 0; }
+}

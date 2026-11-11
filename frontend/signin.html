@@ -1,17 +1,27 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="report">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>DataVest · Sign in</title>
+  <meta name="theme-color" content="#0a0a0a">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="report.css">
+  <script>try { const t = localStorage.getItem("datavest.theme"); if (t === "dark" || t === "light") document.documentElement.dataset.theme = t; } catch {}</script>
 </head>
 <body class="signin-page">
-  <header class="top" id="top"></header>
+  <div class="r-hero page-hero">
+    <header class="top" id="top"></header>
+    <div class="stage">
+      <p class="eyebrow mono">Account</p>
+      <p class="mega mega-page" aria-hidden="true">Sign in</p>
+    </div>
+  </div>
 
+  <div class="r-body">
   <main class="signin">
     <div class="signin-copy">
       <h1>Keep your markets with you.</h1>
@@ -29,8 +39,9 @@
       <p class="fine">You'll choose your Google account in a pop-up window.</p>
     </div>
   </main>
+  </div>
 
-  <footer class="foot"><p class="credit">Built by ZMH</p></footer>
+  <footer class="foot r-foot"><p class="wordmark" aria-hidden="true">DataVest</p><p class="credit">Built by ZMH</p></footer>
   <script type="module">
     import { authConfigured, onUser, signInWithGoogle, signOut } from "./js/auth.js";
     import { $, esc, renderTopBar } from "./js/common.js";

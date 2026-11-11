@@ -1,24 +1,35 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="report">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>DataVest · Models</title>
   <meta name="description" content="Can we forecast next month's market risk, and does the RSI indicator really work? Tested out of sample.">
+  <meta name="theme-color" content="#0a0a0a">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="report.css">
+  <script>try { const t = localStorage.getItem("datavest.theme"); if (t === "dark" || t === "light") document.documentElement.dataset.theme = t; } catch {}</script>
 </head>
 <body>
-  <header class="top" id="top"></header>
+  <div class="r-hero page-hero">
+    <header class="top" id="top"></header>
+    <div class="stage">
+      <p class="kicker eyebrow mono">Models, tested on data they never saw</p>
+      <p class="mega mega-page" aria-hidden="true">Models</p>
+      <h1 class="hero-h1" id="headline">What the models say, and how well they do.</h1>
 
-  <main id="main" class="page">
-    <section class="lede">
-      <p class="kicker">Models, tested on data they never saw</p>
-      <h1 id="headline">What the models say, and how well they do.</h1>
+    </div>
+  </div>
+
+  <div class="r-body">
+  <main id="main" class="page frame auto">
+    <section class="lede-x">
       <div class="findings" id="findings"><p class="muted">Loading the results…</p></div>
     </section>
+
 
     <!-- 1. volatility -->
     <section class="block" aria-labelledby="vol-title">
@@ -85,8 +96,10 @@
       <p class="more">Read the full notebooks, with code: <a href="analysis/02_volatility_forecasting.html">forecasting volatility</a> and <a href="analysis/03_does_rsi_work.html">does RSI work?</a></p>
     </section>
   </main>
+  </div>
 
-  <footer class="foot">
+  <footer class="foot r-foot">
+    <p class="wordmark" aria-hidden="true">DataVest</p>
     <p>Prices from Yahoo Finance, updated every weekday. <span id="updated"></span></p>
     <p>DataVest is a learning project. Nothing here is financial advice, and past performance does not predict future results.</p>
     <p class="credit">Built by ZMH</p>

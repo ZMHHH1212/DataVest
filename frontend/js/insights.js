@@ -2,6 +2,7 @@
 import { $, css, pct, fmtDate, fmtMonth, getJSON, esc, renderTopBar, chartDefaults, crosshair, endLabels } from "./common.js";
 import { mountSurface } from "./surface3d.js";
 import { drawdownSeries, mountStickers } from "./report.js";
+import { onThemeChange } from "./theme.js";
 
 // Fixed series slots: colour follows the market, never its position in the list.
 const GROWTH = [
@@ -89,38 +90,6 @@ function starPoints(n, R, r) {
 
 // ---- light / dark ---------------------------------------------------------------------
 let surface = null;
-const THEME_KEY = "datavest.theme";
-const isDark = () => {
-  const t = document.documentElement.dataset.theme;
-  return t ? t === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
-};
-const SUN = `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>`;
-const MOON = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>`;
-
-function themeButton() {
-  const b = document.createElement("button");
-  b.type = "button";
-  b.className = "btn-quiet theme-btn";
-  b.id = "theme";
-  const paint = () => {
-    const dark = isDark();
-    b.innerHTML = dark ? SUN : MOON;
-    b.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
-    b.title = b.getAttribute("aria-label");
-  };
-  b.addEventListener("click", () => {
-    const next = isDark() ? "light" : "dark";
-    document.documentElement.dataset.theme = next;
-    try { localStorage.setItem(THEME_KEY, next); } catch { /* storage blocked */ }
-    paint();
-    redraw();
-  });
-  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
-    if (!document.documentElement.dataset.theme) { paint(); redraw(); }
-  });
-  $("top").insertBefore(b, $("account"));
-  paint();
-}
 
 // Charts read their colours when drawn, so a theme change redraws them.
 function redraw() {
@@ -449,7 +418,7 @@ function regimes() {
 
 async function init() {
   renderTopBar("insights");
-  themeButton();
+  onThemeChange(redraw);
   chartDefaults();
   Chart.defaults.font.family = css("--body");
   try {

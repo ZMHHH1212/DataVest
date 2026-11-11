@@ -1,24 +1,31 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="report">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>DataVest · Portfolio simulator</title>
   <meta name="description" content="Build a practice portfolio from real markets and see how it would have done: growth, risk, worst fall, diversification and the efficient frontier.">
+  <meta name="theme-color" content="#0a0a0a">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="report.css">
+  <script>try { const t = localStorage.getItem("datavest.theme"); if (t === "dark" || t === "light") document.documentElement.dataset.theme = t; } catch {}</script>
 </head>
 <body>
-  <header class="top" id="top"></header>
+  <div class="r-hero page-hero">
+    <header class="top" id="top"></header>
+    <div class="stage">
+      <p class="kicker eyebrow mono">Portfolio simulator</p>
+      <p class="mega mega-page" aria-hidden="true">Portfolio</p>
+      <h1 class="hero-h1">Build a practice portfolio and see how it would have done.</h1>
+        <p class="nb-lead">Mix DataVest's markets, then test the mix on real weekly prices from the last five years. It's for learning only: past results don't predict the future.</p>
+    </div>
+  </div>
 
-  <main id="main" class="page">
-    <section class="lede">
-      <p class="kicker">Portfolio simulator</p>
-      <h1>Build a practice portfolio and see how it would have done.</h1>
-      <p class="nb-lead">Mix DataVest's markets, then test the mix on real weekly prices from the last five years. It's for learning only: past results don't predict the future.</p>
-    </section>
+  <div class="r-body">
+  <main id="main" class="page frame auto">
 
     <section class="block" aria-labelledby="b-title">
       <h2 id="b-title" class="section-title">Your mix</h2>
@@ -84,8 +91,10 @@
       </details>
     </section>
   </main>
+  </div>
 
-  <footer class="foot">
+  <footer class="foot r-foot">
+    <p class="wordmark" aria-hidden="true">DataVest</p>
     <p>Weekly prices from Yahoo Finance. Funds and stocks include dividends; index levels don't. No trading costs or taxes are included. Your mix is saved in this browser only.</p>
     <p>DataVest is a learning project. Nothing here is financial advice.</p>
     <p class="credit">Built by ZMH</p>

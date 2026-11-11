@@ -96,8 +96,8 @@ with sync_playwright() as p:
                 page.click("#currency button >> nth=1")
                 if "US$" not in page.inner_text("#g-headline"):
                     errors.append("currency switch failed")
-            if name == "insights":
-                # giant display words must fit the screen once the real fonts have loaded
+            if True:
+                # giant display words (page names, footer) must fit the screen once the real fonts have loaded
                 page.evaluate("document.fonts.ready")
                 for sel in (".mega", ".r-foot .wordmark"):
                     over = page.evaluate("""(sel) => { const el = document.querySelector(sel); if (!el) return 0;

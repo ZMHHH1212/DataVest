@@ -21,9 +21,18 @@ from pygments.lexers import PythonLexer
 REPO = "https://github.com/ZMHHH1212/DataVest/blob/main/analysis"
 FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com">'
          '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
-         '<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700'
-         '&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">')
-FOOTER = ('<footer class="foot"><p>Prices from Yahoo Finance. The notebooks are re-run with fresh data every weekday.</p>'
+         '<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900'
+         '&family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">')
+# report look (same as the rest of the site) + saved light/dark choice applied before paint
+STYLE = ('<link rel="stylesheet" href="../styles.css"><link rel="stylesheet" href="../report.css">'
+         '<script>try { const t = localStorage.getItem("datavest.theme"); '
+         'if (t === "dark" || t === "light") document.documentElement.dataset.theme = t; } catch {}</script>')
+
+
+def hero(eyebrow: str, extra: str = "") -> str:
+    return (f'<div class="r-hero page-hero"><header class="top" id="top"></header><div class="stage">'
+            f'<p class="kicker eyebrow mono">{eyebrow}</p><p class="mega mega-page" aria-hidden="true">Analysis</p>{extra}</div></div>')
+FOOTER = ('<footer class="foot r-foot"><p class="wordmark" aria-hidden="true">DataVest</p><p>Prices from Yahoo Finance. The notebooks are re-run with fresh data every weekday.</p>'
           '<p>DataVest is a learning project. Nothing here is financial advice, and past performance does not predict future results.</p>'
           '<p class="credit">Built by ZMH</p></footer>')
 PLAIN_REPR = re.compile(r"^(<|Text\(|\[<|\(<|<Figure)")
@@ -112,17 +121,18 @@ def render_notebook(path: Path, out_dir: Path, run_date: str) -> dict:
 
     toc_html = "".join(f'<li><a href="#{a}">{html.escape(t)}</a></li>' for a, t in toc)
     page = f"""<!doctype html>
-<html lang="en">
+<html lang="en" class="report">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DataVest · {html.escape(title)}</title>
 <meta name="description" content="{html.escape(summary_of(first)[:180])}">
 {FONTS}
-<link rel="stylesheet" href="../styles.css">
+{STYLE}
 </head>
 <body class="nb-page">
-<header class="top" id="top"></header>
+{hero('<a href="./">Analysis</a> · study')}
+<div class="r-body">
 <div class="nb-layout">
   <aside class="nb-toc" aria-label="Contents">
     <p class="toc-title">Contents</p>
@@ -138,6 +148,7 @@ def render_notebook(path: Path, out_dir: Path, run_date: str) -> dict:
     <p class="nb-meta">Run with the latest data on {run_date}. The code behind each result is folded away under "Show code".</p>
     {''.join(body)}
   </article>
+</div>
 </div>
 {FOOTER}
 <script type="module">
@@ -170,27 +181,24 @@ def render_index(items: list[dict], out_dir: Path, run_date: str) -> None:
         </div>
       </li>""" for i, it in enumerate(items))
     page = f"""<!doctype html>
-<html lang="en">
+<html lang="en" class="report">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DataVest · Analysis</title>
 <meta name="description" content="Data analysis behind DataVest: US vs Hong Kong markets, forecasting risk, and testing the RSI indicator.">
 {FONTS}
-<link rel="stylesheet" href="../styles.css">
+{STYLE}
 </head>
 <body>
-<header class="top" id="top"></header>
-<main class="page nb-index" id="main">
-  <section class="lede">
-    <p class="kicker">Analysis</p>
-    <h1>The research behind DataVest.</h1>
-    <p class="nb-lead">Each study asks one question about the markets and answers it with five years of daily prices. The full code is included, and every study is re-run with fresh data each weekday.</p>
-  </section>
+{hero('Analysis', '<h1 class="hero-h1">The research behind DataVest.</h1><p class="nb-lead">Each study asks one question about the markets and answers it with five years of daily prices. The full code is included, and every study is re-run with fresh data each weekday.</p>')}
+<div class="r-body">
+<main class="page nb-index frame auto" id="main">
   <ol class="nb-list">{rows}
   </ol>
   <p class="nb-meta">Last run {run_date}.</p>
 </main>
+</div>
 {FOOTER}
 <script type="module">
   import {{ renderTopBar }} from "../js/common.js";

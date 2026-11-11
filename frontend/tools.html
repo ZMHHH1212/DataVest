@@ -1,31 +1,38 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="report">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>DataVest · Money tools</title>
   <meta name="description" content="Free calculators: watch savings grow, plan for a goal, see the cost of waiting, and split your pay with MPF and the 50/30/20 rule.">
+  <meta name="theme-color" content="#0a0a0a">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="report.css">
+  <script>try { const t = localStorage.getItem("datavest.theme"); if (t === "dark" || t === "light") document.documentElement.dataset.theme = t; } catch {}</script>
 </head>
 <body>
-  <header class="top" id="top"></header>
-
-  <main id="main" class="page">
-    <section class="lede">
-      <p class="kicker">Money tools</p>
-      <h1>Small amounts, saved early, become large ones.</h1>
-      <p class="nb-lead">Four calculators for planning your own money. Nothing you type leaves this page.</p>
-      <div class="currency" role="group" aria-label="Currency">
-        <span class="muted">Currency</span>
-        <div class="segmented" id="currency">
-          <button type="button" data-cur="HK$" aria-pressed="true">HK$</button>
-          <button type="button" data-cur="US$" aria-pressed="false">US$</button>
+  <div class="r-hero page-hero">
+    <header class="top" id="top"></header>
+    <div class="stage">
+      <p class="kicker eyebrow mono">Money tools</p>
+      <p class="mega mega-page" aria-hidden="true">Tools</p>
+      <h1 class="hero-h1">Small amounts, saved early, become large ones.</h1>
+        <p class="nb-lead">Four calculators for planning your own money. Nothing you type leaves this page.</p>
+        <div class="currency" role="group" aria-label="Currency">
+          <span class="muted">Currency</span>
+          <div class="segmented" id="currency">
+            <button type="button" data-cur="HK$" aria-pressed="true">HK$</button>
+            <button type="button" data-cur="US$" aria-pressed="false">US$</button>
+          </div>
         </div>
-      </div>
-    </section>
+    </div>
+  </div>
+
+  <div class="r-body">
+  <main id="main" class="page frame auto">
 
     <!-- 1. growth -->
     <section class="block tool" aria-labelledby="g-title">
@@ -115,8 +122,10 @@
       </div>
     </section>
   </main>
+  </div>
 
-  <footer class="foot">
+  <footer class="foot r-foot">
+    <p class="wordmark" aria-hidden="true">DataVest</p>
     <p>Results are estimates from the numbers you enter. Real returns go up and down from year to year, and fees and taxes reduce them.</p>
     <p>DataVest is a learning project. Nothing here is financial advice.</p>
     <p class="credit">Built by ZMH</p>

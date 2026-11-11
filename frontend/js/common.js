@@ -1,6 +1,7 @@
 // Shared helpers: formatting, data loading, the top bar, chart defaults.
 import { onUser, signOut } from "./auth.js";
 import { t, isZh, switchLang } from "./i18n.js";
+import { mountThemeButton } from "./theme.js";
 
 export const $ = (id) => document.getElementById(id);
 export const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -51,6 +52,8 @@ export function renderTopBar(active, base = "", { i18n = false } = {}) {
     ${langBtn}
     <div class="account" id="account"><a class="btn-quiet" href="${base}signin.html">${signIn}</a></div>`;
   if (i18n) $("lang").addEventListener("click", switchLang);
+  // report-style pages get the light/dark button
+  if (document.documentElement.classList.contains("report")) mountThemeButton($("top"));
 
   onUser((user) => {
     const box = $("account");
