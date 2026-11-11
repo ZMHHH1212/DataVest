@@ -41,18 +41,21 @@ function inside(px, py, poly) {
 
 /**
  * Mount the surface.
- * opts: { rows: [{label, values}], dates: [iso], formatDate, colors: {ink, soft, line, amber}, highlight }
+ * opts: { rows: [{label, values}], dates: [iso], formatDate, colors: {ink, soft, line, amber, paper}, highlight,
+ *         mode: "fill" (colour ramp, default) | "line" (engraving: opaque paper ribbons, ink edges and hatching) }
  * Returns { setHighlight(label), destroy() }.
  */
 export function mountSurface(canvas, tip, opts) {
   const ctx = canvas.getContext("2d");
   const { rows, dates } = opts;
+  const lineArt = opts.mode === "line";
   const nR = rows.length, nC = dates.length;
   const all = rows.flatMap((r) => r.values).filter((v) => v != null);
   const vmax = Math.max(...all), vmin = Math.min(...all);
   const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-  const view = { yaw: -0.65, pitch: 0.5, zoom: 1, spin: !reduce, highlight: opts.highlight ?? null };
-  const home = { yaw: -0.65, pitch: 0.5, zoom: 1 };
+  const z0 = opts.zoom ?? 1; // starting zoom (smaller on narrow screens so labels fit)
+  const view = { yaw: -0.65, pitch: 0.5, zoom: z0, spin: !reduce, highlight: opts.highlight ?? null };
+  const home = { yaw: -0.65, pitch: 0.5, zoom: z0 };
   let quads = [];
   let hover = null;
   let raf = 0, last = 0, dragging = null, w = 0, h = 0;
@@ -72,7 +75,7 @@ export function mountSurface(canvas, tip, opts) {
   }
 
   function cam() {
-    return { yaw: view.yaw, pitch: view.pitch, scale: Math.min(w, h * 1.5) * 0.31 * view.zoom, cx: w / 2, cy: h * 0.7 };
+    return { yaw: view.yaw, pitch: view.pitch, scale: Math.min(w, h * 1.5) * 0.31 * view.zoom, cx: w * (0.5 - (opts.shift ?? 0)), cy: h * 0.7 };
   }
 
   function draw() {
@@ -111,9 +114,29 @@ export function mountSurface(canvas, tip, opts) {
     }
     quads.sort((a, b) => b.depth - a.depth);
     for (const q of quads) {
-      const [cr, cg, cb] = ramp((q.value - vmin) / (vmax - vmin || 1));
       const hl = view.highlight != null && rows[q.r].label === view.highlight;
       const dim = view.highlight != null && !hl;
+      if (lineArt) {
+        // hidden-line drawing: the opaque ribbon hides whatever is behind it
+        const [a, , c, d] = q.pts;
+        ctx.beginPath();
+        q.pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
+        ctx.closePath();
+        ctx.fillStyle = opts.colors.paper;
+        ctx.fill();
+        ctx.strokeStyle = hl ? opts.colors.amber : opts.colors.ink;
+        if (q.col % 2 === 0) {
+          ctx.globalAlpha = dim ? 0.25 : 0.55;
+          ctx.lineWidth = 0.7;
+          ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(d[0], d[1]); ctx.stroke();
+        }
+        ctx.globalAlpha = dim ? 0.45 : 1;
+        ctx.lineWidth = hl ? 2 : 1.25;
+        ctx.beginPath(); ctx.moveTo(d[0], d[1]); ctx.lineTo(c[0], c[1]); ctx.stroke();
+        ctx.globalAlpha = 1;
+        continue;
+      }
+      const [cr, cg, cb] = ramp((q.value - vmin) / (vmax - vmin || 1));
       ctx.beginPath();
       q.pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
       ctx.closePath();
@@ -125,6 +148,7 @@ export function mountSurface(canvas, tip, opts) {
     ctx.font = `500 11px ${opts.font || "sans-serif"}`;
     rows.forEach((row, r) => {
       const isH = row.label === view.highlight;
+      if (!lineArt) {
       ctx.beginPath();
       let started = false;
       row.values.forEach((v, col) => {
@@ -135,6 +159,7 @@ export function mountSurface(canvas, tip, opts) {
       ctx.strokeStyle = isH ? opts.colors.amber : "rgba(220,230,242,0.28)";
       ctx.lineWidth = isH ? 2 : 1;
       ctx.stroke();
+      }
       const [lx, ly] = P(X(nC - 1) + 0.08, 0, Z(r));
       ctx.fillStyle = isH ? opts.colors.amber : opts.colors.soft;
       ctx.fillText(row.label, lx + 4, ly + 4);
@@ -150,7 +175,7 @@ export function mountSurface(canvas, tip, opts) {
       ctx.beginPath();
       hover.q.pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
       ctx.closePath();
-      ctx.strokeStyle = "#ffffff";
+      ctx.strokeStyle = lineArt ? opts.colors.amber : "#ffffff";
       ctx.lineWidth = 2;
       ctx.stroke();
     }

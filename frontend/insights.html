@@ -1,105 +1,182 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="report">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>DataVest · Insights</title>
   <meta name="description" content="US vs Hong Kong markets over five years: growth, risk and how closely they move together.">
+  <meta name="theme-color" content="#0a0a0a">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="report.css">
 </head>
 <body>
-  <header class="top" id="top"></header>
+  <!-- 1. Opening: black, giant type, chapters and stickers -->
+  <div class="r-hero">
+    <header class="top" id="top"></header>
 
-  <main id="main" class="page">
-    <section class="lede">
-      <p class="kicker">The last 5 years</p>
-      <h1 id="headline">How US and Hong Kong markets compare.</h1>
+    <nav class="chapters" aria-label="Chapters">
+      <a href="#ch-1"><b style="--c: var(--k1)">1</b><span>Growth</span></a>
+      <a href="#ch-2"><b style="--c: var(--k2)">2</b><span>Risk</span></a>
+      <a href="#ch-3"><b style="--c: var(--k3)">3</b><span>Together</span></a>
+      <a href="#ch-4"><b style="--c: var(--k4)">4</b><span>Market map</span></a>
+      <a href="#ch-5"><b style="--c: var(--k5)">5</b><span>Regimes</span></a>
+      <a href="#ch-6"><b style="--c: var(--k6)">6</b><span>All markets</span></a>
+    </nav>
+
+    <div class="stage">
+      <p class="eyebrow mono" id="hero-range">DataVest report</p>
+      <h1 class="mega" aria-label="US versus Hong Kong"><span>US</span> <span class="vs">vs</span> <span>HK</span></h1>
+      <div class="stickers" id="stickers" aria-label="Key numbers (drag them around)"></div>
+      <p class="hero-sub"><b>Five years in data:</b> how the two markets grew, swung and moved together.</p>
+      <p class="scroll mono"><a href="#lede">Start scrolling</a><i aria-hidden="true"></i></p>
+    </div>
+  </div>
+
+  <!-- 2. Lede: mint, ruler edges, line-art landscape with data cards -->
+  <div class="r-body">
+    <section class="lede-x" id="lede" aria-labelledby="headline">
+      <span class="tri l" aria-hidden="true"></span><span class="tri r" aria-hidden="true"></span>
+      <h2 id="headline" class="display">How US and Hong Kong markets compare.</h2>
+      <div class="art">
+        <canvas id="lineart" tabindex="0" role="img" aria-label="Line drawing in 3D of how far each market fell below its previous high over five years"></canvas>
+        <div class="sf-tip" id="lineart-tip" hidden></div>
+        <div class="callout box mono" id="call-a"></div>
+        <div class="callout card" id="call-b"></div>
+      </div>
+      <p class="art-note" id="art-note">Each ridge is one market. The higher a ridge rises, the further that market was below its previous high. Drag to turn it.</p>
       <div class="findings" id="findings"><p class="muted">Loading the numbers…</p></div>
     </section>
 
-    <section class="block" aria-labelledby="growth-title">
-      <div class="chart-head">
-        <h2 id="growth-title" class="chart-title">Growth of $100</h2>
-        <div class="legend" id="growth-legend" role="group" aria-label="Show or hide markets"></div>
-      </div>
-      <p class="chart-note">Index levels leave out dividends. The two index funds include them, so the gap between an index and its fund is roughly what dividends added.</p>
-      <div class="chart-wrap"><canvas id="growth" role="img" aria-label="Growth of $100 over five years"></canvas></div>
-    </section>
-
-    <section class="block two-col">
-      <div>
-        <h2 class="chart-title">Risk vs return</h2>
-        <p class="chart-note">Further right means a bumpier ride. Higher means more growth per year. The best place to be is top left.</p>
-        <div class="legend static">
-          <span class="key"><i style="background: var(--s1)"></i>United States</span>
-          <span class="key"><i style="background: var(--s2)"></i>Hong Kong</span>
+    <main id="main" class="frame">
+      <section class="chapter" id="ch-1" aria-labelledby="growth-title">
+        <div class="ch-head">
+          <div>
+            <p class="ch-num mono">01 / Growth</p>
+            <h2 id="growth-title" class="two-tone"><span>Growth of</span> $100</h2>
+          </div>
+          <p class="chart-note">Index levels leave out dividends. The two index funds include them, so the gap between an index and its fund is roughly what dividends added.</p>
         </div>
-        <div class="chart-wrap tall"><canvas id="scatter" role="img" aria-label="Risk versus return for each market"></canvas></div>
-      </div>
-      <div>
-        <h2 class="chart-title">Do they move together?</h2>
-        <p class="chart-note" id="corr-note"></p>
-        <div class="segmented" role="group" aria-label="How returns are measured">
-          <button type="button" data-corr="weekly" aria-pressed="true">Weekly returns</button>
-          <button type="button" data-corr="daily" aria-pressed="false">Same-day returns</button>
+        <div class="window">
+          <div class="win-bar"><span class="mono">growth_of_100 · weekly · 5Y</span><div class="legend" id="growth-legend" role="group" aria-label="Show or hide markets"></div></div>
+          <div class="chart-wrap"><canvas id="growth" role="img" aria-label="Growth of $100 over five years"></canvas></div>
         </div>
-        <div class="heatmap-wrap"><table class="heatmap" id="heatmap"></table></div>
-        <div class="scale" aria-hidden="true"><span>−1 opposite</span><i></i><span>+1 in step</span></div>
-      </div>
-    </section>
+      </section>
 
-    <section class="block" aria-labelledby="rc-title">
-      <h2 id="rc-title" class="chart-title">Hang Seng vs S&amp;P 500: the link changes over time</h2>
-      <p class="chart-note">Correlation of weekly returns over rolling one-year windows. 1 means they moved in step, 0 means no link.</p>
-      <div class="chart-wrap short2"><canvas id="rollcorr" role="img" aria-label="Rolling one-year correlation between the Hang Seng and the S&P 500"></canvas></div>
-    </section>
+      <section class="chapter" id="ch-2" aria-labelledby="risk-title">
+        <div class="ch-head">
+          <div>
+            <p class="ch-num mono">02 / Risk</p>
+            <h2 id="risk-title" class="two-tone"><span>Risk</span> vs return</h2>
+          </div>
+          <p class="chart-note">Further right means a bumpier ride. Higher means more growth per year. The best place to be is top left.</p>
+        </div>
+        <div class="window">
+          <div class="win-bar"><span class="mono">risk_return · per year</span>
+            <div class="legend static">
+              <span class="key"><i style="background: var(--s1)"></i>United States</span>
+              <span class="key"><i style="background: var(--s2)"></i>Hong Kong</span>
+            </div>
+          </div>
+          <div class="chart-wrap tall"><canvas id="scatter" role="img" aria-label="Risk versus return for each market"></canvas></div>
+        </div>
+      </section>
 
-    <section class="block" aria-labelledby="map-title" id="map-block">
-      <h2 id="map-title" class="chart-title">Market map: which stocks move together?</h2>
-      <p class="chart-note" id="map-note">An unsupervised learning model grouped large US and Hong Kong stocks by how their weekly returns move together. Nobody told it about countries or industries.</p>
-      <div class="two-col">
-        <div>
-          <div class="legend static" id="map-legend"></div>
-          <div class="chart-wrap tall"><canvas id="mapchart" role="img" aria-label="Map of stocks by how they move"></canvas></div>
+      <section class="chapter" id="ch-3" aria-labelledby="corr-title">
+        <div class="ch-head">
+          <div>
+            <p class="ch-num mono">03 / Together</p>
+            <h2 id="corr-title" class="two-tone"><span>Do they move</span> together?</h2>
+          </div>
+          <p class="chart-note" id="corr-note"></p>
+        </div>
+        <div class="win-grid wide-left">
+          <div class="window">
+            <div class="win-bar"><span class="mono">correlation</span>
+              <div class="segmented" role="group" aria-label="How returns are measured">
+                <button type="button" data-corr="weekly" aria-pressed="true">Weekly</button>
+                <button type="button" data-corr="daily" aria-pressed="false">Same-day</button>
+              </div>
+            </div>
+            <div class="heatmap-wrap"><table class="heatmap" id="heatmap"></table></div>
+            <div class="scale" aria-hidden="true"><span>−1 opposite</span><i></i><span>+1 in step</span></div>
+          </div>
+          <section class="window" aria-labelledby="rc-title">
+            <div class="win-bar"><h3 id="rc-title" class="mono">Hang Seng vs S&amp;P 500 · rolling 1Y</h3></div>
+            <p class="chart-note">Correlation of weekly returns over rolling one-year windows. 1 means they moved in step, 0 means no link.</p>
+            <div class="chart-wrap short2"><canvas id="rollcorr" role="img" aria-label="Rolling one-year correlation between the Hang Seng and the S&P 500"></canvas></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="chapter" aria-labelledby="map-title" id="map-block">
+        <span id="ch-4" class="anchor"></span>
+        <div class="ch-head">
+          <div>
+            <p class="ch-num mono">04 / Market map · machine learning</p>
+            <h2 id="map-title" class="two-tone"><span>Which stocks</span> move together?</h2>
+          </div>
+          <p class="chart-note" id="map-note">An unsupervised learning model grouped large US and Hong Kong stocks by how their weekly returns move together. Nobody told it about countries or industries.</p>
+        </div>
+        <div class="win-grid wide-left">
+          <div class="window">
+            <div class="win-bar"><span class="mono">pca · clusters</span><div class="legend static" id="map-legend"></div></div>
+            <div class="chart-wrap tall"><canvas id="mapchart" role="img" aria-label="Map of stocks by how they move"></canvas></div>
+            <details class="inline-help">
+              <summary>How was this map made?</summary>
+              <p>Each dot is a stock. Principal component analysis (PCA) squeezes about five years of weekly returns into a few "patterns" of movement, and the map plots each stock on two of them. Stocks close together tend to move together. The groups come from hierarchical clustering on correlation, with the number of groups chosen by the silhouette score, which measures how well-separated the groups are.</p>
+            </details>
+          </div>
+          <div id="map-groups" class="groups"></div>
+        </div>
+      </section>
+
+      <section class="chapter" aria-labelledby="reg-title" id="reg-block">
+        <span id="ch-5" class="anchor"></span>
+        <div class="ch-head">
+          <div>
+            <p class="ch-num mono">05 / Regimes · hidden Markov model</p>
+            <h2 id="reg-title" class="two-tone"><span>Calm</span> or stormy?</h2>
+          </div>
+          <p class="chart-note" id="reg-note"></p>
+        </div>
+        <div class="window">
+          <div class="win-bar">
+            <div class="legend static">
+              <span class="key"><i style="background: var(--ink)"></i>Price</span>
+              <span class="key"><i class="band"></i>Stormy phase (model is over 50% sure)</span>
+            </div>
+            <div class="segmented" id="reg-pick" role="group" aria-label="Market"></div>
+          </div>
+          <div class="chart-wrap"><canvas id="regchart" role="img" aria-label="Price with stormy phases shaded"></canvas></div>
+          <div class="table-wrap"><table class="stats" id="reg-table"></table></div>
           <details class="inline-help">
-            <summary>How was this map made?</summary>
-            <p>Each dot is a stock. Principal component analysis (PCA) squeezes about five years of weekly returns into a few "patterns" of movement, and the map plots each stock on two of them. Stocks close together tend to move together. The groups come from hierarchical clustering on correlation, with the number of groups chosen by the silhouette score, which measures how well-separated the groups are.</p>
+            <summary>How does the model find regimes?</summary>
+            <p>A Hidden Markov Model assumes the market switches between two hidden states, calm and stormy, each with its own typical daily swing. It learns those swings, and how likely the market is to switch, from the data alone (Baum–Welch algorithm). "Today" uses only past data. The shaded history uses the full sample, so it's a description of the past, not a forecast.</p>
           </details>
         </div>
-        <div id="map-groups" class="groups"></div>
-      </div>
-    </section>
+      </section>
 
-    <section class="block" aria-labelledby="reg-title" id="reg-block">
-      <div class="chart-head">
-        <h2 id="reg-title" class="chart-title">Calm or stormy? Market regimes</h2>
-        <div class="segmented" id="reg-pick" role="group" aria-label="Market"></div>
-      </div>
-      <p class="chart-note" id="reg-note"></p>
-      <div class="legend static">
-        <span class="key"><i style="background: var(--ink)"></i>Price</span>
-        <span class="key"><i class="band"></i>Stormy phase (model is over 50% sure)</span>
-      </div>
-      <div class="chart-wrap"><canvas id="regchart" role="img" aria-label="Price with stormy phases shaded"></canvas></div>
-      <div class="table-wrap"><table class="stats" id="reg-table"></table></div>
-      <details class="inline-help">
-        <summary>How does the model find regimes?</summary>
-        <p>A Hidden Markov Model assumes the market switches between two hidden states, calm and stormy, each with its own typical daily swing. It learns those swings, and how likely the market is to switch, from the data alone (Baum–Welch algorithm). "Today" uses only past data. The shaded history uses the full sample, so it's a description of the past, not a forecast.</p>
-      </details>
-    </section>
+      <section class="chapter" id="ch-6" aria-labelledby="table-title">
+        <div class="ch-head">
+          <div>
+            <p class="ch-num mono">06 / All markets</p>
+            <h2 id="table-title" class="two-tone"><span>Every market,</span> side by side</h2>
+          </div>
+          <p class="chart-note">Click a column heading to sort. The Sharpe ratio is growth per unit of volatility, using a 0% risk-free rate.</p>
+        </div>
+        <div class="window">
+          <div class="table-wrap"><table class="stats" id="stats"></table></div>
+        </div>
+        <p class="more"><a href="analysis/01_us_vs_hk_markets.html">Read the full analysis notebook, with code and method notes →</a></p>
+      </section>
+    </main>
+  </div>
 
-    <section class="block" aria-labelledby="table-title">
-      <h2 id="table-title" class="chart-title">Every market, side by side</h2>
-      <p class="chart-note">Click a column heading to sort. The Sharpe ratio is growth per unit of volatility, using a 0% risk-free rate.</p>
-      <div class="table-wrap"><table class="stats" id="stats"></table></div>
-      <p class="more"><a href="analysis/01_us_vs_hk_markets.html">Read the full analysis notebook, with code and method notes</a></p>
-    </section>
-  </main>
-
-  <footer class="foot">
+  <footer class="foot r-foot">
+    <p class="wordmark" aria-hidden="true">DataVest</p>
     <p>Prices from Yahoo Finance, updated every weekday. <span id="updated"></span></p>
     <p>DataVest is a learning project. Nothing here is financial advice, and past performance does not predict future results.</p>
     <p class="credit">Built by ZMH</p>

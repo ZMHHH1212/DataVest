@@ -1,5 +1,7 @@
 // Insights page: US vs Hong Kong over 5 years. Data from data/insights.json (export_site.py).
 import { $, css, pct, fmtDate, fmtMonth, getJSON, esc, renderTopBar, chartDefaults, crosshair, endLabels } from "./common.js";
+import { mountSurface } from "./surface3d.js";
+import { drawdownSeries, deepest, mountStickers } from "./report.js";
 
 // Fixed series slots: colour follows the market, never its position in the list.
 const GROWTH = [
@@ -21,26 +23,93 @@ function findings() {
   const out = [];
   const us = st["^GSPC"], hk = st["^HSI"];
   if (us && hk) {
-    out.push(`<p>Over five years the <b>S&amp;P 500</b> grew <b>${pct(us.cagr)} a year</b>, while the <b>Hang Seng</b> managed <b>${pct(hk.cagr)} a year</b> (index levels, before dividends).</p>`);
+    out.push(`<p><span class="mono">► Growth</span>Over five years the <b>S&amp;P 500</b> grew <b>${pct(us.cagr)} a year</b>, while the <b>Hang Seng</b> managed <b>${pct(hk.cagr)} a year</b> (index levels, before dividends).</p>`);
     const [bumpier, calmer, bv, cv] = hk.volatility >= us.volatility
       ? ["Hong Kong", "the S&amp;P 500", hk.volatility, us.volatility]
       : ["The US", "the Hang Seng", us.volatility, hk.volatility];
-    out.push(`<p>${bumpier} was the bumpier ride: volatility of ${(bv * 100).toFixed(0)}% against ${(cv * 100).toFixed(0)}% for ${calmer}. The worst falls were ${pct(hk.max_drawdown, 0)} for the Hang Seng and ${pct(us.max_drawdown, 0)} for the S&amp;P 500.</p>`);
+    out.push(`<p><span class="mono">► Risk</span>${bumpier} was the bumpier ride: volatility of ${(bv * 100).toFixed(0)}% against ${(cv * 100).toFixed(0)}% for ${calmer}. The worst falls were ${pct(hk.max_drawdown, 0)} for the Hang Seng and ${pct(us.max_drawdown, 0)} for the S&amp;P 500.</p>`);
     const gap = us.cagr - hk.cagr;
-    $("headline").textContent = Math.abs(gap) < 0.02
-      ? "US and Hong Kong markets grew at a similar pace."
-      : `${gap > 0 ? "The US" : "Hong Kong"} pulled ahead by ${(Math.abs(gap) * 100).toFixed(0)} percentage points a year.`;
+    $("headline").innerHTML = Math.abs(gap) < 0.02
+      ? `<span class="dim">US and Hong Kong markets</span> grew at a similar pace.`
+      : `${gap > 0 ? "The US" : "Hong Kong"} pulled ahead <span class="dim">by ${(Math.abs(gap) * 100).toFixed(0)} percentage points a year.</span>`;
   }
   const i = data.symbols.indexOf("^HSI"), j = data.symbols.indexOf("^GSPC");
   if (i >= 0 && j >= 0) {
     const w = data.corr_weekly[i][j], d = data.corr_daily[i][j];
     if (w != null && d != null) {
-      out.push(`<p>The two markets move together more than same-day numbers suggest: correlation is <b>${d.toFixed(2)}</b> on same-day returns but <b>${w.toFixed(2)}</b> on weekly returns, because Hong Kong closes before New York opens.</p>`);
+      out.push(`<p><span class="mono">► Link</span>The two markets move together more than same-day numbers suggest: correlation is <b>${d.toFixed(2)}</b> on same-day returns but <b>${w.toFixed(2)}</b> on weekly returns, because Hong Kong closes before New York opens.</p>`);
     }
   }
   const ranked = Object.entries(st).filter(([, v]) => v.sharpe != null).sort((a, b) => b[1].sharpe - a[1].sharpe);
-  if (ranked.length) out.push(`<p>Best growth for the risk taken: <b>${esc(nm(ranked[0][0]))}</b>. Weakest: <b>${esc(nm(ranked[ranked.length - 1][0]))}</b>.</p>`);
+  if (ranked.length) out.push(`<p><span class="mono">► Best for the risk</span>Best growth for the risk taken: <b>${esc(nm(ranked[0][0]))}</b>. Weakest: <b>${esc(nm(ranked[ranked.length - 1][0]))}</b>.</p>`);
   $("findings").innerHTML = out.join("");
+}
+
+// ---- opening: date range and stickers -------------------------------------------
+const SHORT_NAMES = { "^GSPC": "S&P 500", "^IXIC": "Nasdaq", "^HSI": "Hang Seng", SPY: "SPY", "2800.HK": "Tracker 2800", "0700.HK": "Tencent", "0005.HK": "HSBC" };
+const short = (s) => SHORT_NAMES[s] || nm(s);
+const year = (iso) => iso.slice(0, 4);
+
+function hero() {
+  const d = data.growth.dates;
+  $("hero-range").textContent = `DataVest report · ${year(d[0])}–${year(d[d.length - 1])} · ${data.symbols.length} markets`;
+}
+
+function stickers() {
+  const st = data.stats, out = [];
+  const add = (shape, color, small, big, foot, tilt, pos) => out.push(
+    `<div class="sticker ${shape}" data-sticker style="--bg: var(${color}); --tilt: ${tilt}deg; ${pos}" role="img" aria-label="${esc(`${small} ${big} ${foot}`)}">
+      ${shape === "star" ? `<svg viewBox="0 0 100 100" aria-hidden="true"><polygon points="${starPoints(12, 50, 34)}"/></svg>` : ""}
+      <span class="s-small">${esc(small)}</span><span class="s-big">${esc(big)}</span><span class="s-foot">${esc(foot)}</span>
+    </div>`);
+  if (st["^GSPC"]) add("blob", "--k1", "S&P 500", pct(st["^GSPC"].cagr, 0), "a year", -8, "left: 3%; top: 8%;");
+  if (st["^HSI"]) add("disc", "--k5", "Hang Seng", pct(st["^HSI"].cagr, 0), "a year", 7, "right: 4%; top: 2%;");
+  const i = data.symbols.indexOf("^HSI"), j = data.symbols.indexOf("^GSPC");
+  if (i >= 0 && j >= 0 && data.corr_weekly[i][j] != null) add("star", "--k2", "US–HK link", data.corr_weekly[i][j].toFixed(2), "weekly", -4, "left: 9%; bottom: -16%;");
+  const worst = Object.entries(st).filter(([, v]) => v.max_drawdown != null).sort((a, b) => a[1].max_drawdown - b[1].max_drawdown)[0];
+  if (worst) add("ticket", "--k4", "Worst fall", pct(worst[1].max_drawdown, 0), short(worst[0]), 9, "right: 18%; bottom: -4%;");
+  if (patterns?.map) add("pill", "--k3", "ML found", `${patterns.map.k} groups`, `in ${patterns.map.stocks.length} stocks`, -5, "right: 1%; top: 46%;");
+  const r = patterns?.regimes?.["^GSPC"];
+  if (r) {
+    const p = r.today_p_turbulent, stormy = p > 0.5;
+    add("bubble", stormy ? "--k6" : "--k3", "S&P 500 now", stormy ? "Stormy" : "Calm", `${Math.round((stormy ? p : 1 - p) * 100)}% sure`, 4, "left: 1%; top: 52%;");
+  }
+  $("stickers").innerHTML = out.join("");
+  mountStickers($("stickers"));
+}
+
+function starPoints(n, R, r) {
+  const pts = [];
+  for (let k = 0; k < n * 2; k++) {
+    const a = (Math.PI * k) / n - Math.PI / 2, rad = k % 2 ? r : R;
+    pts.push(`${(50 + rad * Math.cos(a)).toFixed(1)},${(50 + rad * Math.sin(a)).toFixed(1)}`);
+  }
+  return pts.join(" ");
+}
+
+// ---- line-art landscape: how far each market sat below its previous high ---------------
+function lineArt() {
+  const g = data.growth;
+  const syms = data.symbols.filter((s) => g.series[s]);
+  const rows = syms.map((s) => ({ label: short(s), values: drawdownSeries(g.series[s]).map((v) => (v == null ? null : -v)) }));
+  mountSurface($("lineart"), $("lineart-tip"), {
+    rows, dates: g.dates, mode: "line",
+    ...(window.matchMedia("(max-width: 760px)").matches ? { zoom: 0.72, shift: 0.08 } : {}),
+    formatDate: (iso) => fmtDate(iso),
+    tipTemplate: (label, date, v) => `${esc(label)}<br>${date}<br><b>${v}%</b> below its high`,
+    font: css("--mono"),
+    colors: { ink: css("--ink"), soft: css("--ink-soft"), line: css("--rule"), amber: css("--k1"), paper: css("--paper") },
+  });
+
+  // Spade-style data cards: the window, and the deepest fall
+  const worst = syms.map((s) => ({ s, ...deepest(g.series[s]) })).sort((a, b) => a.value - b.value)[0];
+  $("call-a").innerHTML = `<p>► Window</p><p>${esc(g.dates[0])} → ${esc(g.dates[g.dates.length - 1])}</p>
+    <p>► Sample</p><p>${syms.length} markets · ${g.dates.length} weeks<br>US + Hong Kong</p>`;
+  if (worst && worst.index >= 0) {
+    $("call-b").innerHTML = `<span class="badge ${isHK(worst.s) ? "hk" : "us"}">${isHK(worst.s) ? "HK" : "US"}</span>
+      <span class="who"><b>${esc(short(worst.s))}</b><span class="mono">${esc(g.dates[worst.index])} · deepest point</span></span>
+      <span class="amt">${pct(worst.value, 0)}</span>`;
+  } else $("call-b").hidden = true;
 }
 
 // ---- growth of $100 --------------------------------------------------------
@@ -335,12 +404,15 @@ function regimes() {
 async function init() {
   renderTopBar("insights");
   chartDefaults();
+  Chart.defaults.font.family = css("--body");
   try {
     const [meta, ins] = await Promise.all([getJSON("data/tickers.json"), getJSON("data/insights.json")]);
     names = Object.fromEntries(meta.tickers.map((t) => [t.symbol, t.name]));
     data = ins;
     $("updated").textContent = `Last updated ${new Date(ins.generated_at).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}.`;
     findings();
+    hero();
+    try { lineArt(); } catch (e) { console.error(e); $("lede").querySelector(".art").hidden = true; }
     growth();
     scatter();
     heatmap("weekly");
@@ -350,6 +422,7 @@ async function init() {
     try { patterns = await getJSON("data/patterns.json"); } catch { patterns = null; }
     marketMap();
     regimes();
+    stickers();
   } catch (err) {
     console.error(err);
     $("main").innerHTML = `<p class="notice">The insights data isn't available yet. It is built together with the market data: run <code>python -m app.export_site</code> in the backend folder.</p>`;
