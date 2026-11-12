@@ -537,3 +537,24 @@ html.report[lang="zh-HK"] .display, html.report[lang="zh-HK"] .two-tone, html.re
 .r-hero .lang { margin-left: auto; display: inline-grid; place-items: center; min-width: 2.25rem; height: 2.25rem; padding: 0 0.6rem; border-radius: 999px; font: 600 0.875rem/1 var(--body); }
 .r-hero .lang ~ .theme-btn { margin-left: 0.35rem; }  /* language and light/dark sit together */
 .r-hero .lang ~ .theme-btn + .account { margin-left: 0.75rem; }
+
+/* Stickers, quieter: dark glass cards with a thin outline, white numbers, one small colour dot as the only hint */
+.sticker, .sticker.bubble, .sticker.dark {
+  background: rgba(14, 18, 26, 0.72);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(219, 230, 245, 0.22);
+  color: #e6ecf5;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.55);
+}
+.sticker::before {
+  content: ""; position: absolute; top: 0.7rem; left: 0.8rem;
+  width: 6px; height: 6px; border-radius: 50%; background: var(--bg);
+}
+.sticker .s-big { color: #ffffff; }
+.sticker .s-small, .sticker .s-foot { color: #8b97aa; opacity: 1; }
+.sticker.ticket { filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.55)); }
+.sticker.star { background: none; border: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; color: #e6ecf5; }
+.sticker.star::before { top: 26%; left: 50%; margin-left: -3px; }
+.sticker.star polygon { fill: rgba(14, 18, 26, 0.78); stroke: rgba(219, 230, 245, 0.3); stroke-width: 1.2; }
+.sticker:hover { filter: none; border-color: rgba(219, 230, 245, 0.45); }
