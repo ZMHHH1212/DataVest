@@ -558,3 +558,5 @@ html.report[lang="zh-HK"] .display, html.report[lang="zh-HK"] .two-tone, html.re
 .sticker.star::before { top: 26%; left: 50%; margin-left: -3px; }
 .sticker.star polygon { fill: rgba(14, 18, 26, 0.78); stroke: rgba(219, 230, 245, 0.3); stroke-width: 1.2; }
 .sticker:hover { filter: none; border-color: rgba(219, 230, 245, 0.45); }
+/* 3D panels: a finger drag turns the drawing (in any direction) instead of scrolling the page */
+.sf-wrap canvas, .art canvas { touch-action: none; }

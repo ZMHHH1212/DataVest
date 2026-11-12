@@ -138,7 +138,7 @@ export function mountSphere(canvas, opts = {}) {
   const onMove = (e) => {
     if (drag) {
       view.yaw = drag.yaw + (e.clientX - drag.x) * 0.006;
-      view.pitch = Math.min(1.2, Math.max(-1.2, drag.pitch + (e.clientY - drag.y) * 0.004));
+      view.pitch = drag.pitch + (e.clientY - drag.y) * 0.004; // full 360° in every direction
     }
     if (e.pointerType === "mouse") mouse = pos(e);
     if (reduce) draw();

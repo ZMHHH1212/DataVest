@@ -213,7 +213,7 @@ export function mountSurface(canvas, tip, opts) {
   const onMove = (e) => {
     if (dragging) {
       view.yaw = dragging.yaw + (e.clientX - dragging.x) * 0.008;
-      view.pitch = Math.min(1.35, Math.max(0.08, dragging.pitch + (e.clientY - dragging.y) * 0.006));
+      view.pitch = dragging.pitch + (e.clientY - dragging.y) * 0.006; // free in every direction: a full 360° turn
       draw();
     } else if (e.pointerType === "mouse") showTip(e);
   };
@@ -225,7 +225,7 @@ export function mountSurface(canvas, tip, opts) {
     e.preventDefault();
     view.spin = false; opts.onSpin?.(false);
     view.yaw += k[0];
-    view.pitch = Math.min(1.35, Math.max(0.08, view.pitch + k[1]));
+    view.pitch += k[1];
     draw();
   };
   canvas.addEventListener("pointerdown", onDown);
