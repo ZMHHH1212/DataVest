@@ -1,0 +1,125 @@
+/* Home page: one bold moment (the sphere and its title), everything after it quiet and editorial.
+   Loaded after report.css; every rule is scoped to html.home. */
+
+html.home body { background: var(--paper); }
+
+/* ---- opening ---- */
+html.home .r-hero { background-image: none; padding-bottom: 0; }
+html.home .orb-hero {
+  height: clamp(560px, calc(100svh - 9.5rem), 880px);
+  background: radial-gradient(ellipse 60% 75% at 66% 46%, rgba(56, 120, 220, 0.13) 0%, rgba(20, 40, 80, 0.06) 45%, transparent 75%);
+}
+html.home .orb-hero::after { background: linear-gradient(to top, rgba(6, 8, 12, 0.9) 0%, rgba(6, 8, 12, 0.4) 30%, transparent 52%); }
+html.home .orb-copy { left: clamp(1.25rem, 4.5vw, 4rem); right: clamp(1.25rem, 4.5vw, 4rem); bottom: clamp(2.25rem, 7vh, 4.5rem); max-width: none; }
+html.home .orb-title {
+  max-width: 11ch;
+  font: 300 clamp(3rem, 7.4vw, 7.25rem)/0.98 var(--display);
+  letter-spacing: -0.035em;
+  color: #f2f4f8;
+  text-wrap: balance;
+}
+html.home .orb-sub { margin-top: 1.5rem; max-width: 30rem; font-size: 1.0625rem; line-height: 1.55; color: #9aa6b8; }
+html.home .orb-actions { position: static; margin-top: 2rem; pointer-events: auto; }
+html.home .orb-btn { padding: 0.85rem 1.35rem; }
+html.home .orb-hint { font: 400 0.8125rem/1 var(--body); color: #6f7b8f; top: auto; bottom: clamp(2.25rem, 7vh, 4.5rem); }
+
+/* latest closes, under the sphere */
+html.home .pulse {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0 clamp(1.25rem, 4.5vw, 4rem);
+  min-height: 5.25rem;
+}
+html.home .pulse a {
+  display: grid; grid-template-columns: auto 1fr; align-content: center; align-items: baseline; gap: 0.3rem 0.75rem;
+  padding: 1.1rem 1.5rem 1.1rem 0; color: #f2f4f8; text-decoration: none;
+}
+html.home .pulse a + a { padding-left: 1.5rem; border-left: 1px solid rgba(255, 255, 255, 0.08); }
+html.home .pulse .nm { grid-column: 1 / -1; font-size: 0.8125rem; color: #8b97aa; }
+html.home .pulse .v { font-size: 1.125rem; font-variant-numeric: tabular-nums; }
+html.home .pulse .c { font-size: 0.875rem; font-variant-numeric: tabular-nums; }
+html.home .pulse .up { color: #4ade80; }
+html.home .pulse .down { color: #f87171; }
+html.home .pulse a:hover .v { color: #fff; }
+html.home .pulse a:hover .nm { color: #c7d0dd; }
+html.home .pulse .when { align-self: center; padding-left: 1.5rem; font-size: 0.8125rem; color: #6f7b8f; white-space: nowrap; }
+
+/* ---- the quiet part ---- */
+html.home .hm { max-width: 80rem; margin: 0 auto; padding: 0 clamp(1.25rem, 4.5vw, 4rem); }
+html.home .hm h2, html.home .hm h3 { font-family: var(--display); font-weight: 300; font-optical-sizing: auto; margin: 0; }
+html.home .hm .dim, html.home .hm h2 span { color: inherit; }
+
+html.home .hm-intro {
+  display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 2.5rem clamp(2rem, 6vw, 6rem); align-items: end;
+  padding: clamp(5rem, 11vw, 9.5rem) 0 0;
+}
+html.home .hm-statement { font-size: clamp(2.4rem, 5vw, 4.75rem); line-height: 1.04; letter-spacing: -0.03em; max-width: 15ch; text-wrap: balance; }
+html.home .hm-lede { margin: 0; max-width: 36ch; font-size: 1.125rem; line-height: 1.6; color: var(--ink-soft); }
+
+html.home .hm-stats {
+  grid-column: 1 / -1; margin: clamp(2.5rem, 6vw, 4.5rem) 0 0;
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
+  border-top: 1px solid var(--rule);
+}
+html.home .hm-stats > div { display: flex; flex-direction: column; padding: 1.75rem 1.25rem 0 0; }
+html.home .hm-stats > div + div { padding-left: 1.25rem; border-left: 1px solid var(--rule); }
+html.home .hm-stats dd { order: 1; margin: 0; font: 300 clamp(2.4rem, 4.4vw, 4rem)/1 var(--display); letter-spacing: -0.03em; font-variant-numeric: lining-nums tabular-nums; }
+html.home .hm-stats dt { order: 2; margin-top: 0.75rem; font-size: 0.875rem; color: var(--ink-soft); }
+html.home #s-updated { font-size: clamp(1.5rem, 2.4vw, 2rem); line-height: 1.1; padding-top: 0.4em; }
+
+html.home .hm-sec { padding: clamp(5.5rem, 12vw, 10rem) 0 0; }
+html.home .hm-head {
+  display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 1.25rem clamp(2rem, 6vw, 6rem); align-items: end;
+  padding-bottom: clamp(2rem, 4vw, 3rem);
+}
+html.home .hm-head h2 { font-size: clamp(2.2rem, 4.4vw, 4rem); line-height: 1.02; letter-spacing: -0.03em; }
+html.home .hm-head p { margin: 0; max-width: 36ch; color: var(--ink-soft); line-height: 1.6; }
+
+/* principles: plain rows, title left, words right */
+html.home .hm-rows { list-style: none; margin: 0; padding: 0; border-bottom: 1px solid var(--rule); }
+html.home .hm-rows li {
+  display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 0.75rem clamp(2rem, 6vw, 6rem);
+  padding: clamp(1.5rem, 3vw, 2.25rem) 0; border-top: 1px solid var(--rule);
+}
+html.home .hm-rows h3 { font-size: clamp(1.6rem, 2.6vw, 2.25rem); line-height: 1.1; letter-spacing: -0.02em; }
+html.home .hm-rows p { margin: 0; max-width: 40ch; color: var(--ink-soft); line-height: 1.6; }
+
+/* where to start: an index of the site */
+html.home .hm-index { border-bottom: 1px solid var(--rule); }
+html.home .hm-index a {
+  display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 0.5rem clamp(2rem, 6vw, 6rem); align-items: baseline;
+  padding: clamp(1.25rem, 2.6vw, 1.9rem) 0; border-top: 1px solid var(--rule); align-items: center;
+  color: var(--ink); text-decoration: none;
+}
+html.home .hm-index .nm {
+  font: 300 clamp(2rem, 4.6vw, 4.25rem)/1 var(--display); letter-spacing: -0.03em;
+  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1), color 0.2s;
+}
+html.home .hm-index .ds { max-width: 40ch; color: var(--ink-soft); line-height: 1.55; transition: color 0.2s; }
+html.home .hm-index a:hover .nm, html.home .hm-index a:focus-visible .nm { transform: translateX(0.6rem); color: var(--accent); }
+html.home .hm-index a:hover .ds, html.home .hm-index a:focus-visible .ds { color: var(--ink); }
+html.home .hm-index a:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+
+html.home .r-foot { margin-top: clamp(6rem, 12vw, 10rem); }
+
+/* Chinese: a touch more air between characters, a little less tight */
+html.home[lang="zh-HK"] .orb-title { max-width: 9em; font-size: clamp(2.6rem, 5.4vw, 5.25rem); letter-spacing: 0.02em; line-height: 1.15; }
+html.home[lang="zh-HK"] :is(.hm-statement, .hm-head h2, .hm-rows h3, .hm-index .nm) { letter-spacing: 0; line-height: 1.2; }
+
+@media (max-width: 900px) {
+  html.home .pulse { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  html.home .pulse a, html.home .pulse a + a { padding: 1rem 1rem 1rem 0; border-left: 0; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+  html.home .pulse a:nth-child(even) { padding-left: 1rem; border-left: 1px solid rgba(255, 255, 255, 0.08); }
+  html.home .pulse .when { grid-column: 1 / -1; padding: 0.9rem 0; }
+  html.home :is(.hm-intro, .hm-head, .hm-rows li, .hm-index a) { grid-template-columns: minmax(0, 1fr); }
+  html.home .hm-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  html.home .hm-stats > div, html.home .hm-stats > div + div { padding: 1.25rem 1rem 1.25rem 0; border-left: 0; border-bottom: 1px solid var(--rule); }
+  html.home .hm-stats > div:nth-child(even) { padding-left: 1rem; border-left: 1px solid var(--rule); }
+  html.home .hm-stats > div:last-child { grid-column: 1 / -1; }
+}
+@media (max-width: 760px) {
+  html.home .orb-hero { height: clamp(600px, 92svh, 760px); }
+  html.home .orb-hint { display: none; }
+  html.home .orb-actions { flex-wrap: wrap; }
+}
+@media (prefers-reduced-motion: reduce) { html.home .hm-index .nm { transition: none; } }

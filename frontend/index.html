@@ -11,83 +11,74 @@
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..600;1,6..72,200..600&family=Geist:wght@300..700&family=Geist+Mono:wght@400..600&family=Noto+Sans+HK:wght@300;400;500;700&family=Noto+Serif+HK:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="report.css">
+  <link rel="stylesheet" href="home.css">
   <script>let t = null; try { t = localStorage.getItem("datavest.theme"); } catch {} document.documentElement.dataset.theme = t === "light" ? "light" : "dark";</script>
 </head>
 <body>
-  <!-- opening: glowing particle sphere -->
+  <!-- opening: the particle sphere, the title and the latest closes -->
   <div class="r-hero orb-wrap">
     <header class="top" id="top"></header>
     <section class="orb-hero" aria-labelledby="orb-title">
       <canvas id="orb" aria-hidden="true"></canvas>
-      <p class="orb-hint mono" aria-hidden="true" data-i18n="h.hint">Drag to spin</p>
+      <p class="orb-hint" aria-hidden="true" data-i18n="h.hint">Drag to spin</p>
       <div class="orb-copy">
-        <p class="orb-brand">DataVest</p>
         <h1 class="orb-title" id="orb-title" data-i18n="h.title">See how markets<br>really behave</h1>
         <p class="orb-sub" data-i18n="h.sub">Growth, ups and downs, and the worst falls, explained in plain language.</p>
-      </div>
-      <div class="orb-actions">
-        <a class="orb-btn primary" href="markets.html" data-i18n="h.openMarkets">Open the markets</a>
-        <a class="orb-btn" href="learn.html" data-i18n="h.startLearning">Start learning</a>
+        <div class="orb-actions">
+          <a class="orb-btn primary" href="markets.html" data-i18n="h.openMarkets">Open the markets</a>
+          <a class="orb-btn" href="learn.html" data-i18n="h.startLearning">Start learning</a>
+        </div>
       </div>
     </section>
+    <div class="pulse" id="pulse" role="group" aria-label="Latest closes"></div>
   </div>
 
-  <div class="r-body">
-    <main id="main" class="frame home-main">
-      <!-- what DataVest is -->
-      <section class="lede-x intro" aria-labelledby="intro-title">
-        <span class="tri l" aria-hidden="true"></span><span class="tri r" aria-hidden="true"></span>
-        <p class="ch-num mono" data-i18n="h.k0">00 / What is DataVest</p>
-        <h2 id="intro-title" class="display" data-i18n="h.introTitle"><span class="dim">A free place to learn</span> how money and markets really work.</h2>
-        <p class="art-note" data-i18n="h.intro">DataVest uses real prices from US and Hong Kong markets to teach investing in plain language. Every chart is calculated from data, every model is tested on data it has never seen, and nothing here is trying to sell you anything.</p>
-        <dl class="stat-strip" id="stats">
-          <div><dt data-i18n="h.sMarkets">Markets tracked</dt><dd id="s-markets">–</dd></div>
-          <div><dt data-i18n="h.sStocks">Stocks studied</dt><dd id="s-stocks">–</dd></div>
-          <div><dt data-i18n="h.sYears">Years of prices</dt><dd>5</dd></div>
-          <div><dt data-i18n="h.sLessons">Lessons</dt><dd id="s-lessons">–</dd></div>
-          <div><dt data-i18n="h.sUpdated">Last update</dt><dd id="s-updated">–</dd></div>
-        </dl>
-      </section>
+  <main id="main" class="hm">
+    <!-- what DataVest is -->
+    <section class="hm-intro" aria-labelledby="intro-title">
+      <h2 id="intro-title" class="hm-statement" data-i18n="h.introTitle"><span class="dim">A free place to learn</span> how money and markets really work.</h2>
+      <p class="hm-lede" data-i18n="h.intro">DataVest uses real prices from US and Hong Kong markets to teach investing in plain language. Every chart is calculated from data, every model is tested on data it has never seen, and nothing here is trying to sell you anything.</p>
+      <dl class="hm-stats" id="stats">
+        <div><dd id="s-markets">–</dd><dt data-i18n="h.sMarkets">Markets tracked</dt></div>
+        <div><dd id="s-stocks">–</dd><dt data-i18n="h.sStocks">Stocks studied</dt></div>
+        <div><dd>5</dd><dt data-i18n="h.sYears">Years of prices</dt></div>
+        <div><dd id="s-lessons">–</dd><dt data-i18n="h.sLessons">Lessons</dt></div>
+        <div><dd id="s-updated">–</dd><dt data-i18n="h.sUpdated">Last update</dt></div>
+      </dl>
+    </section>
 
-      <!-- philosophy -->
-      <section class="chapter" id="philosophy" aria-labelledby="ph-title">
-        <div class="ch-head">
-          <div>
-            <p class="ch-num mono" data-i18n="h.k1">01 / Philosophy</p>
-            <h2 id="ph-title" class="two-tone" data-i18n="h.phTitle"><span>What we</span> believe</h2>
-          </div>
-          <p class="chart-note" data-i18n="h.phNote">Five ideas shape every page on DataVest. They are also a good way to think about money in general.</p>
-        </div>
-        <ol class="principles">
-          <li class="window"><span class="p-num mono">01</span><h3 data-i18n="h.p1t">Data before opinion</h3><p data-i18n="h.p1">Every claim on this site comes from real prices you can check. If the data doesn't support something, we don't say it.</p></li>
-          <li class="window"><span class="p-num mono">02</span><h3 data-i18n="h.p2t">Say it plainly</h3><p data-i18n="h.p2">Finance is full of jargon. Each idea is explained in everyday words first, then given its proper name.</p></li>
-          <li class="window"><span class="p-num mono">03</span><h3 data-i18n="h.p3t">Test, then trust</h3><p data-i18n="h.p3">Models are judged on data they never saw. When something fails, like the RSI signals on the Models page, we show that too.</p></li>
-          <li class="window"><span class="p-num mono">04</span><h3 data-i18n="h.p4t">Risk is half the story</h3><p data-i18n="h.p4">Growth always comes with falls. Every market is shown with its worst drop and how bumpy the ride was, not just its return.</p></li>
-          <li class="window"><span class="p-num mono">05</span><h3 data-i18n="h.p5t">Learning, not advice</h3><p data-i18n="h.p5">DataVest is free and sells nothing. It is here to help you think for yourself, not to tell you what to buy.</p></li>
-        </ol>
-      </section>
+    <!-- philosophy -->
+    <section class="hm-sec" id="philosophy" aria-labelledby="ph-title">
+      <header class="hm-head">
+        <h2 id="ph-title" data-i18n="h.phTitle"><span>What we</span> believe</h2>
+        <p data-i18n="h.phNote">Five ideas shape every page on DataVest. They are also a good way to think about money in general.</p>
+      </header>
+      <ul class="hm-rows">
+        <li><h3 data-i18n="h.p1t">Data before opinion</h3><p data-i18n="h.p1">Every claim on this site comes from real prices you can check. If the data doesn't support something, we don't say it.</p></li>
+        <li><h3 data-i18n="h.p2t">Say it plainly</h3><p data-i18n="h.p2">Finance is full of jargon. Each idea is explained in everyday words first, then given its proper name.</p></li>
+        <li><h3 data-i18n="h.p3t">Test, then trust</h3><p data-i18n="h.p3">Models are judged on data they never saw. When something fails, like the RSI signals on the Models page, we show that too.</p></li>
+        <li><h3 data-i18n="h.p4t">Risk is half the story</h3><p data-i18n="h.p4">Growth always comes with falls. Every market is shown with its worst drop and how bumpy the ride was, not just its return.</p></li>
+        <li><h3 data-i18n="h.p5t">Learning, not advice</h3><p data-i18n="h.p5">DataVest is free and sells nothing. It is here to help you think for yourself, not to tell you what to buy.</p></li>
+      </ul>
+    </section>
 
-      <!-- explore -->
-      <section class="chapter" id="explore" aria-labelledby="ex-title">
-        <div class="ch-head">
-          <div>
-            <p class="ch-num mono" data-i18n="h.k2">02 / Explore</p>
-            <h2 id="ex-title" class="two-tone" data-i18n="h.exTitle"><span>Where to</span> start</h2>
-          </div>
-          <p class="chart-note" data-i18n="h.exNote">New to investing? Start with Learn. Curious about the numbers? Open Markets or Insights.</p>
-        </div>
-        <div class="explore">
-          <a class="window go" href="markets.html"><span class="mono" data-i18n="nav.markets">Markets</span><p data-i18n="h.e1">See how markets really behave: growth, ups and downs, and the worst falls, explained in plain language.</p><i aria-hidden="true">→</i></a>
-          <a class="window go" href="insights.html"><span class="mono" data-i18n="nav.insights">Insights</span><p data-i18n="h.e2">US vs Hong Kong markets over five years: growth, risk and how closely they move together.</p><i aria-hidden="true">→</i></a>
-          <a class="window go" href="models.html"><span class="mono" data-i18n="nav.models">Models</span><p data-i18n="h.e3">Can we forecast next month's market risk, and does the RSI indicator really work? Tested out of sample.</p><i aria-hidden="true">→</i></a>
-          <a class="window go" href="portfolio.html"><span class="mono" data-i18n="nav.portfolio">Portfolio</span><p data-i18n="h.e4">Build a practice portfolio from real markets and see how it would have done.</p><i aria-hidden="true">→</i></a>
-          <a class="window go" href="learn.html"><span class="mono" data-i18n="nav.learn">Learn</span><p data-i18n="h.e5">Lessons on money and stock investing, from budgeting to valuation and behavioural finance, with real data, tools and quizzes.</p><i aria-hidden="true">→</i></a>
-          <a class="window go" href="tools.html"><span class="mono" data-i18n="nav.tools">Tools</span><p data-i18n="h.e6">Free calculators: watch savings grow, plan for a goal, see the cost of waiting, and split your pay.</p><i aria-hidden="true">→</i></a>
-          <a class="window go" href="analysis/"><span class="mono" data-i18n="nav.analysis">Analysis</span><p data-i18n="h.e7">The research behind DataVest: full studies with code, re-run with fresh data every weekday.</p><i aria-hidden="true">→</i></a>
-        </div>
-      </section>
-    </main>
-  </div>
+    <!-- where to go -->
+    <section class="hm-sec" id="explore" aria-labelledby="ex-title">
+      <header class="hm-head">
+        <h2 id="ex-title" data-i18n="h.exTitle"><span>Where to</span> start</h2>
+        <p data-i18n="h.exNote">New to investing? Start with Learn. Curious about the numbers? Open Markets or Insights.</p>
+      </header>
+      <nav class="hm-index" aria-label="Sections">
+        <a href="markets.html"><span class="nm" data-i18n="nav.markets">Markets</span><span class="ds" data-i18n="h.e1">See how markets really behave: growth, ups and downs, and the worst falls, explained in plain language.</span></a>
+        <a href="insights.html"><span class="nm" data-i18n="nav.insights">Insights</span><span class="ds" data-i18n="h.e2">US vs Hong Kong markets over five years: growth, risk and how closely they move together.</span></a>
+        <a href="models.html"><span class="nm" data-i18n="nav.models">Models</span><span class="ds" data-i18n="h.e3">Can we forecast next month's market risk, and does the RSI indicator really work? Tested out of sample.</span></a>
+        <a href="portfolio.html"><span class="nm" data-i18n="nav.portfolio">Portfolio</span><span class="ds" data-i18n="h.e4">Build a practice portfolio from real markets and see how it would have done.</span></a>
+        <a href="learn.html"><span class="nm" data-i18n="nav.learn">Learn</span><span class="ds" data-i18n="h.e5">Lessons on money and stock investing, from budgeting to valuation and behavioural finance, with real data, tools and quizzes.</span></a>
+        <a href="tools.html"><span class="nm" data-i18n="nav.tools">Tools</span><span class="ds" data-i18n="h.e6">Free calculators: watch savings grow, plan for a goal, see the cost of waiting, and split your pay.</span></a>
+        <a href="analysis/"><span class="nm" data-i18n="nav.analysis">Analysis</span><span class="ds" data-i18n="h.e7">The research behind DataVest: full studies with code, re-run with fresh data every weekday.</span></a>
+      </nav>
+    </section>
+  </main>
 
   <footer class="foot r-foot">
     <p class="wordmark" aria-hidden="true">DataVest</p>

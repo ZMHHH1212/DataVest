@@ -1,6 +1,8 @@
 // Chinese (Traditional, Hong Kong style, keeping common English finance terms) keyed by the English text.
 // Used by i18n.js: tx() for sentences built in code, translatePage() for the fixed text on each page.
 export const ZH_TEXT = {
+  "Close of {date}": "{date} 收市",
+  "Latest closes": "最新收市價",
   "<span class=\"mono\">► Growth</span>Over five years the <b>S&amp;P 500</b> grew <b>{us} a year</b>, while the <b>Hang Seng</b> managed <b>{hk} a year</b> (index levels, before dividends).": "<span class=\"mono\">► 增長 Growth</span>五年來，<b>標普500</b>每年增長 <b>{us}</b>，<b>恒生指數</b>則每年 <b>{hk}</b>（指數水平，未計股息）。",
   "Hong Kong": "香港",
   "the S&amp;P 500": "標普500",
