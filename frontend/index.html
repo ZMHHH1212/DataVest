@@ -47,6 +47,30 @@
       </dl>
     </section>
 
+    <!-- what $1,000 became -->
+    <section class="hm-sec" id="grow" aria-labelledby="gr-title">
+      <header class="hm-head">
+        <h2 id="gr-title">What $1,000 became</h2>
+        <p>Pick a market and slide the start date. Real daily prices, with dividends counted for funds and shares.</p>
+      </header>
+      <div class="gr">
+        <div class="gr-pick" id="gr-pick" role="group" aria-label="Market"></div>
+        <div class="gr-read">
+          <div class="gr-money">
+            <p class="gr-lead"><span id="gr-start">$1,000</span> <span>became</span></p>
+            <p class="gr-big" id="gr-end">–</p>
+          </div>
+          <dl class="gr-facts">
+            <div><dt>Total return</dt><dd id="gr-total">–</dd></div>
+            <div><dt>Per year</dt><dd id="gr-year">–</dd></div>
+            <div><dt>Worst fall on the way</dt><dd><span id="gr-worst" class="down">–</span><small id="gr-when"></small></dd></div>
+          </dl>
+        </div>
+        <div class="gr-chart"><canvas id="gr-canvas" role="img" aria-label="Growth of $1,000"></canvas><div class="gr-tip" id="gr-tip" hidden></div></div>
+        <label class="gr-range"><span>Invested on</span><input type="range" id="gr-range" min="0" max="1" value="0"><output id="gr-from" for="gr-range">–</output></label>
+      </div>
+    </section>
+
     <!-- philosophy -->
     <section class="hm-sec" id="philosophy" aria-labelledby="ph-title">
       <header class="hm-head">

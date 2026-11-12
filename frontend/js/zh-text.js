@@ -1,6 +1,17 @@
 // Chinese (Traditional, Hong Kong style, keeping common English finance terms) keyed by the English text.
 // Used by i18n.js: tx() for sentences built in code, translatePage() for the fixed text on each page.
 export const ZH_TEXT = {
+  "What $1,000 became": "$1,000 變成了多少",
+  "Pick a market and slide the start date. Real daily prices, with dividends counted for funds and shares.": "揀一個市場，再拖動開始日期。用真實的每日價格，基金和股票已計入股息。",
+  "became": "變成",
+  "Total return": "總回報",
+  "Per year": "每年",
+  "Worst fall on the way": "途中最大跌幅（Max drawdown）",
+  "Invested on": "投入日期",
+  "Growth of $1,000": "$1,000 的增長",
+  "{from} to {to}": "{from}至{to}",
+  "No fall from a high": "沒有從高位下跌",
+  "{start} invested in {name} on {date} grew to {end}.": "{date}投入{name}的{start}，變成了{end}。",
   "Close of {date}": "{date} 收市",
   "Latest closes": "最新收市價",
   "<span class=\"mono\">► Growth</span>Over five years the <b>S&amp;P 500</b> grew <b>{us} a year</b>, while the <b>Hang Seng</b> managed <b>{hk} a year</b> (index levels, before dividends).": "<span class=\"mono\">► 增長 Growth</span>五年來，<b>標普500</b>每年增長 <b>{us}</b>，<b>恒生指數</b>則每年 <b>{hk}</b>（指數水平，未計股息）。",

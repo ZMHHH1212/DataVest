@@ -62,11 +62,17 @@ export function mountSphere(canvas, opts = {}) {
   const pts = spherePoints(opts.count ?? 5000, opts.seed ?? 7);
   const colors = opts.colors ?? [[44, 198, 166], [227, 237, 220], [246, 214, 178], [242, 169, 59]];
   const BUCKETS = 12;
-  const fills = Array.from({ length: BUCKETS }, (_, i) => {
-    const t = i / (BUCKETS - 1), k = t * (colors.length - 1), j = Math.min(colors.length - 2, Math.floor(k)), u = k - j;
-    const c = colors[j].map((v, q) => Math.round(v + (colors[j + 1][q] - v) * u));
-    return `rgb(${c[0]},${c[1]},${c[2]})`;
-  });
+  // colours can lean towards a "mood" colour (setMood), eased in and out over a few frames
+  let mood = [255, 255, 255], mix = 0, moodTarget = 0, fills = [];
+  const lean = (c, k) => c.map((v, q) => Math.round(v + (mood[q] - v) * k));
+  function buildFills() {
+    fills = Array.from({ length: BUCKETS }, (_, i) => {
+      const t = i / (BUCKETS - 1), k = t * (colors.length - 1), j = Math.min(colors.length - 2, Math.floor(k)), u = k - j;
+      const c = lean(colors[j].map((v, q) => v + (colors[j + 1][q] - v) * u), mix * 0.62);
+      return `rgb(${c[0]},${c[1]},${c[2]})`;
+    });
+  }
+  buildFills();
   // sort by colour bucket once, so each frame changes fillStyle only 12 times
   pts.forEach((p) => { p.b = Math.round(p.t * (BUCKETS - 1)); p.ox = 0; p.oy = 0; });
   pts.sort((a, b) => a.b - b.b);
@@ -92,9 +98,10 @@ export function mountSphere(canvas, opts = {}) {
     const dist = 3.2;
     // soft warm light inside the sphere
     const glow = ctx.createRadialGradient(cx, cy + R * 0.15, 0, cx, cy, R * 1.15);
-    glow.addColorStop(0, "rgba(246, 214, 178, 0.16)");
-    glow.addColorStop(0.5, "rgba(242, 169, 59, 0.05)");
-    glow.addColorStop(1, "rgba(242, 169, 59, 0)");
+    const g1 = lean([246, 214, 178], mix * 0.7), g2 = lean([242, 169, 59], mix * 0.7);
+    glow.addColorStop(0, `rgba(${g1}, ${0.16 + 0.08 * mix})`);
+    glow.addColorStop(0.5, `rgba(${g2}, 0.05)`);
+    glow.addColorStop(1, `rgba(${g2}, 0)`);
     ctx.fillStyle = glow;
     ctx.fillRect(0, 0, w, h);
     ctx.globalCompositeOperation = "lighter";
@@ -131,7 +138,9 @@ export function mountSphere(canvas, opts = {}) {
     last = t;
     if (!visible) return;
     if (view.spin && !drag) view.yaw += dt * 0.00011;
-    if (view.spin || mouse || drag) draw();
+    const easing = Math.abs(moodTarget - mix) > 0.002;
+    if (easing) { mix += (moodTarget - mix) * (reduce ? 1 : 0.09); buildFills(); }
+    if (view.spin || mouse || drag || easing) draw();
   }
 
   const pos = (e) => { const r = canvas.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
@@ -160,6 +169,10 @@ export function mountSphere(canvas, opts = {}) {
   raf = requestAnimationFrame(loop);
 
   return {
+    /** Lean the colours towards [r, g, b] (or back to normal with null). */
+    setMood(rgb) {
+      if (rgb) { mood = rgb; moodTarget = 1; } else moodTarget = 0;
+    },
     destroy() {
       cancelAnimationFrame(raf); ro.disconnect(); io.disconnect();
       canvas.removeEventListener("pointermove", onMove);
