@@ -42,15 +42,17 @@
                 <option value="monthly">Every month</option>
               </select>
             </label>
-            <label>Compare with
-              <select id="bench" class="picker"></select>
-            </label>
           </div>
+          <fieldset class="cmp-pick">
+            <legend>Compare with (pick up to 3)</legend>
+            <div class="chip-toggles" id="bench" role="group" aria-label="Comparisons"></div>
+          </fieldset>
         </div>
         <div>
           <div class="pf-stats" id="pf-stats"></div>
           <div class="legend static" id="g-legend"></div>
           <div class="chart-wrap"><canvas id="g-chart" role="img" aria-label="Growth of 100: your portfolio vs the benchmark"></canvas></div>
+          <div class="table-wrap"><table class="stats cmp-table" id="cmp-table"></table></div>
         </div>
       </div>
     </section>

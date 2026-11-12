@@ -59,28 +59,78 @@ function update(moveSliders = true) {
   renderFrontier();
 }
 
-// ---- growth vs benchmark -----------------------------------------------------------------
+// ---- growth vs comparisons -----------------------------------------------------------------
+// Things to compare with: the preset mixes and every single market. Up to three at once.
+const MAX_CMP = 3;
+const CMP_KEY = "datavest.portfolio.compare";
+const CMP_COLORS = ["--s2", "--s3", "--s4"];
+let compare = ["m:^HSI", "m:^GSPC"];
+
+function cmpOptions() {
+  return [
+    ...presets().map(([name, wt], i) => ({ id: `p:${i}`, label: name, weights: wt, kind: "mix" })),
+    ...D.names.map((sym, i) => ({ id: `m:${sym}`, label: marketName(sym, D.labels[i]), weights: D.names.map((_, j) => (j === i ? 1 : 0)), kind: "market" })),
+  ];
+}
+
+function renderCompareChips() {
+  const opts = cmpOptions();
+  const group = (kind, title) => `<span class="chip-group">${title}</span>` + opts.filter((o) => o.kind === kind).map((o) => {
+    const on = compare.includes(o.id);
+    const full = !on && compare.length >= MAX_CMP;
+    return `<button type="button" class="chip-toggle" data-id="${esc(o.id)}" aria-pressed="${on}"${full ? " disabled" : ""}>${esc(o.label)}</button>`;
+  }).join("");
+  $("bench").innerHTML = group("mix", tx("Mixes")) + group("market", tx("Markets"));
+  $("bench").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => {
+    const id = b.dataset.id;
+    compare = compare.includes(id) ? compare.filter((x) => x !== id) : [...compare, id].slice(0, MAX_CMP);
+    try { localStorage.setItem(CMP_KEY, JSON.stringify(compare)); } catch { /* storage blocked */ }
+    renderCompareChips();
+    renderGrowth();
+  }));
+}
+
 function renderGrowth() {
   const reb = $("rebalance").value;
   const curve = P.backtest(D.prices, D.dates, w, reb);
-  const bi = Number($("bench").value);
-  const bw = D.names.map((_, i) => (i === bi ? 1 : 0));
-  const bench = P.backtest(D.prices, D.dates, bw, "none");
-  const m = P.curveMetrics(curve), bm = P.curveMetrics(bench);
+  const m = P.curveMetrics(curve);
+  const opts = cmpOptions();
+  // preset mixes follow the same rebalancing as yours; single markets are just held
+  const cmps = compare.map((id) => opts.find((o) => o.id === id)).filter(Boolean).map((o, k) => {
+    const c = P.backtest(D.prices, D.dates, o.weights, o.kind === "mix" ? reb : "none");
+    return { ...o, curve: c, m: P.curveMetrics(c), color: CMP_COLORS[k % CMP_COLORS.length] };
+  });
+  const first = cmps[0];
   const dr = P.diversificationRatio(w, D.cov);
   const card = (label, val, sub) => `<div class="pf-stat"><span>${label}</span><b>${val}</b><small>${sub}</small></div>`;
+  const vs = (f) => (first ? `${esc(first.label)}: ${f(first.m)}` : "");
   $("pf-stats").innerHTML = [
-    card(tx("Growth per year"), pct(m.cagr), `${short(D.names[bi])}: ${pct(bm.cagr)}`),
-    card(tx("Volatility"), vol(m.vol), `${short(D.names[bi])}: ${vol(bm.vol)}`),
-    card(tx("Worst fall"), pct(m.maxDrawdown, 0), `${short(D.names[bi])}: ${pct(bm.maxDrawdown, 0)}`),
+    card(tx("Growth per year"), pct(m.cagr), vs((x) => pct(x.cagr))),
+    card(tx("Volatility"), vol(m.vol), vs((x) => vol(x.vol))),
+    card(tx("Worst fall"), pct(m.maxDrawdown, 0), vs((x) => pct(x.maxDrawdown, 0))),
     card(tx("Diversification"), `${dr.toFixed(2)}×`, tx(dr < 1.1 ? "little benefit from mixing" : "risk lowered by mixing")),
   ].join("");
-  $("g-legend").innerHTML = `<span class="key"><i style="background: var(--s1)"></i>${tx("Your mix")}</span><span class="key"><i style="background: var(--ink-soft)"></i>${esc(marketName(D.names[bi], D.labels[bi]))}</span>`;
+  $("g-legend").innerHTML = `<span class="key"><i style="background: var(--s1)"></i>${tx("Your mix")}</span>` +
+    cmps.map((c) => `<span class="key"><i class="dash" style="--c: var(${c.color})"></i>${esc(c.label)}</span>`).join("");
+
+  // side-by-side table: your mix first, then each comparison; best value in each column marked
+  const rows = [{ label: tx("Your mix"), m, you: true }, ...cmps];
+  const cols = [
+    [tx("Growth per year"), (x) => x.cagr, (v) => pct(v), "max"],
+    [tx("Total change"), (x) => x.total, (v) => pct(v, 0), "max"],
+    [tx("Volatility"), (x) => x.vol, (v) => vol(v), "min"],
+    [tx("Worst fall"), (x) => x.maxDrawdown, (v) => pct(v, 0), "max"],
+    [tx("Sharpe ratio"), (x) => x.sharpe ?? 0, (v) => v.toFixed(2).replace("-", "−"), "max"],
+  ];
+  const bestOf = cols.map(([, get, , dir]) => (dir === "max" ? Math.max : Math.min)(...rows.map((r) => get(r.m))));
+  $("cmp-table").innerHTML = `<thead><tr><th scope="col"></th>${cols.map(([h]) => `<th scope="col">${h}</th>`).join("")}</tr></thead>
+    <tbody>${rows.map((r) => `<tr${r.you ? ' class="you"' : ""}><th scope="row"><i class="sw-dot" style="background: var(${r.you ? "--s1" : r.color})"></i>${esc(r.label)}</th>${cols.map(([, get, fmt], k) => `<td class="num${get(r.m) === bestOf[k] && rows.length > 1 ? " best" : ""}">${fmt(get(r.m))}</td>`).join("")}</tr>`).join("")}</tbody>`;
+
   const data = {
     labels: D.dates,
     datasets: [
-      { label: tx("Your mix"), data: curve.map((x) => x * 100), borderColor: css("--s1"), borderWidth: 2, pointRadius: 0, pointHoverRadius: 4, tension: 0.1 },
-      { label: marketName(D.names[bi], D.labels[bi]), data: bench.map((x) => x * 100), borderColor: css("--ink-soft"), borderWidth: 1.5, borderDash: [5, 4], pointRadius: 0, pointHoverRadius: 4, tension: 0.1 },
+      { label: tx("Your mix"), data: curve.map((x) => x * 100), borderColor: css("--s1"), borderWidth: 2.25, pointRadius: 0, pointHoverRadius: 4, tension: 0.1 },
+      ...cmps.map((c) => ({ label: c.label, data: c.curve.map((x) => x * 100), borderColor: css(c.color), borderWidth: 1.5, borderDash: [5, 4], pointRadius: 0, pointHoverRadius: 4, tension: 0.1 })),
     ],
   };
   if (gChart) { gChart.data = data; gChart.update("none"); return; }
@@ -209,8 +259,12 @@ async function init() {
 
     $("presets").innerHTML = presets().map(([name], i) => `<button type="button" data-p="${i}" aria-pressed="false">${esc(name)}</button>`).join("");
     $("presets").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { w = presets()[Number(b.dataset.p)][1]; update(); }));
-    $("bench").innerHTML = D.names.map((s, i) => `<option value="${i}"${s === "^HSI" ? " selected" : ""}>${esc(marketName(s, D.labels[i]))}</option>`).join("");
-    ["rebalance", "bench"].forEach((id) => $(id).addEventListener("change", renderGrowth));
+    try {
+      const saved = JSON.parse(localStorage.getItem(CMP_KEY) || "null");
+      if (Array.isArray(saved)) compare = saved.filter((id) => cmpOptions().some((o) => o.id === id)).slice(0, MAX_CMP);
+    } catch { /* storage blocked or bad data */ }
+    renderCompareChips();
+    $("rebalance").addEventListener("change", renderGrowth);
     $("cap").addEventListener("change", renderFrontier);
     $("use-minvar").addEventListener("click", () => { w = frontierData().minvar; update(); });
     $("use-maxsharpe").addEventListener("click", () => { w = frontierData().maxsharpe; update(); });

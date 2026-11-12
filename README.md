@@ -41,6 +41,7 @@ Data-first order, so the data science and AI work sits at the centre.
 - **Home page opening**: glowing 3D particle sphere (drag to spin, dots drift from the mouse), own canvas code in `frontend/js/particles.js`, English and Chinese text
 - **New home page** (`index.html`): sphere opening, what DataVest is with live numbers, our philosophy, and where to start; the market dashboard moved to `markets.html` and now uses the report style with light/dark mode
 - **Chinese on every page**: 中/EN button on all pages; fixed text is translated by its English wording (`frontend/js/zh-text.js`, `translatePage` in `i18n.js`) and sentences built from data use `tx()` templates; lesson text and the Analysis studies are next
+- **Portfolio comparisons**: compare your mix with up to three things at once (preset mixes or any market), each drawn on the chart, with a side-by-side table of growth, total change, volatility, worst fall and Sharpe ratio
 - [ ] **v2 — AI tutor**: chat assistant grounded in DataVest's lessons and live numbers (RAG), on a free tier; project write-up
 
 ## Run it

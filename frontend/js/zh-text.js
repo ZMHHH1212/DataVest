@@ -398,5 +398,9 @@ export const ZH_TEXT = {
   "View the notebook on GitHub": "在 GitHub 查看 notebook",
   "Prices from Yahoo Finance. The notebooks are re-run with fresh data every weekday.": "價格來自 Yahoo Finance。Notebook 每個工作日都會用最新數據重新運行。",
   "Analysis": "研究",
-  "· study": "· 專題"
+  "· study": "· 專題",
+  "Compare with (pick up to 3)": "比較對象（最多揀 3 個）",
+  "Comparisons": "比較對象",
+  "Mixes": "組合",
+  "Total change": "總變幅"
 };

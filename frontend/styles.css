@@ -599,3 +599,22 @@ h3.chart-title { font-size: 1rem; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 .nb-md.lesson-body { max-width: 54rem; }
 .lesson-body > p, .lesson-body > ul, .lesson-body > ol, .lesson-body > h3, .lesson-body > table { max-width: 42rem; }
+
+/* portfolio: choose up to three comparisons */
+.cmp-pick { margin: 1.1rem 0 0; padding: 0; border: 0; min-width: 0; }
+.cmp-pick legend { padding: 0; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.9375rem; }
+.chip-toggles { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
+.chip-group { flex-basis: 100%; margin-top: 0.35rem; font-size: 0.75rem; color: var(--ink-soft); }
+.chip-toggle {
+  padding: 0.35rem 0.7rem; border-radius: 999px; border: 1px solid var(--rule);
+  background: transparent; color: var(--ink); font: 500 0.8125rem/1.2 var(--body); cursor: pointer;
+}
+.chip-toggle:hover:not(:disabled) { border-color: var(--ink-soft); }
+.chip-toggle[aria-pressed="true"] { background: var(--ink); color: var(--paper-raised); border-color: var(--ink); }
+.chip-toggle:disabled { opacity: 0.4; cursor: not-allowed; }
+.key i.dash { width: 1.1rem; height: 0; border-radius: 0; background: none; border-top: 2.5px dashed var(--c); vertical-align: 0.25em; }
+.cmp-table { margin-top: 1rem; }
+.cmp-table th[scope="row"] { text-align: left; font-weight: 500; white-space: nowrap; }
+.cmp-table .sw-dot { display: inline-block; width: 0.6rem; height: 0.6rem; border-radius: 50%; margin-right: 0.45rem; vertical-align: 0.05em; }
+.cmp-table tr.you th, .cmp-table tr.you td { font-weight: 700; }
+.cmp-table td.best { color: var(--jade); }
