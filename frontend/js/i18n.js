@@ -147,8 +147,8 @@ export function tx(en, vars = {}) {
 }
 
 const norm = (s) => s.replace(/\s+/g, " ").trim();
-const SKIP = "script, style, code, pre, .hl, .nb-md, .nb-out, .mega, [data-zh-skip]";
-const BLOCKS = "h1, h2, h3, p, li, summary, dt, dd, td, th, label, legend, option, figcaption, span, a, button, small, b";
+const SKIP = "script, style, code, pre, .hl, body.nb-page .nb-md, body.nb-page .nb-out, .mega, [data-zh-skip]";  // research notebooks stay English
+const BLOCKS = "h1, h2, h3, h4, p, li, summary, dt, dd, td, th, caption, label, legend, option, figcaption, span, a, button, small, b";
 
 /**
  * Translate a page (or part of one) from its English text: whole elements first (so sentences with

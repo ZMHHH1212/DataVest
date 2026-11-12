@@ -3,11 +3,20 @@ import { FOUNDATIONS } from "./lessons.js";
 import { INVESTING } from "./lessons-investing.js";
 import { mountWidgets } from "./widgets.js";
 import { $, esc, getJSON, renderTopBar, chartDefaults } from "./common.js";
-import { tx } from "./i18n.js";
+import { tx, isZh } from "./i18n.js";
+import { ZH_LESSONS } from "./lessons-zh.js";
+
+// In Chinese, swap in the translated text; ids, timing, widgets and correct answers stay from the English lesson.
+function localise(l) {
+  const z = isZh && ZH_LESSONS[l.id];
+  if (!z) return l;
+  return { ...l, title: z.title, summary: z.summary, body: z.body, takeaways: z.takeaways,
+    quiz: l.quiz.map((q, i) => ({ ...q, ...(z.quiz?.[i] || {}) })) };
+}
 
 const TRACKS = [
-  { title: tx("Money foundations"), lessons: FOUNDATIONS },
-  { title: tx("Stock investing"), lessons: INVESTING },
+  { title: tx("Money foundations"), lessons: FOUNDATIONS.map(localise) },
+  { title: tx("Stock investing"), lessons: INVESTING.map(localise) },
 ];
 const LESSONS = TRACKS.flatMap((t) => t.lessons);
 const trackOf = (l) => TRACKS.find((t) => t.lessons.includes(l));

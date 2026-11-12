@@ -2,6 +2,7 @@
 // Maths comes from invest.js (tested); prices from data/prices/*.json.
 import { $, css, esc, fmtDate, fmtMonth, getJSON, crosshair } from "./common.js";
 import * as v from "./invest.js";
+import { tx, isZh, translatePage } from "./i18n.js";
 
 const charts = [];
 const priceCache = new Map();
@@ -71,8 +72,8 @@ function returns(root) {
     const yrs = Math.max(num($("r-yrs")), 0.01);
     $("r-out").innerHTML = `
       <p class="w-big">${pct(hpr)} <span>holding-period return</span></p>
-      <p class="w-big">${pct(v.annualise(hpr, yrs))} <span>a year, annualised over ${yrs} ${yrs === 1 ? "year" : "years"}</span></p>
-      <p class="muted">Without the dividends it would be ${pct(v.holdingPeriodReturn(num($("r-buy")), num($("r-sell"))))}.</p>`;
+      <p class="w-big">${pct(v.annualise(hpr, yrs))} <span>${tx(yrs === 1 ? "a year, annualised over {n} year" : "a year, annualised over {n} years", { n: yrs })}</span></p>
+      <p class="muted">${tx("Without the dividends it would be {x}.", { x: pct(v.holdingPeriodReturn(num($("r-buy")), num($("r-sell")))) })}</p>`;
   };
   onInputs(root, run);
   run();
@@ -89,8 +90,8 @@ function riskCheck(root) {
   root.innerHTML = `
     <h4>Risk tolerance self-check</h4>
     <form class="rc" onsubmit="return false">${qs.map(([q, opts], i) => `
-      <fieldset><legend>${i + 1}. ${esc(q)}</legend>
-        ${opts.map((o, j) => `<label class="opt"><input type="radio" name="rc${i}" value="${j + 1}"> <span>${esc(o)}</span></label>`).join("")}
+      <fieldset><legend>${i + 1}. ${esc(tx(q))}</legend>
+        ${opts.map((o, j) => `<label class="opt"><input type="radio" name="rc${i}" value="${j + 1}"> <span>${esc(tx(o))}</span></label>`).join("")}
       </fieldset>`).join("")}</form>
     <p class="w-result" id="rc-out" role="status">Answer all four to see your result.</p>`;
   root.querySelectorAll("input").forEach((el) => el.addEventListener("change", () => {
@@ -102,7 +103,7 @@ function riskCheck(root) {
       : score <= 9
         ? ["Balanced", "Some ups and downs are acceptable for better growth. A mix of shares and bonds, such as a balanced fund, fits this profile."]
         : ["Growth-oriented", "A long horizon and calm about falls. A higher share in broad stock index funds fits, provided your emergency fund is in place first."];
-    $("rc-out").innerHTML = `<b>${name}</b> (score ${score} of 12). ${text} <span class="muted">This is a learning exercise, not financial advice.</span>`;
+    $("rc-out").innerHTML = tx('<b>{name}</b> (score {s} of 12). {text} <span class="muted">This is a learning exercise, not financial advice.</span>', { name: tx(name), s: score, text: tx(text) });
   }));
 }
 
@@ -127,7 +128,7 @@ function tradeCost(root) {
     const rows = [["Trade value", c.value], ["Broker commission", c.commission], ["Stamp duty", c.stampDuty], ["Exchange trading fee", c.tradingFee], ["SFC levy", c.sfcLevy], ["AFRC levy", c.afrcLevy], ["Settlement fee", c.settlement]];
     $("tc-table").innerHTML = `<tbody>${rows.map(([k, x], i) => `<tr${i === 0 ? ' class="sub"' : ""}><td>${k}</td><td class="num">${hk(x, 2)}</td></tr>`).join("")}<tr class="total"><td>Cost of buying</td><td class="num">${hk(c.total, 2)} (${(c.pctOfValue * 100).toFixed(3)}%)</td></tr></tbody>`;
     const be = c.value ? v.breakEvenRise(opts) : 0;
-    $("tc-out").innerHTML = c.value ? `Selling later costs about the same again, so the round trip costs about <b>${hk(c.total * 2, 2)}</b>. The price must rise about <b>${(be * 100).toFixed(2)}%</b> before you make any profit.` : "";
+    $("tc-out").innerHTML = c.value ? tx("Selling later costs about the same again, so the round trip costs about <b>{total}</b>. The price must rise about <b>{be}%</b> before you make any profit.", { total: hk(c.total * 2, 2), be: (be * 100).toFixed(2) }) : "";
   };
   onInputs(root, run);
   run();
@@ -163,12 +164,12 @@ async function bearMarkets(root) {
     const falls = v.bigFalls(series, 0.2);
     const idx = (d) => series.findIndex((r) => r[0] === d);
     bands = falls.map((f) => [idx(f.peak), f.recovered ? idx(f.recovered) : series.length - 1]);
-    const data = [ds("Price", series.map((r) => r[1]), "--ink", { borderWidth: 1.5 })];
+    const data = [ds(tx("Price"), series.map((r) => r[1]), "--ink", { borderWidth: 1.5 })];
     if (chart) { chart.data.labels = series.map((r) => r[0]); chart.data.datasets = data; chart.update("none"); }
     else chart = lineChart($("bm-chart"), series.map((r) => r[0]), data, { plugins: [shade] });
     const days = (a, b) => Math.round((new Date(b) - new Date(a)) / 864e5);
     $("bm-table").innerHTML = falls.length
-      ? `<thead><tr><th>Peak</th><th>Low</th><th>Fall</th><th>Back to the peak</th></tr></thead><tbody>${falls.map((f) => `<tr><td>${fmtDate(f.peak)}</td><td>${fmtDate(f.trough)}</td><td class="num down">${pct(f.depth, 0)}</td><td class="num">${f.recovered ? `${fmtDate(f.recovered)} (${Math.round(days(f.peak, f.recovered) / 30.4)} months)` : "Not yet"}</td></tr>`).join("")}</tbody>`
+      ? `<thead><tr><th>Peak</th><th>Low</th><th>Fall</th><th>Back to the peak</th></tr></thead><tbody>${falls.map((f) => `<tr><td>${fmtDate(f.peak)}</td><td>${fmtDate(f.trough)}</td><td class="num down">${pct(f.depth, 0)}</td><td class="num">${f.recovered ? tx("{date} ({n} months)", { date: fmtDate(f.recovered), n: Math.round(days(f.peak, f.recovered) / 30.4) }) : tx("Not yet")}</td></tr>`).join("")}</tbody>`
       : `<tbody><tr><td>No fall of 20% or more in this period.</td></tr></tbody>`;
   };
   onSeg(root, "bm-pick", run);
@@ -227,12 +228,12 @@ function tvm(root) {
     const a = num($("tv-amt")), r = num($("tv-r")) / 100, n = Math.max(1, Math.round(num($("tv-n")))), g = num($("tv-g")) / 100, due = $("tv-due").checked;
     const gp = v.presentValueGrowingPerpetuity(a, r, g);
     const rows = [
-      [`The amount today, grown for ${n} years`, "Future value", v.futureValue(a, r, n)],
-      [`The amount received in ${n} years, valued today`, "Present value", v.presentValue(a, r, n)],
-      [`Paid every year for ${n} years, total at the end`, "Future value of an annuity", v.futureValueAnnuity(a, r, n, due)],
-      [`Paid every year for ${n} years, valued today`, "Present value of an annuity", v.presentValueAnnuity(a, r, n, due)],
+      [tx("The amount today, grown for {n} years", { n }), "Future value", v.futureValue(a, r, n)],
+      [tx("The amount received in {n} years, valued today", { n }), "Present value", v.presentValue(a, r, n)],
+      [tx("Paid every year for {n} years, total at the end", { n }), "Future value of an annuity", v.futureValueAnnuity(a, r, n, due)],
+      [tx("Paid every year for {n} years, valued today", { n }), "Present value of an annuity", v.presentValueAnnuity(a, r, n, due)],
       ["Paid every year forever, valued today", "Perpetuity", v.presentValuePerpetuity(a, r)],
-      [`Starting at the amount and growing ${(g * 100).toFixed(2).replace(/\.?0+$/, "")}% a year forever`, "Growing perpetuity", gp],
+      [tx("Starting at the amount and growing {g}% a year forever", { g: (g * 100).toFixed(2).replace(/\.?0+$/, "") }), "Growing perpetuity", gp],
     ];
     $("tv-table").innerHTML = `<thead><tr><th>If the amount is…</th><th>Value</th></tr></thead><tbody>${rows.map(([what, name, x]) => `<tr><td>${what}<br><span class="muted">${name}</span></td><td class="num">${Number.isFinite(x) ? hk(x) : "No finite value (needs rate > growth)"}</td></tr>`).join("")}</tbody>`;
   };
@@ -266,10 +267,10 @@ function gordon(root) {
     } else if (two) {
       const res = v.twoStageValue({ d0, r, g1: num($("gg-g1")) / 100, n: Math.max(1, Math.round(num($("gg-n")))), g2: g });
       $("gg-out").innerHTML = `${hk(res.value, 2)} <span>per share</span>`;
-      $("gg-note").textContent = `${hk(res.pvDividends, 2)} comes from the fast-growth years and ${hk(res.pvTerminal, 2)} (${Math.round((res.pvTerminal / res.value) * 100)}%) from everything after: most value usually sits far in the future.`;
+      $("gg-note").textContent = tx("{a} comes from the fast-growth years and {b} ({p}%) from everything after: most value usually sits far in the future.", { a: hk(res.pvDividends, 2), b: hk(res.pvTerminal, 2), p: Math.round((res.pvTerminal / res.value) * 100) });
     } else {
       $("gg-out").innerHTML = `${hk(v.gordonValue({ d0, r, g }), 2)} <span>per share</span>`;
-      $("gg-note").textContent = `Next year's dividend ${hk(d0 * (1 + g), 2)} ÷ (${(r * 100).toFixed(2)}% − ${(g * 100).toFixed(2)}%).`;
+      $("gg-note").textContent = tx("Next year's dividend {d} ÷ ({r}% − {g}%).", { d: hk(d0 * (1 + g), 2), r: (r * 100).toFixed(2), g: (g * 100).toFixed(2) });
     }
     const rs = [-0.01, 0, 0.01].map((x) => r + x), gs = [-0.01, 0, 0.01].map((x) => g + x);
     const grid = v.gordonGrid({ d0, rs, gs });
@@ -298,7 +299,7 @@ async function maCross(root) {
     const crosses = v.maCrosses(r4, 60);
     const base = v.averageForward(r4, 60);
     const labels = rows.map((r) => r[0]);
-    const data = [ds("Price", rows.map((r) => r[1]), "--ink", { borderWidth: 1.25 }), ds("50-day", rows.map((r) => r[3]), "--s1", { borderWidth: 1.5 }), ds("200-day", rows.map((r) => r[4]), "--s2", { borderWidth: 1.5 })];
+    const data = [ds(tx("Price"), rows.map((r) => r[1]), "--ink", { borderWidth: 1.25 }), ds(tx("50-day"), rows.map((r) => r[3]), "--s1", { borderWidth: 1.5 }), ds(tx("200-day"), rows.map((r) => r[4]), "--s2", { borderWidth: 1.5 })];
     if (chart) { chart.data.labels = labels; chart.data.datasets = data; chart.update("none"); }
     else chart = lineChart($("mc-chart"), labels, data);
     $("mc-table").innerHTML = crosses.length
@@ -306,7 +307,7 @@ async function maCross(root) {
       : "<tbody><tr><td>No crosses in this period.</td></tr></tbody>";
     const avg = (k) => { const xs = crosses.filter((c) => c.kind === k && c.next != null).map((c) => c.next); return xs.length ? [xs.reduce((a, b) => a + b, 0) / xs.length, xs.length] : [null, 0]; };
     const [gAvg, gN] = avg("golden"), [dAvg, dN] = avg("death");
-    $("mc-out").innerHTML = `Average over the next 3 months: after golden crosses <b>${pct(gAvg)}</b> (${gN}), after death crosses <b>${pct(dAvg)}</b> (${dN}), after an ordinary day <b>${pct(base)}</b>. With so few signals, a difference could easily be luck: this is the small-sample problem.`;
+    $("mc-out").innerHTML = tx("Average over the next 3 months: after golden crosses <b>{g}</b> ({gn}), after death crosses <b>{d}</b> ({dn}), after an ordinary day <b>{b}</b>. With so few signals, a difference could easily be luck: this is the small-sample problem.", { g: pct(gAvg), gn: gN, d: pct(dAvg), dn: dN, b: pct(base) });
   };
   onSeg(root, "mc-pick", run);
   run("^HSI");
@@ -329,16 +330,16 @@ async function indexVsFund(root) {
     const i0 = common[0][1], f0 = fmap.get(common[0][0]);
     const labels = common.map((r) => r[0]);
     const idx = common.map((r) => (r[1] / i0) * 100), fund = common.map((r) => (fmap.get(r[0]) / f0) * 100);
-    $("if-legend").innerHTML = legend([[`${MARKETS[ix].label} index level (no dividends)`, "--ink"], [`${MARKETS[fd].label}, dividends reinvested`, "--jade"]]);
-    const data = [ds("Index", idx, "--ink", { borderWidth: 1.5 }), ds("Fund", fund, "--jade")];
+    $("if-legend").innerHTML = legend([[tx("{m} index level (no dividends)", { m: tx(MARKETS[ix].label) }), "--ink"], [tx("{m}, dividends reinvested", { m: tx(MARKETS[fd].label) }), "--jade"]]);
+    const data = [ds(tx("Index"), idx, "--ink", { borderWidth: 1.5 }), ds(tx("Fund"), fund, "--jade")];
     if (chart) { chart.data.labels = labels; chart.data.datasets = data; chart.update("none"); }
     else chart = lineChart($("if-chart"), labels, data, { tooltip: { label: (i) => ` ${i.dataset.label}: ${i.parsed.y.toFixed(1)}` } });
     const yrs = (new Date(labels.at(-1)) - new Date(labels[0])) / (365.25 * 864e5);
     const ia = v.annualise(idx.at(-1) / 100 - 1, yrs), fa = v.annualise(fund.at(-1) / 100 - 1, yrs);
     const gap = (fa - ia) * 100;
-    $("if-out").innerHTML = `Over ${yrs.toFixed(1)} years the index level changed <b>${pct(ia)}</b> a year and the fund returned <b>${pct(fa)}</b> a year. ` + (gap >= 0
-      ? `The fund's extra ${gap.toFixed(1)} points a year is roughly the dividends it received, minus its fees and small tracking differences.`
-      : `The fund trailed the index level by ${Math.abs(gap).toFixed(1)} points a year: its fees and tracking differences outweighed the dividends.`);
+    $("if-out").innerHTML = tx("Over {y} years the index level changed <b>{i}</b> a year and the fund returned <b>{f}</b> a year. ", { y: yrs.toFixed(1), i: pct(ia), f: pct(fa) }) + (gap >= 0
+      ? tx("The fund's extra {g} points a year is roughly the dividends it received, minus its fees and small tracking differences.", { g: gap.toFixed(1) })
+      : tx("The fund trailed the index level by {g} points a year: its fees and tracking differences outweighed the dividends.", { g: Math.abs(gap).toFixed(1) }));
   };
   onSeg(root, "if-pick", run);
   run("hk");
@@ -360,11 +361,11 @@ async function dca(root) {
     if (!rows) { root.innerHTML = `<p class="muted">Price data isn't available yet.</p>`; return; }
     const res = v.dcaVsLump(rows.map((r) => [r[0], r[2]]), len, 12000);
     const labels = res.windows.map((w) => w.start);
-    const data = [ds("Lump sum", res.windows.map((w) => w.lump), "--s1"), ds("Spread out", res.windows.map((w) => w.dca), "--s2")];
+    const data = [ds(tx("Lump sum"), res.windows.map((w) => w.lump), "--s1"), ds(tx("Spread out"), res.windows.map((w) => w.dca), "--s2")];
     if (chart) { chart.data.labels = labels; chart.data.datasets = data; chart.update("none"); }
-    else chart = lineChart($("dca-chart"), labels, data, { tooltip: { title: (i) => `Starting ${fmtMonth(i[0].label)}`, label: (i) => ` ${i.dataset.label}: ${hk(i.parsed.y)}` }, yTicks: { callback: (x) => `${Math.round(x / 1000)}k` } });
-    $("dca-out").innerHTML = `The lump sum ended ahead in <b>${Math.round(res.lumpWinShare * 100)}%</b> of ${res.windows.length} start months <span>(average ${hk(res.avgLump)} vs ${hk(res.avgDca)})</span>`;
-    $("dca-note").textContent = `Each point invests HK$12,000 starting in that month, either all at once or as ${len} equal monthly amounts (uninvested cash earns nothing here), and values both one month after the last purchase. Uses fund prices with dividends reinvested.`;
+    else chart = lineChart($("dca-chart"), labels, data, { tooltip: { title: (i) => tx("Starting {m}", { m: fmtMonth(i[0].label) }), label: (i) => ` ${i.dataset.label}: ${hk(i.parsed.y)}` }, yTicks: { callback: (x) => `${Math.round(x / 1000)}k` } });
+    $("dca-out").innerHTML = tx("The lump sum ended ahead in <b>{p}%</b> of {n} start months <span>(average {a} vs {b})</span>", { p: Math.round(res.lumpWinShare * 100), n: res.windows.length, a: hk(res.avgLump), b: hk(res.avgDca) });
+    $("dca-note").textContent = tx("Each point invests HK$12,000 starting in that month, either all at once or as {n} equal monthly amounts (uninvested cash earns nothing here), and values both one month after the last purchase. Uses fund prices with dividends reinvested.", { n: len });
   };
   onSeg(root, "dca-mkt", (k) => { mkt = k; run(); });
   onSeg(root, "dca-len", (k) => { len = Number(k); run(); });
@@ -388,14 +389,14 @@ function checklist(root) {
   try { saved = JSON.parse(localStorage.getItem(KEY)) || []; } catch { saved = []; }
   root.innerHTML = `
     <h4>Before-you-buy checklist</h4>
-    <ul class="checklist">${items.map((t, i) => `<li><label><input type="checkbox" data-i="${i}" ${saved.includes(i) ? "checked" : ""}> <span>${esc(t)}</span></label></li>`).join("")}</ul>
+    <ul class="checklist">${items.map((t, i) => `<li><label><input type="checkbox" data-i="${i}" ${saved.includes(i) ? "checked" : ""}> <span>${esc(tx(t))}</span></label></li>`).join("")}</ul>
     <p class="w-result" id="cl-out" role="status"></p>`;
   const run = () => {
     const ticked = [...root.querySelectorAll("input:checked")].map((el) => Number(el.dataset.i));
     try { localStorage.setItem(KEY, JSON.stringify(ticked)); } catch { /* storage blocked */ }
     $("cl-out").innerHTML = ticked.length === items.length
       ? "<b>All 8 ticked.</b> Your decision has been through a real process, whatever the outcome."
-      : `${ticked.length} of ${items.length} ticked. Each unticked box is a question worth answering before you buy.`;
+      : tx("{t} of {n} ticked. Each unticked box is a question worth answering before you buy.", { t: ticked.length, n: items.length });
   };
   root.querySelectorAll("input").forEach((el) => el.addEventListener("change", run));
   run();
@@ -412,6 +413,8 @@ export function mountWidgets(container) {
   container.querySelectorAll(".widget[data-widget]").forEach((el) => {
     const fn = WIDGETS[el.dataset.widget];
     if (!fn) return;
+    // Chinese: the tools write English labels; translate them whenever a tool redraws (a second pass finds nothing left)
+    if (isZh) new MutationObserver(() => translatePage(el)).observe(el, { childList: true, subtree: true, characterData: true });
     try {
       const out = fn(el);
       if (out && out.catch) out.catch((err) => { console.error(err); el.innerHTML = `<p class="muted">This tool couldn't load.</p>`; });
