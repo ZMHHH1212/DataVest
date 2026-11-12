@@ -21,8 +21,8 @@ from pygments.lexers import PythonLexer
 REPO = "https://github.com/ZMHHH1212/DataVest/blob/main/analysis"
 FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com">'
          '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
-         '<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900'
-         '&family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&family=Noto+Sans+HK:wght@300;400;500;700&display=swap" rel="stylesheet">')
+         '<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..600;1,6..72,200..600'
+         '&family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&family=Noto+Sans+HK:wght@300;400;500;700&family=Noto+Serif+HK:wght@300;400;500&display=swap" rel="stylesheet">')
 # report look (same as the rest of the site) + saved light/dark choice applied before paint
 STYLE = ('<link rel="stylesheet" href="../styles.css"><link rel="stylesheet" href="../report.css">'
          '<script>let t = null; try { t = localStorage.getItem("datavest.theme"); } catch {} '

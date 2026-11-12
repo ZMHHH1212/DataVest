@@ -21,7 +21,7 @@ html.report {
   /* sticker and chapter colours */
   /* sticker colours, from the DataVest palette: steel paper, jade, desk navy; amber and red only for warnings */
   --k1: #dbe6f5; --k2: #38bdf8; --k3: #111a2b; --k4: #f2a93b; --k5: #dbe6f5; --k6: #f06a5f;
-  --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --display: "Newsreader", "Noto Serif HK", Georgia, "Times New Roman", serif;
   --body: "Geist", system-ui, sans-serif;
   --mono: "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
   --gutter: clamp(1rem, 4vw, 3rem);
@@ -528,9 +528,9 @@ html.report.desk body { font-size: 0.9375rem; }
 @media (min-width: 1150px) { .principles { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
 #s-updated { font-size: clamp(1.25rem, 2.2vw, 1.75rem); line-height: 1.15; }
 
-/* ---- Chinese: Noto Sans HK for the characters, Latin stays in Archivo/Geist; the 中/EN button ---- */
+/* ---- Chinese: Noto Serif HK for headings, Noto Sans HK for text; Latin stays in Newsreader/Geist; the 中/EN button ---- */
 html.report[lang="zh-HK"] {
-  --display: "Archivo", "Noto Sans HK", "Helvetica Neue", Arial, sans-serif;
+  --display: "Newsreader", "Noto Serif HK", Georgia, serif;
   --body: "Geist", "Noto Sans HK", system-ui, sans-serif;
 }
 html.report[lang="zh-HK"] .display, html.report[lang="zh-HK"] .two-tone, html.report[lang="zh-HK"] .hero-h1 { letter-spacing: -0.01em; line-height: 1.15; }
@@ -560,3 +560,28 @@ html.report[lang="zh-HK"] .display, html.report[lang="zh-HK"] .two-tone, html.re
 .sticker:hover { filter: none; border-color: rgba(219, 230, 245, 0.45); }
 /* 3D panels: a finger drag turns the drawing (in any direction) instead of scrolling the page */
 .sf-wrap canvas, .art canvas { touch-action: none; }
+
+/* ---- Type: light serif headings, plain sans text, small capital mono labels (like a private-bank site) ---- */
+html.report :is(.mega, .r-foot .wordmark, .display, .two-tone, .hero-h1, .chapters b, .s-big, .stat-strip dd,
+  .principles h3, .orb-brand, .r-hero .brand, .section-title, .figure, .nb h1, .nb-md h2, .nb-num, .nb-item h2,
+  .result .big, .quiz h2, .widget h4, .w-big, .pf-stat b, .signin-copy h1, .signin-panel h2,
+  .auto > .block > h2.section-title, .auto > .block > h2.chart-title, .auto > .block > .chart-head h2, .auto > .block .tool-grid ~ h2) {
+  font-family: var(--display);
+  font-weight: 300;
+  font-stretch: normal;
+  font-optical-sizing: auto;
+  letter-spacing: -0.015em;
+}
+html.report :is(.mega, .r-foot .wordmark) { letter-spacing: -0.035em; line-height: 0.95; }
+html.report :is(.display, .two-tone, .hero-h1) { line-height: 1.08; }
+html.report .r-hero .brand { font-weight: 400; letter-spacing: -0.01em; font-size: 1.5rem; }
+html.report :is(.stat-strip dd, .s-big, .pf-stat b, .w-big, .result .big) { font-variant-numeric: lining-nums tabular-nums; }
+/* the home title: light serif, sentence case */
+html.report .orb-title { font: 300 clamp(2.2rem, 5.2vw, 4.5rem)/1.06 var(--display); letter-spacing: -0.02em; text-transform: none; }
+html.report[lang="zh-HK"] .orb-title { font-family: var(--display); font-weight: 300; letter-spacing: 0.02em; }
+/* buttons and small labels: capital mono, spaced */
+html.report :is(.btn, .btn-quiet, .orb-btn, .more a, .inline-help summary) {
+  font-family: var(--mono); font-size: 0.75rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+}
+html.report :is(.ch-num, .eyebrow, .stat-strip dt, .p-num) { text-transform: uppercase; letter-spacing: 0.08em; }
+html.report[lang="zh-HK"] :is(.btn, .btn-quiet, .orb-btn, .more a, .inline-help summary, .ch-num, .eyebrow, .stat-strip dt) { letter-spacing: 0.04em; }
